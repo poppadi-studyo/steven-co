@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steven.CO</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.15);
+  --text: #1a1a18;
+  --text2: #6b6a65;
+  --text3: #9b9a94;
+  --teal: #1D9E75;
+  --teal-bg: #E1F5EE;
+  --blue: #378ADD;
+  --blue-bg: #E6F1FB;
+  --purple: #7F77DD;
+  --purple-bg: #EEEDFE;
+  --coral: #D85A30;
+  --coral-bg: #FAECE7;
+  --amber: #BA7517;
+  --amber-bg: #FAEEDA;
+  --gray: #888780;
+  --gray-bg: #F1EFE8;
+  --red: #E24B4A;
+  --red-bg: #FCEBEB;
+  --green: #1D9E75;
+  --green-bg: #E1F5EE;
+  --radius: 10px;
+  --radius-lg: 14px;
+  /* Stream colors */
+  --poppadi: #1D9E75;
+  --poppadi-bg: #E1F5EE;
+  --private: #378ADD;
+  --private-bg: #E6F1FB;
+  --wwa: #7F77DD;
+  --wwa-bg: #EEEDFE;
+}
+[data-theme="dark"] {
+  --bg: #1a1a18;
+  --surface: #242422;
+  --surface2: #2c2c29;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.15);
+  --text: #f0efe9;
+  --text2: #a8a79f;
+  --text3: #6b6a63;
+  --teal: #2ecc93;
+  --teal-bg: #0f2e22;
+  --blue: #5aa3f0;
+  --blue-bg: #0d1e33;
+  --purple: #9b93f0;
+  --purple-bg: #1a1830;
+  --coral: #e8754a;
+  --coral-bg: #2e1810;
+  --amber: #d4910a;
+  --amber-bg: #2e1f00;
+  --gray: #6b6a63;
+  --gray-bg: #2c2c29;
+  --red: #f05555;
+  --red-bg: #2e1010;
+  --green: #2ecc93;
+  --green-bg: #0f2e22;
+  --poppadi: #2ecc93;
+  --poppadi-bg: #0f2e22;
+  --private: #5aa3f0;
+  --private-bg: #0d1e33;
+  --wwa: #9b93f0;
+  --wwa-bg: #1a1830;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
+
+/* ── LAYOUT ── */
+.app { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px; background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100; transition: width 0.2s ease; overflow: visible;
+}
+.sidebar.collapsed { width: 52px; }
+.sidebar .logo, .sidebar .sidebar-footer { overflow: hidden; white-space: nowrap; }
+.sidebar-toggle {
+  position: absolute; right: -13px; top: 24px; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong);
+  cursor: pointer; font-size: 12px; color: var(--text2); display: flex; align-items: center;
+  justify-content: center; z-index: 101; transition: transform 0.2s;
+}
+.sidebar.collapsed .sidebar-toggle { transform: rotate(180deg); }
+.logo { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+.logo-mark { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; color: var(--text); }
+.logo-mark span { color: var(--blue); }
+.logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
+.nav-section { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.8px;
+  text-transform: uppercase; padding: 8px 8px 4px; margin-top: 8px; white-space: nowrap; overflow: hidden; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius);
+  cursor: pointer; color: var(--text2); font-size: 13px; font-weight: 400; transition: all 0.15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--blue-bg); color: var(--blue); font-weight: 500; }
+.nav-item .icon { font-size: 16px; min-width: 20px; text-align: center; }
+.nav-item .badge {
+  margin-left: auto; background: var(--red); color: white; font-size: 10px;
+  font-weight: 600; padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center;
+}
+.sidebar-footer { padding: 12px 8px; border-top: 1px solid var(--border); }
+.user-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius); }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--blue-bg); color: var(--blue);
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.user-name { font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-email { font-size: 10px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── MAIN ── */
+.main { margin-left: 220px; flex: 1; transition: margin-left 0.2s ease; min-height: 100vh; }
+.sidebar.collapsed ~ .main { margin-left: 52px; }
+.topbar {
+  position: sticky; top: 0; z-index: 50; background: var(--bg); border-bottom: 1px solid var(--border);
+  padding: 0 28px; height: 52px; display: flex; align-items: center; justify-content: space-between;
+}
+.topbar-title { font-size: 15px; font-weight: 600; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  background: none; border: 1px solid var(--border-strong); border-radius: 8px;
+  cursor: pointer; font-size: 14px; padding: 5px 10px; color: var(--text2);
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.icon-btn:hover { background: var(--surface); color: var(--text); }
+.content { padding: 28px; max-width: 1100px; }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── CARDS ── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
+.card-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.card-title .actions { display: flex; gap: 8px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* ── KPI CARDS ── */
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+.kpi-label { font-size: 12px; color: var(--text3); font-weight: 500; margin-bottom: 6px; }
+.kpi-value { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; font-family: 'DM Mono', monospace; }
+.kpi-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.kpi.blue .kpi-value { color: var(--blue); }
+.kpi.teal .kpi-value { color: var(--teal); }
+.kpi.purple .kpi-value { color: var(--purple); }
+.kpi.amber .kpi-value { color: var(--amber); }
+
+/* ── STREAM TAGS ── */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  border-radius: 20px; font-size: 11px; font-weight: 500;
+}
+.tag.private { background: var(--private-bg); color: var(--private); }
+.tag.poppadi { background: var(--poppadi-bg); color: var(--poppadi); }
+.tag.wwa { background: var(--wwa-bg); color: var(--wwa); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer;
+  border: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-danger { background: var(--red-bg); color: var(--red); }
+.btn-danger:hover { background: var(--red); color: white; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-ghost { background: none; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 11px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+/* ── STATUS BADGE ── */
+.status { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.status.completed { background: var(--green-bg); color: var(--green); }
+.status.pending { background: var(--amber-bg); color: var(--amber); }
+.status.cancelled { background: var(--gray-bg); color: var(--gray); }
+
+/* ── MODAL ── */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 200; align-items: center; justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--surface); border-radius: var(--radius-lg); padding: 24px;
+  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+.modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* ── FORM ── */
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; display: block; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius);
+  font-size: 13px; font-family: 'DM Sans', sans-serif; background: var(--surface2); color: var(--text);
+  outline: none; transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--blue); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+.page-header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.page-header-row { display: flex; align-items: flex-start; justify-content: space-between; }
+
+/* ── MONTH PICKER ── */
+.month-picker { display: flex; align-items: center; gap: 8px; }
+.month-picker select { padding: 6px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius); font-size: 13px; background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif; cursor: pointer; outline: none; }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); }
+.empty-state .icon { font-size: 32px; margin-bottom: 12px; }
+.empty-state p { font-size: 13px; }
+
+/* ── STUDENT CARD ── */
+.student-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 10px;
+  cursor: pointer; transition: all 0.15s;
+}
+.student-card:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(55,138,221,0.1); }
+.student-avatar {
+  width: 40px; height: 40px; border-radius: 50%; background: var(--private-bg);
+  color: var(--private); display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 600; flex-shrink: 0;
+}
+.student-info { flex: 1; }
+.student-name { font-size: 14px; font-weight: 500; }
+.student-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.student-stats { text-align: right; }
+.student-total { font-size: 15px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--blue); }
+.student-hours { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* ── PIN GATE ── */
+.pin-gate {
+  display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; transition: all 0.15s;
+}
+.pin-gate:hover { border-color: var(--blue); }
+.pin-unlocked { background: var(--green-bg); border-color: var(--green); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 500; z-index: 999; transition: transform 0.3s ease; pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── DIVIDER ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+/* ── COMING SOON ── */
+.coming-soon {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 300px; text-align: center; color: var(--text3);
+}
+.coming-soon .phase-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  background: var(--surface2); color: var(--text3); margin-bottom: 16px; letter-spacing: 0.5px;
+}
+.coming-soon h3 { font-size: 18px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+.coming-soon p { font-size: 13px; max-width: 320px; line-height: 1.6; }
+
+/* ── LOGIN ── */
+#login-screen {
+  position: fixed; inset: 0; background: var(--bg); display: flex;
+  align-items: center; justify-content: center; z-index: 999;
+}
+.login-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 40px; width: 340px; text-align: center;
+}
+.login-logo { font-size: 26px; font-weight: 600; letter-spacing: -1px; margin-bottom: 6px; }
+.login-logo span { color: var(--blue); }
+.login-sub { font-size: 13px; color: var(--text3); margin-bottom: 28px; }
+
+/* ── LOADING ── */
+.loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--text3); gap: 10px; }
+.spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TAKE HOME SUMMARY ── */
+.takehome-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.takehome-row:last-child { border-bottom: none; }
+.takehome-label { font-size: 13px; color: var(--text2); }
+.takehome-amount { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
+.takehome-total { font-size: 18px; font-weight: 600; color: var(--blue); }
+
+@media (max-width: 768px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .content { padding: 16px; }
+  .topbar { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Steven<span>.CO</span></div>
+    <div class="login-sub">Personal Operating System</div>
+    <div id="g_id_onload"
+      data-client_id="YOUR_GOOGLE_CLIENT_ID"
+      data-callback="handleGoogleLogin"
+      data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+      data-type="standard"
+      data-size="large"
+      data-theme="outline"
+      data-text="sign_in_with"
+      data-shape="rectangular"
+      data-logo_alignment="left"
+      data-width="260">
+    </div>
+    <div id="login-error" style="margin-top:12px;font-size:12px;color:var(--red);"></div>
+    <div style="margin-top:16px;font-size:11px;color:var(--text3);">Authorized access only</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-wrapper" style="display:none">
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">‹</button>
+    <div class="logo">
+      <div class="logo-mark">Steven<span>.CO</span></div>
+      <div class="logo-sub">Personal OS</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item" data-page="home" onclick="showPage('home',this)">
+        <span class="icon">⌂</span><span>Home</span>
+      </div>
+
+      <div class="nav-section">Income</div>
+      <div class="nav-item" data-page="private-tutoring" onclick="showPage('private-tutoring',this)">
+        <span class="icon">📚</span><span>Private Tutoring</span>
+      </div>
+      <div class="nav-item" data-page="poppadi" onclick="showPage('poppadi',this)">
+        <span class="icon">🏫</span><span>Poppadi's Studyo</span>
+      </div>
+      <div class="nav-item" data-page="wwa" onclick="showPage('wwa',this)">
+        <span class="icon">✦</span><span>WealthWise Atelier</span>
+      </div>
+
+      <div class="nav-section">Operations</div>
+      <div class="nav-item" data-page="team" onclick="showPage('team',this)">
+        <span class="icon">👥</span><span>Team</span>
+      </div>
+      <div class="nav-item" data-page="schedule" onclick="showPage('schedule',this)">
+        <span class="icon">📅</span><span>Schedule</span>
+      </div>
+
+      <div class="nav-section">System</div>
+      <div class="nav-item" data-page="settings" onclick="showPage('settings',this)">
+        <span class="icon">⚙</span><span>Settings</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-avatar" id="user-avatar">S</div>
+        <div>
+          <div class="user-name" id="user-name">Steven</div>
+          <div class="user-email" id="user-email"></div>
+        </div>
+      </div>
+      <div style="padding: 0 4px; margin-top: 4px;">
+        <div class="nav-item" onclick="logout()" style="color:var(--text3)">
+          <span class="icon">↩</span><span>Sign out</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Home</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="toggleTheme()">◐</button>
+        <button class="icon-btn btn-primary" style="border:none" onclick="openAddSession()">+ Log Session</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── HOME PAGE ── -->
+      <div class="page active" id="page-home">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1>Good morning, Steven 👋</h1>
+              <p>Here's your ecosystem at a glance</p>
+            </div>
+            <div class="month-picker">
+              <select id="home-month-select" onchange="onMonthChange()"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="three-col" style="margin-bottom:16px">
+          <div class="kpi blue">
+            <div class="kpi-label">🔵 Private Tutoring</div>
+            <div class="kpi-value" id="home-pt-income">฿0</div>
+            <div class="kpi-sub" id="home-pt-hours">0 hrs this month</div>
+          </div>
+          <div class="kpi teal">
+            <div class="kpi-label">🟢 Poppadi's Studyo</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">Phase 3 — coming soon</div>
+          </div>
+          <div class="kpi purple">
+            <div class="kpi-label">🟣 WealthWise Atelier</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">Phase 4 — coming soon</div>
+          </div>
+        </div>
+
+        <!-- PIN-protected take-home -->
+        <div class="card">
+          <div class="card-title">Steven's Take-Home <span id="pin-status-label" style="font-size:11px;color:var(--text3)">PIN required</span></div>
+          <div id="pin-gate-area">
+            <div class="pin-gate" id="pin-gate-btn" onclick="togglePin()">
+              <span>🔒</span>
+              <span style="font-size:13px;color:var(--text2)">Unlock to view take-home breakdown</span>
+            </div>
+          </div>
+          <div id="pin-content" style="display:none">
+            <div class="takehome-row">
+              <div class="takehome-label">🔵 Private Tutoring</div>
+              <div class="takehome-amount" id="th-private">฿0</div>
+            </div>
+            <div class="takehome-row">
+              <div class="takehome-label">🟢 Poppadi's — Tutor (T002)</div>
+              <div class="takehome-amount" style="color:var(--text3)">— Phase 3</div>
+            </div>
+            <div class="takehome-row">
+              <div class="takehome-label">🟢 Poppadi's — Profit Share</div>
+              <div class="takehome-amount" style="color:var(--text3)">— Phase 3</div>
+            </div>
+            <div class="takehome-row">
+              <div class="takehome-label">🟣 WealthWise Atelier</div>
+              <div class="takehome-amount" style="color:var(--text3)">— Phase 4</div>
+            </div>
+            <hr class="divider">
+            <div class="takehome-row">
+              <div class="takehome-label" style="font-weight:600;color:var(--text)">Total Take-Home</div>
+              <div class="takehome-amount takehome-total" id="th-total">฿0</div>
+            </div>
+            <div style="margin-top:12px;display:flex;justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm" onclick="togglePin()">🔒 Lock</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card">
+          <div class="card-title">Quick Actions</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-secondary" onclick="showPage('private-tutoring');openAddSession()">📚 Log Tutoring Session</button>
+            <button class="btn btn-secondary" onclick="showPage('wwa',null)">✦ Add WWA Client</button>
+            <button class="btn btn-secondary" onclick="showPage('team',null)">👥 Add Staff Member</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PRIVATE TUTORING PAGE ── -->
+      <div class="page" id="page-private-tutoring">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1>Private Tutoring</h1>
+              <p>Sessions outside Poppadi's · 100% take-home · ฿900/hr default</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="month-picker">
+                <select id="pt-month-select" onchange="renderPrivateTutoring()"></select>
+              </div>
+              <button class="btn btn-primary" onclick="openAddSession()">+ Log Session</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="three-col" style="margin-bottom:16px">
+          <div class="kpi blue">
+            <div class="kpi-label">Income This Month</div>
+            <div class="kpi-value" id="pt-income-kpi">฿0</div>
+            <div class="kpi-sub" id="pt-income-sub">0 sessions</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Hours This Month</div>
+            <div class="kpi-value" id="pt-hours-kpi">0h</div>
+            <div class="kpi-sub" id="pt-students-kpi">0 students</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Avg Rate / Session</div>
+            <div class="kpi-value mono" id="pt-avg-kpi">฿0</div>
+            <div class="kpi-sub">per session</div>
+          </div>
+        </div>
+
+        <!-- Students -->
+        <div class="card">
+          <div class="card-title">Students This Month</div>
+          <div id="pt-students-list">
+            <div class="loading"><div class="spinner"></div> Loading...</div>
+          </div>
+        </div>
+
+        <!-- Session Log -->
+        <div class="card">
+          <div class="card-title">
+            Session Log
+            <div class="actions">
+              <button class="btn btn-ghost btn-sm" onclick="copySessionTable()">⎘ Copy</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Student</th>
+                  <th>Subject</th>
+                  <th>Duration</th>
+                  <th>Rate</th>
+                  <th>Fee</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="pt-sessions-tbody">
+                <tr><td colspan="8"><div class="loading"><div class="spinner"></div> Loading...</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── POPPADI'S PAGE ── -->
+      <div class="page" id="page-poppadi">
+        <div class="page-header"><h1>Poppadi's Studyo</h1><p>Your teaching income + profit share</p></div>
+        <div class="coming-soon">
+          <div class="phase-badge">PHASE 3</div>
+          <h3>Coming in Phase 3</h3>
+          <p>T002 session pull from Poppadi's Google Sheet, profit share tracker, and monthly draw toggle will be built here.</p>
+        </div>
+      </div>
+
+      <!-- ── WWA PAGE ── -->
+      <div class="page" id="page-wwa">
+        <div class="page-header"><h1>WealthWise Atelier</h1><p>Client retainers · Team costs · Steven's net</p></div>
+        <div class="coming-soon">
+          <div class="phase-badge">PHASE 4</div>
+          <h3>Coming in Phase 4</h3>
+          <p>Client list, monthly revenue input, team cost tracking, and Steven's draw from WWA will be built here.</p>
+        </div>
+      </div>
+
+      <!-- ── TEAM PAGE ── -->
+      <div class="page" id="page-team">
+        <div class="page-header"><h1>Team</h1><p>Staff profiles · Ecosystem diagram · Opportunity radar</p></div>
+        <div class="coming-soon">
+          <div class="phase-badge">PHASE 5</div>
+          <h3>Coming in Phase 5</h3>
+          <p>Staff profile builder, ecosystem relationship diagram, skills map, and opportunity radar will be built here.</p>
+        </div>
+      </div>
+
+      <!-- ── SCHEDULE PAGE ── -->
+      <div class="page" id="page-schedule">
+        <div class="page-header"><h1>Schedule</h1><p>Unified calendar · Availability · Booking requests</p></div>
+        <div class="coming-soon">
+          <div class="phase-badge">PHASE 6</div>
+          <h3>Coming in Phase 6</h3>
+          <p>Unified calendar across all three streams, availability manager, copyable slot list, and booking approval flow will be built here.</p>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS PAGE ── -->
+      <div class="page" id="page-settings">
+        <div class="page-header"><h1>Settings</h1><p>Connections · PIN · Defaults</p></div>
+
+        <div class="card">
+          <div class="card-title">Google Sheets</div>
+          <div class="form-group">
+            <label class="form-label">Steven.CO Sheet ID</label>
+            <input class="form-input" id="settings-sheet-id" value="1_ob-xn0nvls6j1N1lL4T6vMsjjROz-7jtFOnNrLGlHk" readonly>
+            <div class="form-hint">Connected · Read + Write via Apps Script</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Apps Script Web App URL</label>
+            <input class="form-input" id="settings-webapp-url" placeholder="Paste your Apps Script Web App URL here" oninput="saveWebAppUrl()">
+            <div class="form-hint">Required for logging sessions. Deploy your Apps Script and paste the URL above.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">PIN Management</div>
+          <div class="form-group">
+            <label class="form-label">Dashboard PIN (4–6 digits)</label>
+            <input class="form-input" id="settings-pin" type="password" placeholder="Enter new PIN" maxlength="6">
+            <div class="form-hint">Protects take-home view and sensitive financial data</div>
+          </div>
+          <button class="btn btn-secondary" onclick="savePin()">Save PIN</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Private Tutoring Defaults</div>
+          <div class="form-group">
+            <label class="form-label">Default Rate (฿/hr)</label>
+            <input class="form-input" id="settings-default-rate" type="number" value="900">
+          </div>
+          <button class="btn btn-secondary" onclick="saveDefaults()">Save Defaults</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Account</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Signed in as <strong id="settings-email"></strong></div>
+          <button class="btn btn-danger" onclick="logout()">Sign Out</button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /app -->
+</div><!-- /app-wrapper -->
+
+<!-- ── ADD SESSION MODAL ── -->
+<div class="modal-backdrop" id="modal-add-session">
+  <div class="modal">
+    <div class="modal-title" id="modal-session-title">Log Private Tutoring Session</div>
+    <input type="hidden" id="edit-session-id">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Student Name *</label>
+        <input class="form-input" id="session-student" placeholder="e.g. Ploy" list="student-suggestions">
+        <datalist id="student-suggestions"></datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject *</label>
+        <input class="form-input" id="session-subject" placeholder="e.g. IELTS, SAT, GED">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input class="form-input" id="session-date" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Start Time</label>
+        <input class="form-input" id="session-start-time" type="time">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Duration (hours) *</label>
+        <input class="form-input" id="session-duration" type="number" step="0.5" min="0.5" placeholder="e.g. 1.5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rate (฿/hr)</label>
+        <input class="form-input" id="session-rate" type="number" placeholder="900">
+        <div class="form-hint">Leave blank to use default (฿<span id="hint-rate">900</span>/hr)</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="session-notes" rows="2" placeholder="Optional notes..."></textarea>
+    </div>
+
+    <div style="background:var(--blue-bg);border-radius:var(--radius);padding:12px;font-size:13px;color:var(--blue)">
+      Session fee: <strong id="session-fee-preview">฿0</strong>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-session')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSession()">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const SHEET_ID  = '1_ob-xn0nvls6j1N1lL4T6vMsjjROz-7jtFOnNrLGlHk';
+const API_KEY   = 'YOUR_GOOGLE_API_KEY'; // Add after Google Cloud setup
+const BASE      = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values`;
+const ALLOWED_EMAILS = ['YOUR_EMAIL@gmail.com']; // Replace with your email
+
+let WEB_APP_URL = localStorage.getItem('stevenco_webapp_url') || '';
+let DEFAULT_RATE = parseInt(localStorage.getItem('stevenco_default_rate') || '900');
+let DASHBOARD_PIN = localStorage.getItem('stevenco_pin') || '1234'; // Change via Settings
+
+const CACHE_KEY = 'stevenco_cache';
+
+// ─── STATE ────────────────────────────────────────────────
+let currentUser = null;
+let pinUnlocked = false;
+let _toastTimer = null;
+let selectedMonth = getCurrentMonthStr();
+
+let DATA = {
+  privateSessions: [],
+};
+
+// ─── MONTH HELPERS ─────────────────────────────────────────
+function getCurrentMonthStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+
+function getMonthOptions() {
+  const options = [];
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    options.push({ val, label });
+  }
+  return options;
+}
+
+function populateMonthPickers() {
+  const opts = getMonthOptions();
+  ['home-month-select','pt-month-select'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = opts.map(o =>
+      `<option value="${o.val}" ${o.val===selectedMonth?'selected':''}>${o.label}</option>`
+    ).join('');
+  });
+}
+
+function onMonthChange() {
+  const sel = document.getElementById('home-month-select');
+  if (sel) selectedMonth = sel.value;
+  const sel2 = document.getElementById('pt-month-select');
+  if (sel2) sel2.value = selectedMonth;
+  renderAll();
+}
+
+function filterByMonth(arr, field) {
+  return arr.filter(r => (r[field]||'').startsWith(selectedMonth));
+}
+
+function fmt(n) { return '฿' + Number(n||0).toLocaleString(); }
+function fmtH(h) { return parseFloat(h||0) % 1 === 0 ? parseFloat(h||0)+'h' : parseFloat(h||0)+'h'; }
+
+// ─── AUTH ──────────────────────────────────────────────────
+function initAuth() {
+  const stored = localStorage.getItem('stevenco_user');
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed._savedAt && (Date.now() - parsed._savedAt) < 7 * 24 * 60 * 60 * 1000) {
+        currentUser = parsed;
+        showApp();
+        return;
+      } else {
+        localStorage.removeItem('stevenco_user');
+      }
+    } catch(e) { localStorage.removeItem('stevenco_user'); }
+  }
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-wrapper').style.display = 'none';
+}
+
+function handleGoogleLogin(response) {
+  try {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    if (!ALLOWED_EMAILS.includes(payload.email)) {
+      document.getElementById('login-error').textContent = 'This email is not authorised.';
+      return;
+    }
+    currentUser = { ...payload, _savedAt: Date.now() };
+    localStorage.setItem('stevenco_user', JSON.stringify(currentUser));
+    showApp();
+  } catch(e) {
+    document.getElementById('login-error').textContent = 'Login failed. Please try again.';
+  }
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-wrapper').style.display = 'block';
+  // Set user info
+  if (currentUser) {
+    const name = currentUser.given_name || currentUser.name || 'Steven';
+    const email = currentUser.email || '';
+    document.getElementById('user-name').textContent = name;
+    document.getElementById('user-email').textContent = email;
+    document.getElementById('user-avatar').textContent = name[0].toUpperCase();
+    document.getElementById('settings-email').textContent = email;
+  }
+  // Restore saved page
+  const savedPage = localStorage.getItem('stevenco_page') || 'home';
+  const navItem = document.querySelector(`[data-page="${savedPage}"]`);
+  showPage(savedPage, navItem);
+  populateMonthPickers();
+  loadAllData();
+}
+
+function logout() {
+  localStorage.removeItem('stevenco_user');
+  localStorage.removeItem(CACHE_KEY);
+  currentUser = null;
+  pinUnlocked = false;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-wrapper').style.display = 'none';
+}
+
+// ─── DATA LOADING ──────────────────────────────────────────
+async function loadAllData() {
+  // Try cache first
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      DATA = parsed.data;
+      renderAll();
+    } catch(e) { localStorage.removeItem(CACHE_KEY); }
+  }
+
+  // Fresh fetch
+  try {
+    if (!API_KEY || API_KEY === 'YOUR_GOOGLE_API_KEY') {
+      // Dev mode — use empty data
+      DATA.privateSessions = [];
+      renderAll();
+      return;
+    }
+    const [sessionRows] = await Promise.all([
+      fetchSheet('PrivateSessions!A:K'),
+    ]);
+    DATA.privateSessions = parseSheet(sessionRows);
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
+    renderAll();
+  } catch(e) {
+    console.error('Load error:', e);
+    showToast('Could not load data — showing cached version');
+  }
+}
+
+async function fetchSheet(range) {
+  const url = `${BASE}/${range}?key=${API_KEY}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Failed to fetch ${range}: ${r.status}`);
+  const d = await r.json();
+  return d.values || [];
+}
+
+function parseSheet(rows) {
+  if (!rows || rows.length < 2) return [];
+  const headers = rows[0];
+  return rows.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (row[i] !== undefined && row[i] !== null) ? row[i] : ''; });
+    return obj;
+  });
+}
+
+// ─── WRITE TO SHEET ────────────────────────────────────────
+async function webAppWrite(action, payload) {
+  if (!WEB_APP_URL) {
+    showToast('⚠ Apps Script URL not set — go to Settings');
+    throw new Error('Web App URL not configured');
+  }
+  const body = JSON.stringify({ action, ...payload });
+  const res = await fetch(WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body
+  });
+  if (!res.ok) throw new Error('Web App request failed: ' + res.status);
+  let data;
+  try { data = await res.json(); } catch(_) { return { success: true }; }
+  if (!data.success) throw new Error(data.error || 'Web App returned error');
+  return data;
+}
+
+// ─── RENDER ALL ────────────────────────────────────────────
+function renderAll() {
+  renderHome();
+  renderPrivateTutoring();
+}
+
+// ─── RENDER HOME ───────────────────────────────────────────
+function renderHome() {
+  const monthSessions = filterByMonth(DATA.privateSessions, 'date')
+    .filter(s => s.status !== 'Cancelled');
+  const ptIncome = monthSessions.reduce((s,r) => s + Number(r.fee||0), 0);
+  const ptHours  = monthSessions.reduce((s,r) => s + Number(r.duration_hrs||0), 0);
+
+  document.getElementById('home-pt-income').textContent = fmt(ptIncome);
+  document.getElementById('home-pt-hours').textContent = `${ptHours}h this month`;
+
+  // Take-home (private only for now)
+  document.getElementById('th-private').textContent = fmt(ptIncome);
+  document.getElementById('th-total').textContent = fmt(ptIncome);
+}
+
+// ─── RENDER PRIVATE TUTORING ───────────────────────────────
+function renderPrivateTutoring() {
+  // Sync month selector
+  const sel = document.getElementById('pt-month-select');
+  if (sel) selectedMonth = sel.value;
+
+  const monthSessions = filterByMonth(DATA.privateSessions, 'date')
+    .filter(s => s.status !== 'Cancelled');
+
+  const income   = monthSessions.reduce((s,r) => s + Number(r.fee||0), 0);
+  const hours    = monthSessions.reduce((s,r) => s + Number(r.duration_hrs||0), 0);
+  const avgFee   = monthSessions.length ? income / monthSessions.length : 0;
+
+  // KPIs
+  document.getElementById('pt-income-kpi').textContent = fmt(income);
+  document.getElementById('pt-income-sub').textContent = `${monthSessions.length} session${monthSessions.length!==1?'s':''}`;
+  document.getElementById('pt-hours-kpi').textContent = hours + 'h';
+
+  // Student breakdown
+  const studentMap = {};
+  monthSessions.forEach(s => {
+    const n = s.student_name || '—';
+    if (!studentMap[n]) studentMap[n] = { hours:0, income:0, sessions:0, subject: s.subject||'' };
+    studentMap[n].hours   += Number(s.duration_hrs||0);
+    studentMap[n].income  += Number(s.fee||0);
+    studentMap[n].sessions++;
+    if (s.subject) studentMap[n].subject = s.subject;
+  });
+
+  const studentNames = Object.keys(studentMap);
+  document.getElementById('pt-students-kpi').textContent = `${studentNames.length} student${studentNames.length!==1?'s':''}`;
+
+  // Students list
+  const studentsList = document.getElementById('pt-students-list');
+  if (studentNames.length === 0) {
+    studentsList.innerHTML = `<div class="empty-state"><div class="icon">📚</div><p>No sessions logged this month.<br>Click "+ Log Session" to add one.</p></div>`;
+  } else {
+    studentsList.innerHTML = studentNames.map(name => {
+      const st = studentMap[name];
+      const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+      return `
+        <div class="student-card">
+          <div class="student-avatar">${initials}</div>
+          <div class="student-info">
+            <div class="student-name">${name}</div>
+            <div class="student-meta">${st.subject || 'No subject'} · ${st.sessions} session${st.sessions!==1?'s':''}</div>
+          </div>
+          <div class="student-stats">
+            <div class="student-total">${fmt(st.income)}</div>
+            <div class="student-hours">${st.hours}h</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Session table
+  const tbody = document.getElementById('pt-sessions-tbody');
+  const allMonthSessions = filterByMonth(DATA.privateSessions, 'date');
+  if (allMonthSessions.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state" style="padding:24px"><div class="icon">📋</div><p>No sessions this month</p></div></td></tr>`;
+  } else {
+    tbody.innerHTML = allMonthSessions.sort((a,b) => b.date.localeCompare(a.date)).map(s => {
+      const statusClass = s.status === 'Completed' ? 'completed' : s.status === 'Cancelled' ? 'cancelled' : 'pending';
+      return `
+        <tr>
+          <td class="mono">${s.date}</td>
+          <td><strong>${s.student_name||'—'}</strong></td>
+          <td style="color:var(--text2)">${s.subject||'—'}</td>
+          <td class="mono">${s.duration_hrs||0}h</td>
+          <td class="mono">${fmt(s.rate||DEFAULT_RATE)}</td>
+          <td class="mono"><strong>${fmt(s.fee)}</strong></td>
+          <td><span class="status ${statusClass}">${s.status||'Completed'}</span></td>
+          <td>
+            <button class="btn btn-ghost btn-sm" onclick="editSession('${s.id}')">Edit</button>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // Update autocomplete
+  updateStudentSuggestions();
+}
+
+function updateStudentSuggestions() {
+  const names = [...new Set(DATA.privateSessions.map(s => s.student_name).filter(Boolean))];
+  const dl = document.getElementById('student-suggestions');
+  if (dl) dl.innerHTML = names.map(n => `<option value="${n}">`).join('');
+}
+
+// ─── SESSION MODAL ─────────────────────────────────────────
+function openAddSession() {
+  document.getElementById('modal-session-title').textContent = 'Log Private Tutoring Session';
+  document.getElementById('edit-session-id').value = '';
+  document.getElementById('session-student').value = '';
+  document.getElementById('session-subject').value = '';
+  document.getElementById('session-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('session-start-time').value = '';
+  document.getElementById('session-duration').value = '';
+  document.getElementById('session-rate').value = '';
+  document.getElementById('session-notes').value = '';
+  document.getElementById('hint-rate').textContent = DEFAULT_RATE;
+  updateFeePreview();
+  document.getElementById('modal-add-session').classList.add('open');
+}
+
+function editSession(id) {
+  const s = DATA.privateSessions.find(r => r.id === id);
+  if (!s) return;
+  document.getElementById('modal-session-title').textContent = 'Edit Session';
+  document.getElementById('edit-session-id').value = id;
+  document.getElementById('session-student').value = s.student_name||'';
+  document.getElementById('session-subject').value = s.subject||'';
+  document.getElementById('session-date').value = s.date||'';
+  document.getElementById('session-start-time').value = s.start_time||'';
+  document.getElementById('session-duration').value = s.duration_hrs||'';
+  document.getElementById('session-rate').value = s.rate||'';
+  document.getElementById('session-notes').value = s.notes||'';
+  document.getElementById('hint-rate').textContent = DEFAULT_RATE;
+  updateFeePreview();
+  document.getElementById('modal-add-session').classList.add('open');
+}
+
+function updateFeePreview() {
+  const dur = parseFloat(document.getElementById('session-duration').value) || 0;
+  const rate = parseFloat(document.getElementById('session-rate').value) || DEFAULT_RATE;
+  const fee = dur * rate;
+  document.getElementById('session-fee-preview').textContent = fmt(fee);
+}
+
+// Attach live preview listeners
+['session-duration','session-rate'].forEach(id => {
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateFeePreview);
+  }, 100);
+});
+
+async function saveSession() {
+  const student = document.getElementById('session-student').value.trim();
+  const subject = document.getElementById('session-subject').value.trim();
+  const date    = document.getElementById('session-date').value;
+  const dur     = parseFloat(document.getElementById('session-duration').value);
+  const rate    = parseFloat(document.getElementById('session-rate').value) || DEFAULT_RATE;
+  const startTime = document.getElementById('session-start-time').value;
+  const notes   = document.getElementById('session-notes').value.trim();
+  const editId  = document.getElementById('edit-session-id').value;
+
+  if (!student || !date || !dur) {
+    showToast('⚠ Please fill in student, date, and duration');
+    return;
+  }
+
+  const fee = dur * rate;
+  const id  = editId || 'PT-' + Date.now();
+
+  const row = {
+    id, student_name: student, date, start_time: startTime,
+    duration_hrs: dur, rate, fee, subject, notes,
+    status: 'Completed', created_at: new Date().toISOString()
+  };
+
+  // Optimistic UI update
+  if (editId) {
+    const idx = DATA.privateSessions.findIndex(r => r.id === editId);
+    if (idx > -1) DATA.privateSessions[idx] = row;
+  } else {
+    DATA.privateSessions.push(row);
+  }
+  renderAll();
+  closeModal('modal-add-session');
+  showToast(editId ? '✓ Session updated' : '✓ Session logged');
+
+  // Persist to Sheet
+  try {
+    await webAppWrite(editId ? 'updateSession' : 'addSession', { row });
+    // Refresh from sheet
+    localStorage.removeItem(CACHE_KEY);
+    loadAllData();
+  } catch(e) {
+    showToast('⚠ Saved locally — sync pending (check Web App URL in Settings)');
+  }
+}
+
+// ─── PIN ───────────────────────────────────────────────────
+function togglePin() {
+  if (pinUnlocked) {
+    pinUnlocked = false;
+    document.getElementById('pin-content').style.display = 'none';
+    document.getElementById('pin-gate-area').style.display = 'block';
+    document.getElementById('pin-status-label').textContent = 'PIN required';
+    return;
+  }
+  const entered = prompt('🔒 Enter PIN to view take-home:');
+  if (entered === null) return;
+  if (entered === DASHBOARD_PIN) {
+    pinUnlocked = true;
+    document.getElementById('pin-content').style.display = 'block';
+    document.getElementById('pin-gate-area').style.display = 'none';
+    document.getElementById('pin-status-label').textContent = '🔓 Unlocked';
+    renderHome();
+  } else {
+    showToast('❌ Incorrect PIN');
+  }
+}
+
+function savePin() {
+  const val = document.getElementById('settings-pin').value;
+  if (!val || val.length < 4) { showToast('PIN must be 4–6 digits'); return; }
+  DASHBOARD_PIN = val;
+  localStorage.setItem('stevenco_pin', val);
+  showToast('✓ PIN saved');
+  document.getElementById('settings-pin').value = '';
+}
+
+// ─── SETTINGS ──────────────────────────────────────────────
+function saveWebAppUrl() {
+  const url = document.getElementById('settings-webapp-url').value.trim();
+  WEB_APP_URL = url;
+  localStorage.setItem('stevenco_webapp_url', url);
+}
+
+function saveDefaults() {
+  const rate = parseInt(document.getElementById('settings-default-rate').value) || 900;
+  DEFAULT_RATE = rate;
+  localStorage.setItem('stevenco_default_rate', rate);
+  showToast('✓ Defaults saved');
+}
+
+// Load saved settings into UI
+function loadSettings() {
+  const savedUrl = localStorage.getItem('stevenco_webapp_url');
+  if (savedUrl) document.getElementById('settings-webapp-url').value = savedUrl;
+  document.getElementById('settings-default-rate').value = DEFAULT_RATE;
+}
+
+// ─── NAVIGATION ────────────────────────────────────────────
+const PAGE_TITLES = {
+  home: 'Home', 'private-tutoring': 'Private Tutoring',
+  poppadi: "Poppadi's Studyo", wwa: 'WealthWise Atelier',
+  team: 'Team', schedule: 'Schedule', settings: 'Settings'
+};
+
+function showPage(id, btn) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    const navItem = document.querySelector(`[data-page="${id}"]`);
+    if (navItem) navItem.classList.add('active');
+  }
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[id] || id;
+  localStorage.setItem('stevenco_page', id);
+  if (id === 'settings') loadSettings();
+  if (id === 'private-tutoring') populateMonthPickers();
+}
+
+// ─── SIDEBAR ───────────────────────────────────────────────
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('collapsed');
+  localStorage.setItem('stevenco_sidebar', sidebar.classList.contains('collapsed') ? '1' : '0');
+}
+
+// ─── THEME ─────────────────────────────────────────────────
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('stevenco_theme', isDark ? 'light' : 'dark');
+}
+
+// ─── UTILS ─────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function showToast(msg, duration) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), duration || 2500);
+}
+
+function copySessionTable() {
+  const monthSessions = filterByMonth(DATA.privateSessions, 'date');
+  if (!monthSessions.length) { showToast('No sessions to copy'); return; }
+  const lines = ['Date\tStudent\tSubject\tHours\tRate\tFee\tStatus'];
+  monthSessions.forEach(s => {
+    lines.push(`${s.date}\t${s.student_name}\t${s.subject}\t${s.duration_hrs}h\t฿${s.rate}\t฿${s.fee}\t${s.status||'Completed'}`);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('✓ Copied to clipboard'));
+}
+
+// ─── INIT ──────────────────────────────────────────────────
+// Restore theme
+const savedTheme = localStorage.getItem('stevenco_theme');
+if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+// Restore sidebar
+const savedSidebar = localStorage.getItem('stevenco_sidebar');
+if (savedSidebar === '1') document.getElementById('sidebar').classList.add('collapsed');
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+  backdrop.addEventListener('click', e => {
+    if (e.target === backdrop) backdrop.classList.remove('open');
+  });
+});
+
+initAuth();
+</script>
+</body>
+</html>
