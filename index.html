@@ -8,70 +8,37 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
-  --bg: #f7f6f3;
-  --surface: #ffffff;
-  --surface2: #f0efe9;
-  --border: rgba(0,0,0,0.08);
-  --border-strong: rgba(0,0,0,0.15);
-  --text: #1a1a18;
-  --text2: #6b6a65;
-  --text3: #9b9a94;
-  --teal: #1D9E75;
-  --teal-bg: #E1F5EE;
-  --blue: #378ADD;
-  --blue-bg: #E6F1FB;
-  --purple: #7F77DD;
-  --purple-bg: #EEEDFE;
-  --coral: #D85A30;
-  --coral-bg: #FAECE7;
-  --amber: #BA7517;
-  --amber-bg: #FAEEDA;
-  --gray: #888780;
-  --gray-bg: #F1EFE8;
-  --red: #E24B4A;
-  --red-bg: #FCEBEB;
-  --green: #1D9E75;
-  --green-bg: #E1F5EE;
-  --radius: 10px;
-  --radius-lg: 14px;
-  --poppadi: #1D9E75;
-  --poppadi-bg: #E1F5EE;
-  --private: #378ADD;
-  --private-bg: #E6F1FB;
-  --wwa: #7F77DD;
-  --wwa-bg: #EEEDFE;
+  --bg: #f7f6f3; --surface: #ffffff; --surface2: #f0efe9;
+  --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.15);
+  --text: #1a1a18; --text2: #6b6a65; --text3: #9b9a94;
+  --teal: #1D9E75; --teal-bg: #E1F5EE;
+  --blue: #378ADD; --blue-bg: #E6F1FB;
+  --purple: #7F77DD; --purple-bg: #EEEDFE;
+  --coral: #D85A30; --coral-bg: #FAECE7;
+  --amber: #BA7517; --amber-bg: #FAEEDA;
+  --gray: #888780; --gray-bg: #F1EFE8;
+  --red: #E24B4A; --red-bg: #FCEBEB;
+  --green: #1D9E75; --green-bg: #E1F5EE;
+  --radius: 10px; --radius-lg: 14px;
+  --poppadi: #1D9E75; --poppadi-bg: #E1F5EE;
+  --private: #378ADD; --private-bg: #E6F1FB;
+  --wwa: #7F77DD; --wwa-bg: #EEEDFE;
 }
 [data-theme="dark"] {
-  --bg: #1a1a18;
-  --surface: #242422;
-  --surface2: #2c2c29;
-  --border: rgba(255,255,255,0.08);
-  --border-strong: rgba(255,255,255,0.15);
-  --text: #f0efe9;
-  --text2: #a8a79f;
-  --text3: #6b6a63;
-  --teal: #2ecc93;
-  --teal-bg: #0f2e22;
-  --blue: #5aa3f0;
-  --blue-bg: #0d1e33;
-  --purple: #9b93f0;
-  --purple-bg: #1a1830;
-  --coral: #e8754a;
-  --coral-bg: #2e1810;
-  --amber: #d4910a;
-  --amber-bg: #2e1f00;
-  --gray: #6b6a63;
-  --gray-bg: #2c2c29;
-  --red: #f05555;
-  --red-bg: #2e1010;
-  --green: #2ecc93;
-  --green-bg: #0f2e22;
-  --poppadi: #2ecc93;
-  --poppadi-bg: #0f2e22;
-  --private: #5aa3f0;
-  --private-bg: #0d1e33;
-  --wwa: #9b93f0;
-  --wwa-bg: #1a1830;
+  --bg: #1a1a18; --surface: #242422; --surface2: #2c2c29;
+  --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15);
+  --text: #f0efe9; --text2: #a8a79f; --text3: #6b6a63;
+  --teal: #2ecc93; --teal-bg: #0f2e22;
+  --blue: #5aa3f0; --blue-bg: #0d1e33;
+  --purple: #9b93f0; --purple-bg: #1a1830;
+  --coral: #e8754a; --coral-bg: #2e1810;
+  --amber: #d4910a; --amber-bg: #2e1f00;
+  --gray: #6b6a63; --gray-bg: #2c2c29;
+  --red: #f05555; --red-bg: #2e1010;
+  --green: #2ecc93; --green-bg: #0f2e22;
+  --poppadi: #2ecc93; --poppadi-bg: #0f2e22;
+  --private: #5aa3f0; --private-bg: #0d1e33;
+  --wwa: #9b93f0; --wwa-bg: #1a1830;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
@@ -141,10 +108,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .kpi.teal .kpi-value { color: var(--teal); }
 .kpi.purple .kpi-value { color: var(--purple); }
 .kpi.amber .kpi-value { color: var(--amber); }
-.tag {
-  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
-  border-radius: 20px; font-size: 11px; font-weight: 500;
-}
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
 .tag.private { background: var(--private-bg); color: var(--private); }
 .tag.poppadi { background: var(--poppadi-bg); color: var(--poppadi); }
 .tag.wwa { background: var(--wwa-bg); color: var(--wwa); }
@@ -164,6 +128,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .btn-ghost:hover { background: var(--surface2); color: var(--text); }
 .btn-teal { background: var(--teal); color: white; }
 .btn-teal:hover { opacity: 0.9; }
+.btn-purple { background: var(--purple); color: white; }
+.btn-purple:hover { opacity: 0.9; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px;
@@ -177,6 +143,7 @@ tr:hover td { background: var(--surface2); }
 .status.pending { background: var(--amber-bg); color: var(--amber); }
 .status.scheduled { background: var(--blue-bg); color: var(--blue); }
 .status.cancelled { background: var(--gray-bg); color: var(--gray); }
+.status.missed { background: var(--red-bg); color: var(--red); }
 .modal-backdrop {
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
   z-index: 200; align-items: center; justify-content: center;
@@ -184,7 +151,7 @@ tr:hover td { background: var(--surface2); }
 .modal-backdrop.open { display: flex; }
 .modal {
   background: var(--surface); border-radius: var(--radius-lg); padding: 24px;
-  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+  width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
 }
 .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
@@ -220,12 +187,14 @@ tr:hover td { background: var(--surface2); }
   font-size: 15px; font-weight: 600; flex-shrink: 0;
 }
 .student-avatar.teal { background: var(--poppadi-bg); color: var(--poppadi); }
+.student-avatar.purple { background: var(--wwa-bg); color: var(--wwa); }
 .student-info { flex: 1; }
 .student-name { font-size: 14px; font-weight: 500; }
 .student-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
 .student-stats { text-align: right; }
 .student-total { font-size: 15px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--blue); }
 .student-total.teal { color: var(--teal); }
+.student-total.purple { color: var(--purple); }
 .student-hours { font-size: 11px; color: var(--text3); margin-top: 2px; }
 .pin-gate {
   display: flex; align-items: center; gap: 8px; padding: 12px 16px;
@@ -269,25 +238,49 @@ tr:hover td { background: var(--surface2); }
 .takehome-label { font-size: 13px; color: var(--text2); }
 .takehome-amount { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
 .takehome-total { font-size: 18px; font-weight: 600; color: var(--blue); }
-
-/* ── PROFIT SHARE DRAW CARD ── */
-.draw-card {
-  background: var(--poppadi-bg); border: 1px solid var(--poppadi); border-radius: var(--radius-lg);
-  padding: 20px; margin-bottom: 16px;
-}
-.draw-card-title { font-size: 13px; font-weight: 600; color: var(--poppadi); margin-bottom: 12px; }
-.draw-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(29,158,117,0.15); }
-.draw-row:last-child { border-bottom: none; }
-.draw-label { font-size: 13px; color: var(--text2); }
-.draw-value { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 600; color: var(--teal); }
 .draw-balance-total { font-size: 20px; font-weight: 700; color: var(--teal); font-family: 'DM Mono', monospace; }
-
-/* ── SYNC BADGE ── */
 .sync-badge {
   display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px;
   border-radius: 20px; font-size: 10px; font-weight: 500;
   background: var(--poppadi-bg); color: var(--poppadi);
 }
+
+/* ── WWA CLIENT CARD ── */
+.client-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; margin-bottom: 12px; transition: all 0.15s;
+}
+.client-card:hover { border-color: var(--wwa); }
+.client-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.client-card-name { font-size: 15px; font-weight: 600; }
+.client-card-retainer { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 600; color: var(--purple); }
+.client-card-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.client-card-team { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.team-pill {
+  display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: 500;
+  background: var(--surface2); color: var(--text2); border: 1px solid var(--border);
+}
+.team-pill.steven { background: var(--blue-bg); color: var(--blue); border-color: transparent; }
+
+/* ── INVOLVEMENT BADGE ── */
+.inv-badge {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: 0.3px;
+}
+.inv-badge.high { background: var(--purple-bg); color: var(--purple); }
+.inv-badge.medium { background: var(--blue-bg); color: var(--blue); }
+.inv-badge.low { background: var(--gray-bg); color: var(--gray); }
+
+/* ── ASSIGNMENT ROW ── */
+.assign-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.assign-row:last-child { border-bottom: none; }
+.assign-name { font-size: 13px; font-weight: 500; min-width: 100px; }
+.assign-role { font-size: 12px; color: var(--text3); flex: 1; }
+.assign-pct { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600; color: var(--purple); min-width: 50px; text-align: right; }
 
 @media (max-width: 768px) {
   .two-col, .three-col { grid-template-columns: 1fr; }
@@ -310,13 +303,9 @@ tr:hover td { background: var(--surface2); }
       data-auto_prompt="false">
     </div>
     <div class="g_id_signin"
-      data-type="standard"
-      data-size="large"
-      data-theme="outline"
-      data-text="sign_in_with"
-      data-shape="rectangular"
-      data-logo_alignment="left"
-      data-width="260">
+      data-type="standard" data-size="large" data-theme="outline"
+      data-text="sign_in_with" data-shape="rectangular"
+      data-logo_alignment="left" data-width="260">
     </div>
     <div id="login-error" style="margin-top:12px;font-size:12px;color:var(--red);"></div>
     <div style="margin-top:16px;font-size:11px;color:var(--text3);">Authorized access only</div>
@@ -416,8 +405,8 @@ tr:hover td { background: var(--surface2); }
           </div>
           <div class="kpi purple">
             <div class="kpi-label">🟣 WealthWise Atelier</div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-sub">Phase 4 — coming soon</div>
+            <div class="kpi-value" id="home-wwa-income">฿0</div>
+            <div class="kpi-sub" id="home-wwa-sub">Steven's net this month</div>
           </div>
         </div>
 
@@ -440,12 +429,12 @@ tr:hover td { background: var(--surface2); }
               <div class="takehome-amount" id="th-poppadi-tutor">฿0</div>
             </div>
             <div class="takehome-row">
-              <div class="takehome-label">🟢 Poppadi's — Profit Share <span id="th-poppadi-draw-badge" style="font-size:10px;color:var(--text3)"></span></div>
+              <div class="takehome-label">🟢 Poppadi's — True Profit <span id="th-poppadi-draw-badge" style="font-size:10px;color:var(--text3)"></span></div>
               <div class="takehome-amount" id="th-poppadi-share">฿0</div>
             </div>
             <div class="takehome-row">
               <div class="takehome-label">🟣 WealthWise Atelier</div>
-              <div class="takehome-amount" style="color:var(--text3)">— Phase 4</div>
+              <div class="takehome-amount" id="th-wwa">฿0</div>
             </div>
             <hr class="divider">
             <div class="takehome-row">
@@ -464,7 +453,7 @@ tr:hover td { background: var(--surface2); }
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn btn-secondary" onclick="showPage('private-tutoring');openAddSession()">📚 Log Tutoring Session</button>
             <button class="btn btn-secondary" onclick="showPage('poppadi',null)">🏫 View Poppadi's</button>
-            <button class="btn btn-secondary" onclick="showPage('wwa',null)">✦ Add WWA Client</button>
+            <button class="btn btn-secondary" onclick="showPage('wwa',null);setTimeout(()=>openAddClient(),200)">✦ Add WWA Client</button>
           </div>
         </div>
       </div>
@@ -506,9 +495,7 @@ tr:hover td { background: var(--surface2); }
 
         <div class="card">
           <div class="card-title">Students This Month</div>
-          <div id="pt-students-list">
-            <div class="loading"><div class="spinner"></div> Loading...</div>
-          </div>
+          <div id="pt-students-list"><div class="loading"><div class="spinner"></div> Loading...</div></div>
         </div>
 
         <div class="card">
@@ -521,10 +508,7 @@ tr:hover td { background: var(--surface2); }
           <div class="table-wrap">
             <table>
               <thead>
-                <tr>
-                  <th>Date</th><th>Student</th><th>Subject</th><th>Duration</th>
-                  <th>Rate</th><th>Fee</th><th>Status</th><th></th>
-                </tr>
+                <tr><th>Date</th><th>Student</th><th>Subject</th><th>Duration</th><th>Rate</th><th>Fee</th><th>Status</th><th></th></tr>
               </thead>
               <tbody id="pt-sessions-tbody">
                 <tr><td colspan="8"><div class="loading"><div class="spinner"></div> Loading...</div></td></tr>
@@ -540,7 +524,7 @@ tr:hover td { background: var(--surface2); }
           <div class="page-header-row">
             <div>
               <h1>Poppadi's Studyo</h1>
-              <p>T002 teaching income · Profit share tracker · Draw toggle</p>
+              <p>T002 teaching income · True profit after fixed costs · Draw toggle</p>
             </div>
             <div style="display:flex;gap:8px;align-items:center">
               <div class="month-picker">
@@ -564,9 +548,9 @@ tr:hover td { background: var(--surface2); }
             <div class="kpi-sub">at ฿650/hr</div>
           </div>
           <div class="kpi teal">
-            <div class="kpi-label">Profit Share This Month</div>
+            <div class="kpi-label">True Profit This Month</div>
             <div class="kpi-value" id="pop-share-kpi">฿0</div>
-            <div class="kpi-sub" id="pop-share-sub">after AJ. Pop's 20%</div>
+            <div class="kpi-sub" id="pop-share-sub">after AJ. Pop 20% + fixed costs</div>
           </div>
         </div>
 
@@ -583,22 +567,19 @@ tr:hover td { background: var(--surface2); }
             </div>
           </div>
           <div id="pop-pin-content" style="display:none">
-            <!-- This month draw toggle -->
             <div id="pop-draw-section" style="margin-bottom:16px"></div>
-            <!-- Accumulated balance -->
             <div style="background:var(--poppadi-bg);border-radius:var(--radius);padding:16px;margin-bottom:16px">
               <div style="font-size:12px;color:var(--poppadi);font-weight:500;margin-bottom:8px">Accumulated Balance (not yet drawn)</div>
               <div class="draw-balance-total" id="pop-accumulated-balance">฿0</div>
-              <div style="font-size:11px;color:var(--text3);margin-top:4px">From months where you chose Carry Forward</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px">True profit from months where you chose Carry Forward</div>
             </div>
-            <!-- Monthly history table -->
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>Month</th><th>Sessions</th><th>Tutor Income</th>
-                    <th>School Remainder</th><th>AJ. Pop 20%</th>
-                    <th>Your Share</th><th>Action</th>
+                    <th>After AJ. Pop 20%</th><th>Fixed Costs</th>
+                    <th>True Profit</th><th>Status</th>
                   </tr>
                 </thead>
                 <tbody id="pop-history-tbody"></tbody>
@@ -610,7 +591,7 @@ tr:hover td { background: var(--surface2); }
           </div>
         </div>
 
-        <!-- T002 Session Log -->
+        <!-- T002 Session Summary -->
         <div class="card">
           <div class="card-title">
             T002 Sessions This Month
@@ -632,11 +613,62 @@ tr:hover td { background: var(--surface2); }
 
       <!-- ── WWA PAGE ── -->
       <div class="page" id="page-wwa">
-        <div class="page-header"><h1>WealthWise Atelier</h1><p>Client retainers · Team costs · Steven's net</p></div>
-        <div class="coming-soon">
-          <div class="phase-badge">PHASE 4</div>
-          <h3>Coming in Phase 4</h3>
-          <p>Client list, monthly revenue input, team cost tracking, and Steven's draw from WWA will be built here.</p>
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1>WealthWise Atelier</h1>
+              <p>Client retainers · Team assignments · Steven's net</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="month-picker">
+                <select id="wwa-month-select" onchange="renderWWA()"></select>
+              </div>
+              <button class="btn btn-purple" onclick="openAddClient()">+ Add Client</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WWA KPIs -->
+        <div class="three-col" style="margin-bottom:16px">
+          <div class="kpi purple">
+            <div class="kpi-label">Total Retainer Revenue</div>
+            <div class="kpi-value" id="wwa-revenue-kpi">฿0</div>
+            <div class="kpi-sub" id="wwa-clients-kpi">0 active clients</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Team + Company Costs</div>
+            <div class="kpi-value" id="wwa-costs-kpi">฿0</div>
+            <div class="kpi-sub" id="wwa-expenses-kpi">incl. subscriptions</div>
+          </div>
+          <div class="kpi purple">
+            <div class="kpi-label">Steven's Net</div>
+            <div class="kpi-value" id="wwa-net-kpi">฿0</div>
+            <div class="kpi-sub">this month</div>
+          </div>
+        </div>
+
+        <!-- Client List -->
+        <div class="card">
+          <div class="card-title">Active Clients</div>
+          <div id="wwa-clients-list">
+            <div class="empty-state">
+              <div class="icon">✦</div>
+              <p>No clients yet.<br>Click "+ Add Client" to onboard your first client.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- WWA Fixed Expenses -->
+        <div class="card">
+          <div class="card-title">
+            WWA Fixed Expenses
+            <button class="btn btn-ghost btn-sm" onclick="openAddWWAExpense()">+ Add Expense</button>
+          </div>
+          <div id="wwa-expenses-list">
+            <div class="empty-state" style="padding:24px">
+              <p>No fixed expenses logged. Add subscriptions, tools, and recurring costs here.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -674,11 +706,11 @@ tr:hover td { background: var(--surface2); }
           <div class="form-group">
             <label class="form-label">Apps Script Web App URL (Steven.CO)</label>
             <input class="form-input" id="settings-webapp-url" placeholder="Paste your Apps Script Web App URL here" oninput="saveWebAppUrl()">
-            <div class="form-hint">Required for logging sessions and draw toggles.</div>
+            <div class="form-hint">Required for logging sessions, draw toggles, and WWA data.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Poppadi's Mirror — last synced</label>
-            <div style="font-size:12px;color:var(--text3)" id="settings-mirror-sync">Not yet synced — deploy mirror script in Poppadi's sheet</div>
+            <div style="font-size:12px;color:var(--text3)" id="settings-mirror-sync">Not yet synced</div>
           </div>
         </div>
 
@@ -713,7 +745,7 @@ tr:hover td { background: var(--surface2); }
 </div>
 </div>
 
-<!-- ADD SESSION MODAL -->
+<!-- ── ADD SESSION MODAL ── -->
 <div class="modal-backdrop" id="modal-add-session">
   <div class="modal">
     <div class="modal-title" id="modal-session-title">Log Private Tutoring Session</div>
@@ -736,7 +768,17 @@ tr:hover td { background: var(--surface2); }
       </div>
       <div class="form-group">
         <label class="form-label">Start Time</label>
-        <input class="form-input" id="session-start-time" type="time">
+        <select class="form-select" id="session-start-time">
+          <option value="">— select —</option>
+          <option>06:00</option><option>06:30</option><option>07:00</option><option>07:30</option>
+          <option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option>
+          <option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option>
+          <option>12:00</option><option>12:30</option><option>13:00</option><option>13:30</option>
+          <option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option>
+          <option>16:00</option><option>16:30</option><option>17:00</option><option>17:30</option>
+          <option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option>
+          <option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option>
+        </select>
       </div>
     </div>
     <div class="form-row">
@@ -751,6 +793,15 @@ tr:hover td { background: var(--surface2); }
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">Status</label>
+      <select class="form-select" id="session-status">
+        <option value="Completed">Completed</option>
+        <option value="Scheduled">Scheduled</option>
+        <option value="Missed">Missed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="form-group">
       <label class="form-label">Notes</label>
       <textarea class="form-textarea" id="session-notes" rows="2" placeholder="Optional notes..."></textarea>
     </div>
@@ -760,6 +811,188 @@ tr:hover td { background: var(--surface2); }
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-add-session')">Cancel</button>
       <button class="btn btn-primary" onclick="saveSession()">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD CLIENT MODAL ── -->
+<div class="modal-backdrop" id="modal-add-client">
+  <div class="modal">
+    <div class="modal-title" id="modal-client-title">Onboard WWA Client</div>
+    <input type="hidden" id="edit-client-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Client Name *</label>
+        <input class="form-input" id="client-name" placeholder="e.g. Louis">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="client-status">
+          <option value="Active">Active</option>
+          <option value="Onboarding">Onboarding</option>
+          <option value="Paused">Paused</option>
+          <option value="Churned">Churned</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Retainer Amount *</label>
+        <input class="form-input" id="client-retainer" type="number" placeholder="e.g. 1800">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Currency</label>
+        <select class="form-select" id="client-currency">
+          <option value="THB">THB (฿)</option>
+          <option value="SGD">SGD (S$)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tier / Package</label>
+        <select class="form-select" id="client-tier">
+          <option value="20-piece">20-piece (Standard)</option>
+          <option value="16-piece">16-piece</option>
+          <option value="12-piece">12-piece</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Start Date</label>
+        <input class="form-input" id="client-start-date" type="date">
+      </div>
+    </div>
+
+    <!-- Company % -->
+    <div class="form-group">
+      <label class="form-label">Company % (goes to company overhead)</label>
+      <input class="form-input" id="client-company-pct" type="number" step="0.5" min="0" max="100" placeholder="e.g. 10">
+      <div class="form-hint">Taken off the top before team splits</div>
+    </div>
+
+    <!-- Steven's role & involvement -->
+    <div style="border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">Steven's Involvement</div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Steven's Role(s) on this client</label>
+          <input class="form-input" id="client-steven-roles" placeholder="e.g. Strategist, Account Manager">
+          <div class="form-hint">Comma-separated if multiple</div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Involvement Level</label>
+          <select class="form-select" id="client-steven-involvement">
+            <option value="High">High</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px;margin-bottom:0">
+        <label class="form-label">Notes <span style="color:var(--text3);font-weight:400">(context for future use)</span></label>
+        <textarea class="form-textarea" id="client-steven-notes" rows="2" placeholder="e.g. Client prefers bilingual content, Steven handles strategy calls directly..."></textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Client Notes</label>
+      <textarea class="form-textarea" id="client-notes" rows="2" placeholder="Optional notes about this client..."></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-client')">Cancel</button>
+      <button class="btn btn-purple" onclick="saveClient()">Save Client</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD TEAM ASSIGNMENT MODAL ── -->
+<div class="modal-backdrop" id="modal-add-assignment">
+  <div class="modal">
+    <div class="modal-title" id="modal-assign-title">Assign Team Member</div>
+    <input type="hidden" id="assign-client-id">
+    <input type="hidden" id="edit-assign-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Team Member *</label>
+        <input class="form-input" id="assign-name" placeholder="e.g. Eye" list="staff-suggestions">
+        <datalist id="staff-suggestions">
+          <option value="Eye"><option value="Thazin"><option value="Jane">
+          <option value="AJ. Pop"><option value="Dr. Poon"><option value="AJ. Koi">
+          <option value="AJ. Sumi"><option value="AJ. Looknaam">
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role on this client *</label>
+        <select class="form-select" id="assign-role">
+          <option value="Account Manager">Account Manager</option>
+          <option value="Copywriter">Copywriter</option>
+          <option value="Strategist">Strategist</option>
+          <option value="Content Ops">Content Ops</option>
+          <option value="Admin">Admin</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">% of retainer *</label>
+        <input class="form-input" id="assign-pct" type="number" step="0.5" min="0" max="100" placeholder="e.g. 15">
+        <div class="form-hint" id="assign-pct-hint"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Business</label>
+        <select class="form-select" id="assign-business">
+          <option value="WWA">WWA only</option>
+          <option value="Both">Both (cross-company)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="assign-notes" rows="2" placeholder="e.g. Handles monthly content calendar + client comms..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-assignment')">Cancel</button>
+      <button class="btn btn-purple" onclick="saveAssignment()">Save Assignment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD WWA EXPENSE MODAL ── -->
+<div class="modal-backdrop" id="modal-add-wwa-expense">
+  <div class="modal">
+    <div class="modal-title">Add WWA Fixed Expense</div>
+    <input type="hidden" id="edit-wwa-expense-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Item Name *</label>
+        <input class="form-input" id="wwa-expense-name" placeholder="e.g. Notion, ChatGPT, Canva">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount (฿) *</label>
+        <input class="form-input" id="wwa-expense-amount" type="number" placeholder="e.g. 500">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Month *</label>
+        <input class="form-input" id="wwa-expense-month" type="month">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="wwa-expense-category">
+          <option value="subscription">Subscription / Tool</option>
+          <option value="software">Software</option>
+          <option value="operational">Operational</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-wwa-expense')">Cancel</button>
+      <button class="btn btn-purple" onclick="saveWWAExpense()">Save Expense</button>
     </div>
   </div>
 </div>
@@ -780,16 +1013,19 @@ let DASHBOARD_PIN = localStorage.getItem('stevenco_pin') || '1234';
 const CACHE_KEY   = 'stevenco_cache';
 
 // ─── STATE ────────────────────────────────────────────────
-let currentUser   = null;
-let pinUnlocked   = false;
+let currentUser    = null;
+let pinUnlocked    = false;
 let popPinUnlocked = false;
-let _toastTimer   = null;
-let selectedMonth = getCurrentMonthStr();
+let _toastTimer    = null;
+let selectedMonth  = getCurrentMonthStr();
 
 let DATA = {
   privateSessions: [],
-  poppadiMirror: [],   // from PoppadiMirror tab — monthly summary
-  profitShare: [],     // from ProfitShare tab — draw records
+  poppadiMirror:   [],
+  profitShare:     [],
+  wwaClients:      [],
+  wwaAssignments:  [],
+  wwaExpenses:     [],
 };
 
 // ─── MONTH HELPERS ────────────────────────────────────────
@@ -812,7 +1048,7 @@ function getMonthOptions() {
 
 function populateMonthPickers() {
   const opts = getMonthOptions();
-  ['home-month-select','pt-month-select','pop-month-select'].forEach(id => {
+  ['home-month-select','pt-month-select','pop-month-select','wwa-month-select'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.innerHTML = opts.map(o =>
@@ -824,7 +1060,7 @@ function populateMonthPickers() {
 function onMonthChange() {
   const sel = document.getElementById('home-month-select');
   if (sel) selectedMonth = sel.value;
-  ['pt-month-select','pop-month-select'].forEach(id => {
+  ['pt-month-select','pop-month-select','wwa-month-select'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = selectedMonth;
   });
@@ -836,24 +1072,9 @@ function filterByMonth(arr, field) {
 }
 
 function fmt(n) { return '฿' + Number(n||0).toLocaleString(); }
-
-function excelSerialToDateStr(serial) {
-  // Excel serial to YYYY-MM-DD
-  if (!serial || isNaN(Number(serial))) return String(serial);
-  const js = new Date((Number(serial) - 25569) * 86400 * 1000);
-  const y = js.getUTCFullYear();
-  const m = String(js.getUTCMonth()+1).padStart(2,'0');
-  const d = String(js.getUTCDate()).padStart(2,'0');
-  return `${y}-${m}-${d}`;
-}
-
-function excelSerialToMonth(serial) {
-  const dateStr = excelSerialToDateStr(serial);
-  return dateStr.slice(0,7); // YYYY-MM
-}
+function fmtSGD(n) { return 'S$' + Number(n||0).toLocaleString(); }
 
 function formatMonthLabel(monthStr) {
-  // YYYY-MM → "May 2026"
   const [y, m] = monthStr.split('-');
   const d = new Date(parseInt(y), parseInt(m)-1, 1);
   return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
@@ -895,19 +1116,18 @@ function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-wrapper').style.display = 'block';
   if (currentUser) {
-    const name = currentUser.given_name || currentUser.name || 'Steven';
+    const name  = currentUser.given_name || currentUser.name || 'Steven';
     const email = currentUser.email || '';
-    document.getElementById('user-name').textContent = name;
-    document.getElementById('user-email').textContent = email;
-    document.getElementById('user-avatar').textContent = name[0].toUpperCase();
+    document.getElementById('user-name').textContent    = name;
+    document.getElementById('user-email').textContent   = email;
+    document.getElementById('user-avatar').textContent  = name[0].toUpperCase();
     document.getElementById('settings-email').textContent = email;
-    // Dynamic greeting
     const hr = new Date().getHours();
     const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
     document.getElementById('home-greeting').textContent = `${greet}, ${name} 👋`;
   }
   const savedPage = localStorage.getItem('stevenco_page') || 'home';
-  const navItem = document.querySelector(`[data-page="${savedPage}"]`);
+  const navItem   = document.querySelector(`[data-page="${savedPage}"]`);
   showPage(savedPage, navItem);
   populateMonthPickers();
   loadAllData();
@@ -925,7 +1145,6 @@ function logout() {
 
 // ─── DATA LOADING ─────────────────────────────────────────
 async function loadAllData() {
-  // Cache-first
   const cached = localStorage.getItem(CACHE_KEY);
   if (cached) {
     try {
@@ -935,16 +1154,21 @@ async function loadAllData() {
     } catch(e) { localStorage.removeItem(CACHE_KEY); }
   }
 
-  // Fresh fetch
   try {
-    const [sessionRows, mirrorRows, profitRows] = await Promise.all([
+    const [sessionRows, mirrorRows, profitRows, clientRows, assignRows, expenseRows] = await Promise.all([
       fetchSheet('PrivateSessions!A:K'),
-      fetchSheet('PoppadiMirror!A:H'),
+      fetchSheet('PoppadiMirror!A:I'),
       fetchSheet('ProfitShare!A:I'),
+      fetchSheet('WWAClients!A:L'),
+      fetchSheet('WWATeamAssignments!A:J'),
+      fetchSheet('WWAExpenses!A:G'),
     ]);
     DATA.privateSessions = parseSheet(sessionRows);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
     DATA.profitShare     = parseSheet(profitRows);
+    DATA.wwaClients      = parseSheet(clientRows);
+    DATA.wwaAssignments  = parseSheet(assignRows);
+    DATA.wwaExpenses     = parseSheet(expenseRows);
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
     renderAll();
   } catch(e) {
@@ -959,7 +1183,7 @@ async function refreshPoppadiData() {
   btn.disabled = true;
   try {
     const [mirrorRows, profitRows] = await Promise.all([
-      fetchSheet('PoppadiMirror!A:H'),
+      fetchSheet('PoppadiMirror!A:I'),
       fetchSheet('ProfitShare!A:I'),
     ]);
     DATA.poppadiMirror = parseSheet(mirrorRows);
@@ -1015,36 +1239,87 @@ function renderAll() {
   renderHome();
   renderPrivateTutoring();
   renderPoppadi();
+  renderWWA();
 }
 
 // ─── RENDER HOME ──────────────────────────────────────────
 function renderHome() {
   // Private Tutoring
-  const ptSessions = filterByMonth(DATA.privateSessions, 'date').filter(s => s.status !== 'Cancelled');
+  const ptSessions = filterByMonth(DATA.privateSessions, 'date').filter(s => s.status !== 'Cancelled' && s.status !== 'Missed');
   const ptIncome   = ptSessions.reduce((s,r) => s + Number(r.fee||0), 0);
   const ptHours    = ptSessions.reduce((s,r) => s + Number(r.duration_hrs||0), 0);
   document.getElementById('home-pt-income').textContent = fmt(ptIncome);
   document.getElementById('home-pt-hours').textContent  = `${ptHours}h this month`;
 
-  // Poppadi's — from mirror
-  const popRow = DATA.poppadiMirror.find(r => r.month === selectedMonth);
+  // Poppadi's
+  const popRow         = DATA.poppadiMirror.find(r => r.month === selectedMonth);
   const popTutorIncome = popRow ? Number(popRow.t002_income||0) : 0;
   const popSessions    = popRow ? Number(popRow.t002_sessions||0) : 0;
   document.getElementById('home-pop-income').textContent = fmt(popTutorIncome);
   document.getElementById('home-pop-sub').textContent    = `${popSessions} session${popSessions!==1?'s':''} completed`;
 
+  // WWA
+  const wwaNet = calcWWANet(selectedMonth);
+  document.getElementById('home-wwa-income').textContent = fmt(wwaNet.stevenNet);
+  document.getElementById('home-wwa-sub').textContent    = wwaNet.activeClients > 0
+    ? `${wwaNet.activeClients} active client${wwaNet.activeClients!==1?'s':''}`
+    : 'No active clients';
+
   // Take-home (PIN protected)
-  const drawRecord = DATA.profitShare.find(r => r.month === selectedMonth);
-  const popShareDrawn = (drawRecord && drawRecord.drawn === 'TRUE') ? Number(drawRecord.steven_share||0) : 0;
+  const drawRecord    = DATA.profitShare.find(r => r.month === selectedMonth);
+  const trueProfit    = calcTrueProfit(popRow);
+  const popShareDrawn = (drawRecord && drawRecord.drawn === 'TRUE') ? trueProfit : 0;
   const popShareBadge = drawRecord && drawRecord.drawn === 'TRUE' ? '· drawn ✓' : '· not drawn';
 
-  document.getElementById('th-private').textContent = fmt(ptIncome);
-  document.getElementById('th-poppadi-tutor').textContent = fmt(popTutorIncome);
-  document.getElementById('th-poppadi-share').textContent = fmt(popShareDrawn);
+  document.getElementById('th-private').textContent          = fmt(ptIncome);
+  document.getElementById('th-poppadi-tutor').textContent    = fmt(popTutorIncome);
+  document.getElementById('th-poppadi-share').textContent    = fmt(popShareDrawn);
   document.getElementById('th-poppadi-draw-badge').textContent = popShareBadge;
+  document.getElementById('th-wwa').textContent              = fmt(wwaNet.stevenNet);
 
-  const total = ptIncome + popTutorIncome + popShareDrawn;
+  const total = ptIncome + popTutorIncome + popShareDrawn + wwaNet.stevenNet;
   document.getElementById('th-total').textContent = fmt(total);
+}
+
+// ─── TRUE PROFIT HELPER ───────────────────────────────────
+function calcTrueProfit(popRow) {
+  if (!popRow) return 0;
+  const stevenShare = Number(popRow.steven_profit_share||0);
+  const fixedCosts  = Number(popRow.fixed_costs||0);
+  const trueProfit  = stevenShare - fixedCosts;
+  return trueProfit > 0 ? trueProfit : 0;
+}
+
+// ─── WWA NET HELPER ───────────────────────────────────────
+function calcWWANet(month) {
+  const activeClients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  let totalRevenue = 0;
+  let teamCosts    = 0;
+  let companyCuts  = 0;
+
+  activeClients.forEach(client => {
+    const retainer = Number(client.retainer_amount||0);
+    // For simplicity, retainer is in THB (SGD clients should be converted — Phase 4 uses manual THB input)
+    totalRevenue += retainer;
+
+    // Company %
+    const companyPct = Number(client.company_pct||0);
+    companyCuts += retainer * (companyPct / 100);
+
+    // Team assignments for this client
+    const assignments = DATA.wwaAssignments.filter(a => a.client_id === client.id);
+    assignments.forEach(a => {
+      teamCosts += retainer * (Number(a.pct||0) / 100);
+    });
+  });
+
+  // WWA fixed expenses this month
+  const monthExpenses = DATA.wwaExpenses.filter(e => (e.month||'').startsWith(month));
+  const fixedExp = monthExpenses.reduce((s,e) => s + Number(e.amount||0), 0);
+
+  const stevenNet = totalRevenue - teamCosts - companyCuts - fixedExp;
+
+  return { totalRevenue, teamCosts, companyCuts, fixedExp, stevenNet: stevenNet > 0 ? stevenNet : 0, activeClients: activeClients.length };
 }
 
 // ─── RENDER PRIVATE TUTORING ──────────────────────────────
@@ -1052,7 +1327,7 @@ function renderPrivateTutoring() {
   const sel = document.getElementById('pt-month-select');
   if (sel) selectedMonth = sel.value;
 
-  const monthSessions = filterByMonth(DATA.privateSessions, 'date').filter(s => s.status !== 'Cancelled');
+  const monthSessions = filterByMonth(DATA.privateSessions, 'date').filter(s => s.status !== 'Cancelled' && s.status !== 'Missed');
   const income = monthSessions.reduce((s,r) => s + Number(r.fee||0), 0);
   const hours  = monthSessions.reduce((s,r) => s + Number(r.duration_hrs||0), 0);
 
@@ -1100,7 +1375,8 @@ function renderPrivateTutoring() {
     tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state" style="padding:24px"><div class="icon">📋</div><p>No sessions this month</p></div></td></tr>`;
   } else {
     tbody.innerHTML = allMonthSessions.sort((a,b) => b.date.localeCompare(a.date)).map(s => {
-      const sc = s.status === 'Completed' ? 'completed' : s.status === 'Cancelled' ? 'cancelled' : 'pending';
+      const st = (s.status||'Completed').toLowerCase();
+      const sc = st === 'completed' ? 'completed' : st === 'cancelled' ? 'cancelled' : st === 'missed' ? 'missed' : 'scheduled';
       return `<tr>
         <td class="mono">${s.date}</td>
         <td><strong>${s.student_name||'—'}</strong></td>
@@ -1121,36 +1397,35 @@ function renderPoppadi() {
   const sel = document.getElementById('pop-month-select');
   if (sel) selectedMonth = sel.value;
 
-  // Get mirror row for selected month
-  const popRow = DATA.poppadiMirror.find(r => r.month === selectedMonth);
+  const popRow       = DATA.poppadiMirror.find(r => r.month === selectedMonth);
   const tutorIncome  = popRow ? Number(popRow.t002_income||0) : 0;
   const tutorHours   = popRow ? Number(popRow.t002_hours||0) : 0;
   const tutorSess    = popRow ? Number(popRow.t002_sessions||0) : 0;
   const stevenShare  = popRow ? Number(popRow.steven_profit_share||0) : 0;
+  const fixedCosts   = popRow ? Number(popRow.fixed_costs||0) : 0;
   const ajPop20      = popRow ? Number(popRow.aj_pop_20pct||0) : 0;
   const grossRem     = popRow ? Number(popRow.school_remainder_gross||0) : 0;
+  const trueProfit   = calcTrueProfit(popRow);
   const lastSynced   = popRow ? (popRow.last_synced || '') : '';
 
-  // KPIs
   document.getElementById('pop-tutor-income').textContent = fmt(tutorIncome);
   document.getElementById('pop-tutor-sub').textContent    = `${tutorSess} session${tutorSess!==1?'s':''} completed`;
   document.getElementById('pop-hours').textContent        = tutorHours + 'h';
-  document.getElementById('pop-share-kpi').textContent    = fmt(stevenShare);
-  document.getElementById('pop-share-sub').textContent    = grossRem ? `From ฿${grossRem.toLocaleString()} school remainder` : 'No data yet';
+  document.getElementById('pop-share-kpi').textContent    = fmt(trueProfit);
+  document.getElementById('pop-share-sub').textContent    = fixedCosts > 0
+    ? `After AJ. Pop 20% (${fmt(ajPop20)}) + fixed costs (${fmt(fixedCosts)})`
+    : grossRem ? `From ${fmt(grossRem)} school remainder · after AJ. Pop 20%` : 'No data yet';
 
-  // Sync badge
   const badge = document.getElementById('pop-sync-badge');
   if (lastSynced) {
     badge.style.display = 'inline-flex';
     badge.title = 'Last synced: ' + lastSynced.slice(0,16);
   }
 
-  // Session list (show sessions for selected month from mirror data)
   const sessionsList = document.getElementById('pop-sessions-list');
   if (!popRow || tutorSess === 0) {
     sessionsList.innerHTML = `<div class="empty-state"><div class="icon">🏫</div><p>No T002 sessions found for this month.<br><small>Run the mirror sync script to pull data from Poppadi's sheet.</small></p></div>`;
   } else {
-    // Show summary card (detailed sessions come from mirror — we show the aggregate)
     sessionsList.innerHTML = `
       <div class="student-card" style="cursor:default">
         <div class="student-avatar teal">T2</div>
@@ -1164,40 +1439,42 @@ function renderPoppadi() {
         </div>
       </div>
       <div style="background:var(--surface2);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--text3);margin-top:8px">
-        School remainder: <strong style="color:var(--text)">${fmt(grossRem)}</strong> · 
-        AJ. Pop's 20%: <strong style="color:var(--text)">${fmt(ajPop20)}</strong> · 
-        Your profit share: <strong style="color:var(--teal)">${fmt(stevenShare)}</strong>
+        School remainder: <strong style="color:var(--text)">${fmt(grossRem)}</strong> ·
+        AJ. Pop 20%: <strong style="color:var(--text)">${fmt(ajPop20)}</strong> ·
+        After 20%: <strong style="color:var(--text)">${fmt(stevenShare)}</strong> ·
+        Fixed costs: <strong style="color:var(--red)">${fmt(fixedCosts)}</strong> ·
+        <strong>True profit: <span style="color:var(--teal)">${fmt(trueProfit)}</span></strong>
       </div>`;
   }
 
-  // PIN content
   if (popPinUnlocked) renderPoppadiPinContent();
 }
 
 function renderPoppadiPinContent() {
-  // Draw toggle for current month
-  const popRow = DATA.poppadiMirror.find(r => r.month === selectedMonth);
-  const drawRecord = DATA.profitShare.find(r => r.month === selectedMonth);
-  const stevenShare = popRow ? Number(popRow.steven_profit_share||0) : 0;
+  const popRow      = DATA.poppadiMirror.find(r => r.month === selectedMonth);
+  const drawRecord  = DATA.profitShare.find(r => r.month === selectedMonth);
+  const trueProfit  = calcTrueProfit(popRow);
   const alreadyDrawn = drawRecord && drawRecord.drawn === 'TRUE';
 
   const drawSection = document.getElementById('pop-draw-section');
-  if (!popRow || stevenShare === 0) {
-    drawSection.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:8px 0">No profit share data for ${formatMonthLabel(selectedMonth)}.</div>`;
+  if (!popRow || trueProfit === 0) {
+    drawSection.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:8px 0">
+      ${!popRow ? `No data for ${formatMonthLabel(selectedMonth)}.` : 'Fixed costs exceed profit share this month — nothing to draw.'}
+    </div>`;
   } else {
     drawSection.innerHTML = `
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:0">
-        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">${formatMonthLabel(selectedMonth)} — Profit Share</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">${formatMonthLabel(selectedMonth)} — True Profit</div>
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div>
-            <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--teal)">${fmt(stevenShare)}</div>
+            <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--teal)">${fmt(trueProfit)}</div>
             <div style="font-size:12px;color:var(--text3);margin-top:2px">available to draw</div>
           </div>
           <div style="text-align:right">
             ${alreadyDrawn
               ? `<div style="background:var(--green-bg);color:var(--green);padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:500">✓ Drawn this month</div>
                  <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="toggleDraw('${selectedMonth}', false)">Undo — Carry Forward</button>`
-              : `<button class="btn btn-teal" onclick="toggleDraw('${selectedMonth}', true)">Draw ${fmt(stevenShare)}</button>
+              : `<button class="btn btn-teal" onclick="toggleDraw('${selectedMonth}', true)">Draw ${fmt(trueProfit)}</button>
                  <div style="font-size:11px;color:var(--text3);margin-top:6px">or carry forward to next month</div>`
             }
           </div>
@@ -1205,13 +1482,12 @@ function renderPoppadiPinContent() {
       </div>`;
   }
 
-  // Accumulated balance (all months not drawn)
+  // Accumulated balance — sum of true profit from undrawn months
   let accumulated = 0;
   DATA.poppadiMirror.forEach(row => {
-    const share = Number(row.steven_profit_share||0);
+    const tp = calcTrueProfit(row);
     const dr = DATA.profitShare.find(r => r.month === row.month);
-    const drawn = dr && dr.drawn === 'TRUE';
-    if (!drawn) accumulated += share;
+    if (!(dr && dr.drawn === 'TRUE')) accumulated += tp;
   });
   document.getElementById('pop-accumulated-balance').textContent = fmt(accumulated);
 
@@ -1222,55 +1498,148 @@ function renderPoppadiPinContent() {
     return;
   }
   tbody.innerHTML = [...DATA.poppadiMirror].sort((a,b) => b.month.localeCompare(a.month)).map(row => {
-    const dr = DATA.profitShare.find(r => r.month === row.month);
-    const drawn = dr && dr.drawn === 'TRUE';
-    const share = Number(row.steven_profit_share||0);
+    const dr        = DATA.profitShare.find(r => r.month === row.month);
+    const drawn     = dr && dr.drawn === 'TRUE';
+    const tp        = calcTrueProfit(row);
+    const afterAJ   = Number(row.steven_profit_share||0);
+    const fc        = Number(row.fixed_costs||0);
     return `<tr>
       <td style="font-weight:500">${formatMonthLabel(row.month)}</td>
       <td class="mono">${row.t002_sessions||0}</td>
       <td class="mono">${fmt(row.t002_income)}</td>
-      <td class="mono">${fmt(row.school_remainder_gross)}</td>
-      <td class="mono" style="color:var(--text3)">${fmt(row.aj_pop_20pct)}</td>
-      <td class="mono" style="color:var(--teal);font-weight:600">${fmt(share)}</td>
-      <td>
-        ${drawn
-          ? `<span class="status completed">Drawn</span>`
-          : `<span class="status pending">Not drawn</span>`
-        }
-      </td>
+      <td class="mono">${fmt(afterAJ)}</td>
+      <td class="mono" style="color:var(--red)">${fc > 0 ? fmt(fc) : '—'}</td>
+      <td class="mono" style="color:var(--teal);font-weight:600">${fmt(tp)}</td>
+      <td>${drawn ? `<span class="status completed">Drawn</span>` : `<span class="status pending">Not drawn</span>`}</td>
     </tr>`;
   }).join('');
 }
 
+// ─── RENDER WWA ───────────────────────────────────────────
+function renderWWA() {
+  const sel = document.getElementById('wwa-month-select');
+  if (sel) selectedMonth = sel.value;
+
+  const wwaNet = calcWWANet(selectedMonth);
+
+  document.getElementById('wwa-revenue-kpi').textContent  = fmt(wwaNet.totalRevenue);
+  document.getElementById('wwa-clients-kpi').textContent  = `${wwaNet.activeClients} active client${wwaNet.activeClients!==1?'s':''}`;
+  document.getElementById('wwa-costs-kpi').textContent    = fmt(wwaNet.teamCosts + wwaNet.companyCuts + wwaNet.fixedExp);
+  document.getElementById('wwa-expenses-kpi').textContent = wwaNet.fixedExp > 0 ? `incl. ${fmt(wwaNet.fixedExp)} subscriptions` : 'incl. subscriptions';
+  document.getElementById('wwa-net-kpi').textContent      = fmt(wwaNet.stevenNet);
+
+  // Client list
+  const clientsList = document.getElementById('wwa-clients-list');
+  if (DATA.wwaClients.length === 0) {
+    clientsList.innerHTML = `<div class="empty-state"><div class="icon">✦</div><p>No clients yet.<br>Click "+ Add Client" to onboard your first client.</p></div>`;
+  } else {
+    clientsList.innerHTML = DATA.wwaClients.map(client => {
+      const assignments = DATA.wwaAssignments.filter(a => a.client_id === client.id);
+      const retainer    = Number(client.retainer_amount||0);
+      const currency    = client.currency || 'THB';
+      const retainerFmt = currency === 'SGD' ? fmtSGD(retainer) : fmt(retainer);
+
+      // Total allocated %
+      const totalPct = assignments.reduce((s,a) => s + Number(a.pct||0), 0) + Number(client.company_pct||0);
+      const stevenPct = 100 - totalPct;
+
+      const invLevel = client.steven_involvement || 'Medium';
+      const invClass = invLevel === 'High' ? 'high' : invLevel === 'Low' ? 'low' : 'medium';
+
+      const statusColor = client.status === 'Active' ? 'completed' : client.status === 'Onboarding' ? 'scheduled' : client.status === 'Paused' ? 'pending' : 'cancelled';
+
+      return `<div class="client-card">
+        <div class="client-card-header">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="client-card-name">${client.client_name}</div>
+              <span class="status ${statusColor}" style="font-size:10px">${client.status}</span>
+              <span class="inv-badge ${invClass}">${invLevel} involvement</span>
+            </div>
+            <div class="client-card-meta">${client.tier||'—'} · ${currency} · Started ${client.start_date||'—'}</div>
+            ${client.steven_roles ? `<div style="font-size:11px;color:var(--blue);margin-top:3px">Steven: ${client.steven_roles}</div>` : ''}
+          </div>
+          <div style="text-align:right">
+            <div class="client-card-retainer">${retainerFmt}<span style="font-size:11px;color:var(--text3);font-family:'DM Sans',sans-serif">/mo</span></div>
+            <div style="font-size:11px;color:var(--teal);margin-top:2px">Steven's cut: ~${stevenPct.toFixed(0)}%</div>
+            <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm" onclick="editClient('${client.id}')">Edit</button>
+              <button class="btn btn-ghost btn-sm" onclick="openAddAssignment('${client.id}')">+ Team</button>
+            </div>
+          </div>
+        </div>
+        ${assignments.length > 0 ? `
+          <div class="client-card-team">
+            <div class="team-pill steven">
+              <span>👤</span> Steven · ${client.steven_roles||'Strategist'} · ~${stevenPct.toFixed(0)}%
+            </div>
+            ${assignments.map(a => `
+              <div class="team-pill">
+                ${a.staff_name} · ${a.role} · ${a.pct}%
+              </div>`).join('')}
+            ${Number(client.company_pct||0) > 0 ? `<div class="team-pill" style="background:var(--amber-bg);color:var(--amber);border-color:transparent">Company · ${client.company_pct}%</div>` : ''}
+          </div>
+          <div id="assign-list-${client.id}"></div>
+        ` : `
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+            <button class="btn btn-ghost btn-sm" onclick="openAddAssignment('${client.id}')">+ Assign team member</button>
+            ${client.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:8px">${client.notes}</div>` : ''}
+          </div>
+        `}
+      </div>`;
+    }).join('');
+  }
+
+  // WWA Expenses list
+  const expensesList = document.getElementById('wwa-expenses-list');
+  const allExpenses  = DATA.wwaExpenses;
+  if (allExpenses.length === 0) {
+    expensesList.innerHTML = `<div class="empty-state" style="padding:24px"><p>No fixed expenses logged. Add subscriptions, tools, and recurring costs here.</p></div>`;
+  } else {
+    expensesList.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Month</th><th>Item</th><th>Category</th><th>Amount</th><th></th></tr></thead>
+      <tbody>
+        ${allExpenses.sort((a,b) => (b.month||'').localeCompare(a.month||'')).map(e => `
+          <tr>
+            <td class="mono">${e.month||'—'}</td>
+            <td>${e.item_name||'—'}</td>
+            <td style="color:var(--text3)">${e.category||'—'}</td>
+            <td class="mono">${fmt(e.amount)}</td>
+            <td><button class="btn btn-ghost btn-sm" onclick="deleteWWAExpense('${e.id}')">Remove</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+  }
+}
+
 // ─── DRAW TOGGLE ──────────────────────────────────────────
 async function toggleDraw(month, draw) {
-  const popRow = DATA.poppadiMirror.find(r => r.month === month);
+  const popRow   = DATA.poppadiMirror.find(r => r.month === month);
   if (!popRow) return;
-  const share    = Number(popRow.steven_profit_share||0);
-  const grossRem = Number(popRow.school_remainder_gross||0);
-  const ajPop20  = Number(popRow.aj_pop_20pct||0);
+  const trueProfit = calcTrueProfit(popRow);
+  const grossRem   = Number(popRow.school_remainder_gross||0);
+  const ajPop20    = Number(popRow.aj_pop_20pct||0);
 
   const existingDr = DATA.profitShare.find(r => r.month === month);
   const row = {
-    id: existingDr ? existingDr.id : 'PS-' + Date.now(),
+    id:               existingDr ? existingDr.id : 'PS-' + Date.now(),
     month,
-    gross_remainder: grossRem,
-    aj_pop_20_pct: ajPop20,
-    steven_share: share,
-    drawn: draw ? 'TRUE' : 'FALSE',
-    draw_date: draw ? new Date().toISOString().slice(0,10) : '',
-    notes: '',
-    updated_at: new Date().toISOString(),
+    gross_remainder:  grossRem,
+    aj_pop_20_pct:    ajPop20,
+    steven_share:     trueProfit,
+    drawn:            draw ? 'TRUE' : 'FALSE',
+    draw_date:        draw ? new Date().toISOString().slice(0,10) : '',
+    notes:            '',
+    updated_at:       new Date().toISOString(),
   };
 
-  // Optimistic update
   const idx = DATA.profitShare.findIndex(r => r.month === month);
   if (idx > -1) DATA.profitShare[idx] = row;
   else DATA.profitShare.push(row);
 
   renderPoppadi();
   renderHome();
-  showToast(draw ? `✓ ${fmt(share)} marked as drawn` : '✓ Marked as carry forward');
+  showToast(draw ? `✓ ${fmt(trueProfit)} marked as drawn` : '✓ Marked as carry forward');
 
   try {
     await webAppWrite('saveProfitShareDraw', { row });
@@ -1339,6 +1708,7 @@ function openAddSession() {
   document.getElementById('session-start-time').value = '';
   document.getElementById('session-duration').value = '';
   document.getElementById('session-rate').value = '';
+  document.getElementById('session-status').value = 'Completed';
   document.getElementById('session-notes').value = '';
   document.getElementById('hint-rate').textContent = DEFAULT_RATE;
   updateFeePreview();
@@ -1356,6 +1726,7 @@ function editSession(id) {
   document.getElementById('session-start-time').value = s.start_time||'';
   document.getElementById('session-duration').value = s.duration_hrs||'';
   document.getElementById('session-rate').value = s.rate||'';
+  document.getElementById('session-status').value = s.status||'Completed';
   document.getElementById('session-notes').value = s.notes||'';
   document.getElementById('hint-rate').textContent = DEFAULT_RATE;
   updateFeePreview();
@@ -1382,6 +1753,7 @@ async function saveSession() {
   const dur       = parseFloat(document.getElementById('session-duration').value);
   const rate      = parseFloat(document.getElementById('session-rate').value) || DEFAULT_RATE;
   const startTime = document.getElementById('session-start-time').value;
+  const status    = document.getElementById('session-status').value;
   const notes     = document.getElementById('session-notes').value.trim();
   const editId    = document.getElementById('edit-session-id').value;
 
@@ -1395,7 +1767,7 @@ async function saveSession() {
   const row = {
     id, student_name: student, date, start_time: startTime,
     duration_hrs: dur, rate, fee, subject, notes,
-    status: 'Completed', created_at: new Date().toISOString()
+    status: status || 'Completed', created_at: new Date().toISOString()
   };
 
   if (editId) {
@@ -1423,6 +1795,209 @@ function updateStudentSuggestions() {
   if (dl) dl.innerHTML = names.map(n => `<option value="${n}">`).join('');
 }
 
+// ─── WWA CLIENT MODAL ─────────────────────────────────────
+function openAddClient() {
+  document.getElementById('modal-client-title').textContent = 'Onboard WWA Client';
+  document.getElementById('edit-client-id').value = '';
+  document.getElementById('client-name').value = '';
+  document.getElementById('client-status').value = 'Active';
+  document.getElementById('client-retainer').value = '';
+  document.getElementById('client-currency').value = 'THB';
+  document.getElementById('client-tier').value = '20-piece';
+  document.getElementById('client-start-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('client-company-pct').value = '';
+  document.getElementById('client-steven-roles').value = 'Strategist';
+  document.getElementById('client-steven-involvement').value = 'Medium';
+  document.getElementById('client-steven-notes').value = '';
+  document.getElementById('client-notes').value = '';
+  document.getElementById('modal-add-client').classList.add('open');
+}
+
+function editClient(id) {
+  const c = DATA.wwaClients.find(r => r.id === id);
+  if (!c) return;
+  document.getElementById('modal-client-title').textContent = 'Edit Client';
+  document.getElementById('edit-client-id').value = id;
+  document.getElementById('client-name').value = c.client_name||'';
+  document.getElementById('client-status').value = c.status||'Active';
+  document.getElementById('client-retainer').value = c.retainer_amount||'';
+  document.getElementById('client-currency').value = c.currency||'THB';
+  document.getElementById('client-tier').value = c.tier||'20-piece';
+  document.getElementById('client-start-date').value = c.start_date||'';
+  document.getElementById('client-company-pct').value = c.company_pct||'';
+  document.getElementById('client-steven-roles').value = c.steven_roles||'Strategist';
+  document.getElementById('client-steven-involvement').value = c.steven_involvement||'Medium';
+  document.getElementById('client-steven-notes').value = c.steven_notes||'';
+  document.getElementById('client-notes').value = c.notes||'';
+  document.getElementById('modal-add-client').classList.add('open');
+}
+
+async function saveClient() {
+  const name   = document.getElementById('client-name').value.trim();
+  const editId = document.getElementById('edit-client-id').value;
+
+  if (!name) { showToast('⚠ Client name is required'); return; }
+
+  const id  = editId || 'WWA-' + Date.now();
+  const row = {
+    id,
+    client_name:        name,
+    status:             document.getElementById('client-status').value,
+    retainer_amount:    document.getElementById('client-retainer').value,
+    currency:           document.getElementById('client-currency').value,
+    tier:               document.getElementById('client-tier').value,
+    start_date:         document.getElementById('client-start-date').value,
+    company_pct:        document.getElementById('client-company-pct').value || '0',
+    steven_roles:       document.getElementById('client-steven-roles').value,
+    steven_involvement: document.getElementById('client-steven-involvement').value,
+    steven_notes:       document.getElementById('client-steven-notes').value,
+    notes:              document.getElementById('client-notes').value,
+    created_at:         new Date().toISOString(),
+  };
+
+  if (editId) {
+    const idx = DATA.wwaClients.findIndex(r => r.id === editId);
+    if (idx > -1) DATA.wwaClients[idx] = row;
+  } else {
+    DATA.wwaClients.push(row);
+  }
+
+  renderWWA();
+  closeModal('modal-add-client');
+  showToast(editId ? '✓ Client updated' : '✓ Client added');
+
+  try {
+    await webAppWrite('saveWWAClient', { row });
+    localStorage.removeItem(CACHE_KEY);
+    loadAllData();
+  } catch(e) {
+    showToast('⚠ Saved locally — sync pending');
+  }
+}
+
+// ─── TEAM ASSIGNMENT MODAL ────────────────────────────────
+function openAddAssignment(clientId) {
+  const client = DATA.wwaClients.find(c => c.id === clientId);
+  document.getElementById('modal-assign-title').textContent = `Assign to ${client ? client.client_name : 'client'}`;
+  document.getElementById('assign-client-id').value = clientId;
+  document.getElementById('edit-assign-id').value = '';
+  document.getElementById('assign-name').value = '';
+  document.getElementById('assign-role').value = 'Account Manager';
+  document.getElementById('assign-pct').value = '';
+  document.getElementById('assign-business').value = 'WWA';
+  document.getElementById('assign-notes').value = '';
+
+  // Show remaining % hint
+  updateAssignPctHint(clientId);
+  document.getElementById('modal-add-assignment').classList.add('open');
+}
+
+function updateAssignPctHint(clientId) {
+  if (!clientId) return;
+  const client = DATA.wwaClients.find(c => c.id === clientId);
+  if (!client) return;
+  const existing = DATA.wwaAssignments.filter(a => a.client_id === clientId);
+  const allocated = existing.reduce((s,a) => s + Number(a.pct||0), 0) + Number(client.company_pct||0);
+  const remaining = 100 - allocated;
+  const hint = document.getElementById('assign-pct-hint');
+  if (hint) hint.textContent = `${allocated}% already allocated · ${remaining}% remaining for Steven + this person`;
+}
+
+async function saveAssignment() {
+  const name     = document.getElementById('assign-name').value.trim();
+  const clientId = document.getElementById('assign-client-id').value;
+  const pct      = document.getElementById('assign-pct').value;
+  const editId   = document.getElementById('edit-assign-id').value;
+
+  if (!name || !clientId || !pct) { showToast('⚠ Name, client, and % are required'); return; }
+
+  const id  = editId || 'ASSIGN-' + Date.now();
+  const row = {
+    id,
+    client_id:   clientId,
+    staff_name:  name,
+    role:        document.getElementById('assign-role').value,
+    pct:         pct,
+    business:    document.getElementById('assign-business').value,
+    notes:       document.getElementById('assign-notes').value,
+    created_at:  new Date().toISOString(),
+  };
+
+  if (editId) {
+    const idx = DATA.wwaAssignments.findIndex(r => r.id === editId);
+    if (idx > -1) DATA.wwaAssignments[idx] = row;
+  } else {
+    DATA.wwaAssignments.push(row);
+  }
+
+  renderWWA();
+  closeModal('modal-add-assignment');
+  showToast(`✓ ${name} assigned`);
+
+  try {
+    await webAppWrite('saveWWAAssignment', { row });
+    localStorage.removeItem(CACHE_KEY);
+    loadAllData();
+  } catch(e) {
+    showToast('⚠ Saved locally — sync pending');
+  }
+}
+
+// ─── WWA EXPENSES ─────────────────────────────────────────
+function openAddWWAExpense() {
+  document.getElementById('edit-wwa-expense-id').value = '';
+  document.getElementById('wwa-expense-name').value = '';
+  document.getElementById('wwa-expense-amount').value = '';
+  document.getElementById('wwa-expense-month').value = selectedMonth;
+  document.getElementById('wwa-expense-category').value = 'subscription';
+  document.getElementById('modal-add-wwa-expense').classList.add('open');
+}
+
+async function saveWWAExpense() {
+  const name   = document.getElementById('wwa-expense-name').value.trim();
+  const amount = document.getElementById('wwa-expense-amount').value;
+  const month  = document.getElementById('wwa-expense-month').value;
+  const editId = document.getElementById('edit-wwa-expense-id').value;
+
+  if (!name || !amount || !month) { showToast('⚠ Name, amount, and month are required'); return; }
+
+  const id  = editId || 'WEXP-' + Date.now();
+  const row = {
+    id, month, item_name: name, amount,
+    category: document.getElementById('wwa-expense-category').value,
+    created_at: new Date().toISOString(),
+  };
+
+  if (editId) {
+    const idx = DATA.wwaExpenses.findIndex(r => r.id === editId);
+    if (idx > -1) DATA.wwaExpenses[idx] = row;
+  } else {
+    DATA.wwaExpenses.push(row);
+  }
+
+  renderWWA();
+  closeModal('modal-add-wwa-expense');
+  showToast('✓ Expense saved');
+
+  try {
+    await webAppWrite('saveWWAExpense', { row });
+    localStorage.removeItem(CACHE_KEY);
+    loadAllData();
+  } catch(e) {
+    showToast('⚠ Saved locally — sync pending');
+  }
+}
+
+async function deleteWWAExpense(id) {
+  if (!confirm('Remove this expense?')) return;
+  DATA.wwaExpenses = DATA.wwaExpenses.filter(e => e.id !== id);
+  renderWWA();
+  try {
+    await webAppWrite('deleteWWAExpense', { id });
+    localStorage.removeItem(CACHE_KEY);
+  } catch(e) { /* local delete still applied */ }
+}
+
 // ─── SETTINGS ─────────────────────────────────────────────
 function saveWebAppUrl() {
   const url = document.getElementById('settings-webapp-url').value.trim();
@@ -1441,7 +2016,6 @@ function loadSettings() {
   const savedUrl = localStorage.getItem('stevenco_webapp_url');
   if (savedUrl) document.getElementById('settings-webapp-url').value = savedUrl;
   document.getElementById('settings-default-rate').value = DEFAULT_RATE;
-  // Mirror sync info
   const mirror = DATA.poppadiMirror;
   if (mirror && mirror.length > 0) {
     const last = mirror[0].last_synced;
@@ -1471,6 +2045,7 @@ function showPage(id, btn) {
   if (id === 'settings') loadSettings();
   if (id === 'poppadi') { populateMonthPickers(); renderPoppadi(); }
   if (id === 'private-tutoring') populateMonthPickers();
+  if (id === 'wwa') { populateMonthPickers(); renderWWA(); }
 }
 
 // ─── SIDEBAR + THEME ──────────────────────────────────────
