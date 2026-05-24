@@ -288,6 +288,98 @@ tr:hover td { background: var(--surface2); }
   .content { padding: 16px; }
   .topbar { padding: 0 16px; }
 }
+
+/* ── TEAM PAGE ── */
+.team-tab {
+  padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: none; background: none; color: var(--text3);
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.team-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.team-tab:hover:not(.active) { color: var(--text2); }
+
+.staff-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; transition: all 0.15s; position: relative;
+}
+.staff-card:hover { border-color: var(--blue); }
+.staff-card-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+.staff-avatar {
+  width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 16px; font-weight: 600; flex-shrink: 0;
+}
+.staff-avatar.poppadi { background: var(--poppadi-bg); color: var(--poppadi); }
+.staff-avatar.wwa     { background: var(--wwa-bg); color: var(--wwa); }
+.staff-avatar.both    { background: var(--blue-bg); color: var(--blue); }
+.staff-avatar.private { background: var(--amber-bg); color: var(--amber); }
+.staff-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.staff-fullname { font-size: 15px; font-weight: 600; }
+.staff-code { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); }
+.staff-type-badge {
+  display: inline-flex; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 500; background: var(--surface2); color: var(--text3);
+}
+.staff-roles-row { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.staff-biz-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.biz-pill {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
+  border-radius: 20px; font-size: 11px; font-weight: 500;
+}
+.biz-pill.poppadi { background: var(--poppadi-bg); color: var(--poppadi); }
+.biz-pill.wwa     { background: var(--wwa-bg); color: var(--wwa); }
+.biz-pill.private { background: var(--blue-bg); color: var(--blue); }
+.staff-pay-row { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+.staff-pay-row strong { color: var(--text); }
+.staff-notes-row { font-size: 11px; color: var(--text3); line-height: 1.5; }
+.staff-edit-btn {
+  position: absolute; top: 14px; right: 14px;
+}
+
+/* Ecosystem diagram nodes */
+.eco-business-col {
+  display: flex; flex-direction: column; gap: 12px; flex: 1;
+}
+.eco-business-header {
+  text-align: center; padding: 10px 16px; border-radius: var(--radius);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+}
+.eco-business-header.poppadi { background: var(--poppadi-bg); color: var(--poppadi); }
+.eco-business-header.wwa     { background: var(--wwa-bg); color: var(--wwa); }
+.eco-business-header.private { background: var(--blue-bg); color: var(--blue); }
+.eco-person-node {
+  padding: 9px 14px; border-radius: var(--radius); font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); background: var(--surface2); cursor: default;
+  transition: all 0.15s; text-align: center;
+}
+.eco-person-node:hover { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
+.eco-person-node.steven { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
+
+/* Radar bars */
+.radar-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.radar-bar-label { font-size: 12px; font-weight: 500; min-width: 90px; }
+.radar-bar-track { flex: 1; background: var(--surface2); border-radius: 20px; height: 8px; overflow: hidden; }
+.radar-bar-fill { height: 100%; border-radius: 20px; transition: width 0.4s ease; }
+.radar-bar-value { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text3); min-width: 40px; text-align: right; }
+
+.opportunity-item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.opportunity-item:last-child { border-bottom: none; }
+.opp-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.opp-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.opp-text strong { color: var(--text); display: block; margin-bottom: 2px; }
+
+.insight-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.insight-row:last-child { border-bottom: none; }
+.insight-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.insight-dot.green  { background: var(--green); }
+.insight-dot.amber  { background: var(--amber); }
+.insight-dot.red    { background: var(--red); }
+.insight-dot.blue   { background: var(--blue); }
 </style>
 </head>
 <body>
@@ -674,12 +766,74 @@ tr:hover td { background: var(--surface2); }
 
       <!-- ── TEAM PAGE ── -->
       <div class="page" id="page-team">
-        <div class="page-header"><h1>Team</h1><p>Staff profiles · Ecosystem diagram · Opportunity radar</p></div>
-        <div class="coming-soon">
-          <div class="phase-badge">PHASE 5</div>
-          <h3>Coming in Phase 5</h3>
-          <p>Staff profile builder, ecosystem relationship diagram, skills map, and opportunity radar will be built here.</p>
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1>Team</h1>
+              <p>Staff profiles · Ecosystem diagram · Opportunity radar</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:3px;gap:2px" id="team-view-tabs">
+                <button class="team-tab active" onclick="switchTeamView('profiles')" id="tab-profiles">Profiles</button>
+                <button class="team-tab" onclick="switchTeamView('ecosystem')" id="tab-ecosystem">Ecosystem</button>
+                <button class="team-tab" onclick="switchTeamView('wwa-matrix')" id="tab-wwa-matrix">WWA Matrix</button>
+                <button class="team-tab" onclick="switchTeamView('radar')" id="tab-radar">Radar</button>
+              </div>
+              <button class="btn btn-secondary" onclick="openAddStaff()" id="team-add-btn">+ Add Staff</button>
+            </div>
+          </div>
         </div>
+
+        <!-- ── VIEW: STAFF PROFILES ── -->
+        <div id="team-view-profiles">
+          <div id="team-profiles-grid" class="two-col"></div>
+        </div>
+
+        <!-- ── VIEW: ECOSYSTEM DIAGRAM ── -->
+        <div id="team-view-ecosystem" style="display:none">
+          <div class="card" style="padding:0;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+              <span style="font-size:13px;font-weight:500;color:var(--text2)">Who works where</span>
+              <div style="margin-left:auto;display:flex;gap:12px;font-size:11px;color:var(--text3)">
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:var(--teal);display:inline-block"></span>Poppadi's</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:var(--purple);display:inline-block"></span>WWA</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:inline-block"></span>Both</span>
+              </div>
+            </div>
+            <div id="ecosystem-diagram" style="min-height:420px;padding:24px;position:relative;overflow:auto"></div>
+          </div>
+        </div>
+
+        <!-- ── VIEW: WWA MATRIX ── -->
+        <div id="team-view-wwa-matrix" style="display:none">
+          <div class="card" style="padding:0;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+              <span style="font-size:13px;font-weight:500;color:var(--text2)">Client × Team — % allocation per client</span>
+            </div>
+            <div class="table-wrap" style="padding:0">
+              <div id="wwa-matrix-container" style="padding:20px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── VIEW: OPPORTUNITY RADAR ── -->
+        <div id="team-view-radar" style="display:none">
+          <div class="two-col">
+            <div class="card">
+              <div class="card-title">Utilisation by Person</div>
+              <div id="radar-utilisation"></div>
+            </div>
+            <div class="card">
+              <div class="card-title">Cross-Business Opportunities</div>
+              <div id="radar-opportunities"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Capacity Insights</div>
+            <div id="radar-insights"></div>
+          </div>
+        </div>
+
       </div>
 
       <!-- ── SCHEDULE PAGE ── -->
@@ -1000,6 +1154,72 @@ tr:hover td { background: var(--surface2); }
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- ── ADD STAFF MODAL ── -->
+<div class="modal-backdrop" id="modal-add-staff">
+  <div class="modal">
+    <div class="modal-title" id="modal-staff-title">Add Staff Member</div>
+    <input type="hidden" id="edit-staff-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Name *</label>
+        <input class="form-input" id="staff-name" placeholder="e.g. Eye">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Staff ID / Code</label>
+        <input class="form-input" id="staff-code" placeholder="e.g. T001, EYE">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-select" id="staff-type">
+          <option value="Full-time">Full-time</option>
+          <option value="Part-time">Part-time</option>
+          <option value="Outsourced">Outsourced</option>
+          <option value="Partner">Partner</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="staff-status">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Business(es)</label>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="staff-biz-poppadi" value="Poppadi"> Poppadi's Studyo
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="staff-biz-wwa" value="WWA"> WealthWise Atelier
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="staff-biz-private" value="Private"> Private Tutoring
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Role(s)</label>
+      <input class="form-input" id="staff-roles" placeholder="e.g. Content Ops, Admin — comma separated">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Pay Structure</label>
+      <input class="form-input" id="staff-pay" placeholder="e.g. ฿650/hr · or TBD">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="staff-notes" rows="2" placeholder="Anything useful to know about this person's role or arrangement..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-staff')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStaff()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─── CONFIG ───────────────────────────────────────────────
 const SHEET_ID  = '1_ob-xn0nvls6j1N1lL4T6vMsjjROz-7jtFOnNrLGlHk';
@@ -1026,6 +1246,7 @@ let DATA = {
   wwaClients:      [],
   wwaAssignments:  [],
   wwaExpenses:     [],
+  staffProfiles:   [],
 };
 
 // ─── MONTH HELPERS ────────────────────────────────────────
@@ -1155,13 +1376,14 @@ async function loadAllData() {
   }
 
   try {
-    const [sessionRows, mirrorRows, profitRows, clientRows, assignRows, expenseRows] = await Promise.all([
+    const [sessionRows, mirrorRows, profitRows, clientRows, assignRows, expenseRows, staffRows] = await Promise.all([
       fetchSheet('PrivateSessions!A:K'),
       fetchSheet('PoppadiMirror!A:I'),
       fetchSheet('ProfitShare!A:I'),
       fetchSheet('WWAClients!A:L'),
       fetchSheet('WWATeamAssignments!A:J'),
       fetchSheet('WWAExpenses!A:G'),
+      fetchSheet('StaffProfiles!A:J'),
     ]);
     DATA.privateSessions = parseSheet(sessionRows);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
@@ -1169,6 +1391,7 @@ async function loadAllData() {
     DATA.wwaClients      = parseSheet(clientRows);
     DATA.wwaAssignments  = parseSheet(assignRows);
     DATA.wwaExpenses     = parseSheet(expenseRows);
+    DATA.staffProfiles   = parseSheet(staffRows);
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
     renderAll();
   } catch(e) {
@@ -1240,6 +1463,7 @@ function renderAll() {
   renderPrivateTutoring();
   renderPoppadi();
   renderWWA();
+  renderTeam();
 }
 
 // ─── RENDER HOME ──────────────────────────────────────────
@@ -2046,6 +2270,7 @@ function showPage(id, btn) {
   if (id === 'poppadi') { populateMonthPickers(); renderPoppadi(); }
   if (id === 'private-tutoring') populateMonthPickers();
   if (id === 'wwa') { populateMonthPickers(); renderWWA(); }
+  if (id === 'team') renderTeam();
 }
 
 // ─── SIDEBAR + THEME ──────────────────────────────────────
@@ -2081,6 +2306,460 @@ function copySessionTable() {
     lines.push(`${s.date}\t${s.student_name}\t${s.subject}\t${s.duration_hrs}h\t฿${s.rate}\t฿${s.fee}\t${s.status||'Completed'}`);
   });
   navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('✓ Copied to clipboard'));
+}
+
+// ─── PHASE 5 — TEAM & ECOSYSTEM ──────────────────────────
+
+// Built-in known staff (seeded from handoff, shown if StaffProfiles tab is empty)
+const SEED_STAFF = [
+  { id:'STAFF-T001', name:'AJ. Pop', code:'T001', type:'Partner', status:'Active', businesses:'Poppadi', roles:'Tutor, Profit Partner', pay:'฿700/hr + 5% referral + 20% profit share', notes:"Business co-founder, full-time. 20% of school remainder goes to AJ. Pop before Steven's share." },
+  { id:'STAFF-EYE', name:'Eye', code:'EYE', type:'Full-time', status:'Active', businesses:'Poppadi,WWA', roles:'Admin, Content Ops', pay:"฿15,000/month salary (Poppadi's Expenses) + WWA % per client", notes:"Spans both businesses. Salary tracked in Poppadi's Expenses; WWA compensation via team assignments." },
+  { id:'STAFF-JANE', name:'Jane', code:'JANE', type:'Full-time', status:'Active', businesses:'Poppadi', roles:'Admin, Social', pay:'Salary/session + 5% referral + ฿15,000/month', notes:'Onboards social media clients via consultancy. UniGuide referral partner.' },
+  { id:'STAFF-THAZIN', name:'Thazin', code:'THAZIN', type:'Full-time', status:'Active', businesses:'Poppadi,WWA', roles:'Personal Assistant', pay:'TBD', notes:'PA across entire ecosystem. Spans both businesses.' },
+  { id:'STAFF-T003', name:'Dr. Poon', code:'T003', type:'Outsourced', status:'Active', businesses:'Poppadi', roles:'Tutor', pay:'฿650/hr', notes:'' },
+  { id:'STAFF-T004', name:'AJ. Koi', code:'T004', type:'Outsourced', status:'Active', businesses:'Poppadi', roles:'Tutor', pay:'฿650/hr', notes:'' },
+  { id:'STAFF-T005', name:'AJ. Sumi', code:'T005', type:'Outsourced', status:'Active', businesses:'Poppadi', roles:'Tutor', pay:'฿700/hr', notes:'' },
+  { id:'STAFF-T006', name:"T'Noey", code:'T006', type:'Outsourced', status:'Active', businesses:'Poppadi', roles:'Tutor', pay:'฿350/hr', notes:'' },
+  { id:'STAFF-T007', name:"T'Nicha", code:'T007', type:'Outsourced', status:'Active', businesses:'Poppadi', roles:'Tutor', pay:'฿350/hr', notes:'' },
+  { id:'STAFF-T008', name:'AJ. Looknaam', code:'T008', type:'Outsourced', status:'Active', businesses:'Poppadi', roles:'Tutor', pay:'฿500/hr', notes:'' },
+];
+
+function getEffectiveStaff() {
+  // If StaffProfiles tab has data, use that. Otherwise fall back to seed.
+  if (DATA.staffProfiles && DATA.staffProfiles.length > 0) return DATA.staffProfiles;
+  return SEED_STAFF;
+}
+
+let currentTeamView = 'profiles';
+
+function switchTeamView(view) {
+  currentTeamView = view;
+  ['profiles','ecosystem','wwa-matrix','radar'].forEach(v => {
+    const el = document.getElementById('team-view-' + v);
+    if (el) el.style.display = v === view ? 'block' : 'none';
+    const tab = document.getElementById('tab-' + v);
+    if (tab) tab.classList.toggle('active', v === view);
+  });
+  // Show/hide add staff button (only relevant for profiles view)
+  const addBtn = document.getElementById('team-add-btn');
+  if (addBtn) addBtn.style.display = view === 'profiles' ? '' : 'none';
+  renderTeamView(view);
+}
+
+function renderTeam() {
+  renderTeamView(currentTeamView);
+}
+
+function renderTeamView(view) {
+  if (view === 'profiles')   renderTeamProfiles();
+  if (view === 'ecosystem')  renderEcosystem();
+  if (view === 'wwa-matrix') renderWWAMatrix();
+  if (view === 'radar')      renderRadar();
+}
+
+// ── STAFF PROFILES ────────────────────────────────────────
+function renderTeamProfiles() {
+  const staff = getEffectiveStaff();
+  const grid  = document.getElementById('team-profiles-grid');
+  if (!grid) return;
+
+  if (staff.length === 0) {
+    grid.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3)">
+      <div style="font-size:28px;margin-bottom:12px">👥</div>
+      <div style="font-size:14px;font-weight:500">No staff profiles yet</div>
+      <div style="font-size:12px;margin-top:6px">Click "+ Add Staff" to start building your team roster.</div>
+    </div>`;
+    return;
+  }
+
+  // Steven always first
+  const stevenCard = `<div class="staff-card" style="border-color:var(--blue)">
+    <div class="staff-card-header">
+      <div class="staff-avatar both">SG</div>
+      <div style="flex:1">
+        <div class="staff-name-row">
+          <div class="staff-fullname">Steven Gerdphol</div>
+          <span class="staff-code">T002</span>
+          <span class="staff-type-badge" style="background:var(--blue-bg);color:var(--blue)">Founder · CEO</span>
+        </div>
+        <div class="staff-roles-row">Strategist · Account Manager · Tutor (T002) · Admin</div>
+      </div>
+    </div>
+    <div class="staff-biz-pills">
+      <span class="biz-pill poppadi">🏫 Poppadi's Studyo</span>
+      <span class="biz-pill wwa">✦ WealthWise Atelier</span>
+      <span class="biz-pill private">📚 Private Tutoring</span>
+    </div>
+    <div class="staff-pay-row">All three income streams · Owner profit share + tutor income + private fees</div>
+  </div>`;
+
+  const cards = staff.filter(s => s.status !== 'Inactive').map(s => {
+    const bizList = (s.businesses || '').split(',').map(b => b.trim()).filter(Boolean);
+    const hasPop  = bizList.some(b => b === 'Poppadi' || b === "Poppadi's");
+    const hasWWA  = bizList.some(b => b === 'WWA');
+    const hasPvt  = bizList.some(b => b === 'Private');
+    const avatarClass = hasPop && hasWWA ? 'both' : hasWWA ? 'wwa' : hasPop ? 'poppadi' : 'private';
+    const initials = (s.name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+    const bizPills = [
+      hasPop ? `<span class="biz-pill poppadi">🏫 Poppadi's</span>` : '',
+      hasWWA ? `<span class="biz-pill wwa">✦ WWA</span>` : '',
+      hasPvt ? `<span class="biz-pill private">📚 Private</span>` : '',
+    ].join('');
+
+    // How many WWA clients is this person on?
+    const wwaCount = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
+    const wwaNote  = wwaCount > 0 ? `<div style="font-size:11px;color:var(--purple);margin-top:6px">On ${wwaCount} WWA client${wwaCount!==1?'s':''}</div>` : '';
+
+    const payTbd = (s.pay || 'TBD').includes('TBD');
+
+    return `<div class="staff-card">
+      <button class="btn btn-ghost btn-sm staff-edit-btn" onclick="editStaff('${s.id}')">Edit</button>
+      <div class="staff-card-header">
+        <div class="staff-avatar ${avatarClass}">${initials}</div>
+        <div style="flex:1">
+          <div class="staff-name-row">
+            <div class="staff-fullname">${s.name}</div>
+            ${s.code ? `<span class="staff-code">${s.code}</span>` : ''}
+            <span class="staff-type-badge">${s.type || 'Staff'}</span>
+          </div>
+          <div class="staff-roles-row">${s.roles || '—'}</div>
+        </div>
+      </div>
+      <div class="staff-biz-pills">${bizPills || '<span style="font-size:11px;color:var(--text3)">No business assigned</span>'}</div>
+      <div class="staff-pay-row" style="${payTbd?'color:var(--amber)':''}">
+        ${payTbd ? '⚠ ' : ''}Pay: <strong>${s.pay || 'TBD'}</strong>
+      </div>
+      ${wwaNote}
+      ${s.notes ? `<div class="staff-notes-row">${s.notes}</div>` : ''}
+    </div>`;
+  });
+
+  grid.innerHTML = stevenCard + cards.join('');
+}
+
+// ── ECOSYSTEM DIAGRAM ─────────────────────────────────────
+function renderEcosystem() {
+  const container = document.getElementById('ecosystem-diagram');
+  if (!container) return;
+
+  const staff = getEffectiveStaff();
+  const popStaff = staff.filter(s => {
+    const biz = (s.businesses||'');
+    return (biz.includes('Poppadi') || biz.includes("Poppadi's")) && !biz.includes('WWA');
+  });
+  const wwaStaff = staff.filter(s => {
+    const biz = (s.businesses||'');
+    return biz.includes('WWA') && !(biz.includes('Poppadi') || biz.includes("Poppadi's"));
+  });
+  const bothStaff = staff.filter(s => {
+    const biz = (s.businesses||'');
+    return (biz.includes('Poppadi') || biz.includes("Poppadi's")) && biz.includes('WWA');
+  });
+
+  const makeNodes = (people, extra='') => people.map(s =>
+    `<div class="eco-person-node" title="${s.roles||''}">${s.name}${s.code ? ` <span style="opacity:0.5;font-size:10px">${s.code}</span>` : ''}</div>`
+  ).join('');
+
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;min-height:340px">
+      <div class="eco-business-col">
+        <div class="eco-business-header poppadi">🏫 Poppadi's Studyo</div>
+        <div class="eco-person-node steven">Steven Gerdphol <span style="opacity:0.5;font-size:10px">T002</span></div>
+        ${makeNodes(popStaff)}
+        ${bothStaff.length ? bothStaff.map(s => `<div class="eco-person-node" style="border-color:var(--blue);opacity:0.6" title="Also works in WWA">${s.name} ↔</div>`).join('') : ''}
+      </div>
+      <div class="eco-business-col" style="align-items:center">
+        <div style="padding:10px 0;text-align:center">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Cross-business</div>
+          ${bothStaff.length
+            ? bothStaff.map(s => `
+              <div class="eco-person-node both" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue);margin-bottom:8px">
+                ↔ ${s.name}
+                <div style="font-size:10px;opacity:0.7;margin-top:2px">${s.roles||''}</div>
+              </div>`).join('')
+            : '<div style="font-size:12px;color:var(--text3);padding:20px">No cross-business staff yet</div>'
+          }
+        </div>
+        <div style="border-left:2px dashed var(--border);height:100%;position:absolute;left:50%;top:60px"></div>
+      </div>
+      <div class="eco-business-col">
+        <div class="eco-business-header wwa">✦ WealthWise Atelier</div>
+        <div class="eco-person-node steven">Steven Gerdphol <span style="opacity:0.5;font-size:10px">Strategist</span></div>
+        ${makeNodes(wwaStaff)}
+        ${bothStaff.length ? bothStaff.map(s => `<div class="eco-person-node" style="border-color:var(--blue);opacity:0.6" title="Also works in Poppadi's">${s.name} ↔</div>`).join('') : ''}
+      </div>
+    </div>
+    <div style="margin-top:24px;padding:14px;background:var(--surface2);border-radius:var(--radius);font-size:12px;color:var(--text3)">
+      <strong style="color:var(--text)">Prompt Language Studyo Co., Ltd.</strong> · All staff operate under one legal entity.
+      Private Tutoring (Steven only) is kept separate from the company structure.
+      <span style="margin-left:8px">↔ = cross-business staff</span>
+    </div>`;
+}
+
+// ── WWA MATRIX ────────────────────────────────────────────
+function renderWWAMatrix() {
+  const container = document.getElementById('wwa-matrix-container');
+  if (!container) return;
+
+  const clients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  if (clients.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">✦</div><p>No active WWA clients yet.<br>Add clients in the WealthWise Atelier page first.</p></div>`;
+    return;
+  }
+
+  // Gather all people who appear in assignments, plus Steven
+  const allPeople = ['Steven'];
+  DATA.wwaAssignments.forEach(a => {
+    if (!allPeople.includes(a.staff_name)) allPeople.push(a.staff_name);
+  });
+
+  let html = `<div class="table-wrap"><table>
+    <thead>
+      <tr>
+        <th style="min-width:100px">Person</th>
+        ${clients.map(c => `<th style="text-align:center">${c.client_name}<div style="font-weight:400;color:var(--text3);font-size:10px">${c.currency} ${c.tier||''}</div></th>`).join('')}
+        <th style="text-align:center">Clients</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  allPeople.forEach(person => {
+    const isStevenRow = person === 'Steven';
+    let clientCount = 0;
+    const cells = clients.map(client => {
+      if (isStevenRow) {
+        // Steven's cut = 100% - company% - all team %
+        const totalPct = DATA.wwaAssignments
+          .filter(a => a.client_id === client.id)
+          .reduce((s,a) => s + Number(a.pct||0), 0) + Number(client.company_pct||0);
+        const stevenPct = 100 - totalPct;
+        clientCount++;
+        return `<td style="text-align:center">
+          <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--blue)">~${stevenPct.toFixed(0)}%</span>
+          <div style="font-size:10px;color:var(--text3)">${client.steven_roles||'Strategist'}</div>
+        </td>`;
+      }
+      const assign = DATA.wwaAssignments.find(a => a.client_id === client.id && a.staff_name === person);
+      if (!assign) return `<td style="text-align:center;color:var(--text3)">—</td>`;
+      clientCount++;
+      return `<td style="text-align:center">
+        <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--purple)">${assign.pct}%</span>
+        <div style="font-size:10px;color:var(--text3)">${assign.role||''}</div>
+      </td>`;
+    }).join('');
+
+    const rowStyle = isStevenRow ? 'background:var(--blue-bg)' : '';
+    html += `<tr style="${rowStyle}">
+      <td style="font-weight:${isStevenRow?'600':'500'};color:${isStevenRow?'var(--blue)':'var(--text)'}">${person}</td>
+      ${cells}
+      <td style="text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:var(--text3)">${clientCount}</td>
+    </tr>`;
+  });
+
+  // Company % row
+  const companyRow = clients.map(c =>
+    Number(c.company_pct||0) > 0
+      ? `<td style="text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">${c.company_pct}%</td>`
+      : `<td style="text-align:center;color:var(--text3)">—</td>`
+  ).join('');
+  html += `<tr style="background:var(--amber-bg)">
+    <td style="font-weight:500;color:var(--amber)">Company overhead</td>
+    ${companyRow}
+    <td></td>
+  </tr>`;
+
+  html += `</tbody></table></div>
+    <div style="margin-top:12px;font-size:11px;color:var(--text3)">
+      % shown is each person's share of the client retainer. Steven's % is derived: 100% − team % − company %.
+    </div>`;
+  container.innerHTML = html;
+}
+
+// ── OPPORTUNITY RADAR ─────────────────────────────────────
+function renderRadar() {
+  renderRadarUtilisation();
+  renderRadarOpportunities();
+  renderRadarInsights();
+}
+
+function renderRadarUtilisation() {
+  const el = document.getElementById('radar-utilisation');
+  if (!el) return;
+
+  const staff = getEffectiveStaff().filter(s => s.status !== 'Inactive');
+  const clients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+
+  const rows = staff.slice(0, 8).map(s => {
+    const wwaClients = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
+    const bizList    = (s.businesses || '').split(',').length;
+    const maxPossible = clients.length + 2; // clients + potential roles
+    const score = Math.min(100, Math.round(((wwaClients / Math.max(clients.length, 1)) * 60) + (bizList * 20)));
+    const color = score > 70 ? 'var(--teal)' : score > 40 ? 'var(--blue)' : 'var(--border-strong)';
+    return `<div class="radar-bar-row">
+      <div class="radar-bar-label">${s.name.split(' ')[0]}</div>
+      <div class="radar-bar-track"><div class="radar-bar-fill" style="width:${score}%;background:${color}"></div></div>
+      <div class="radar-bar-value">${wwaClients > 0 ? wwaClients + ' client' + (wwaClients!==1?'s':'') : s.businesses.includes('WWA') ? 'WWA' : 'Poppadi'}</div>
+    </div>`;
+  });
+
+  el.innerHTML = rows.length ? rows.join('') : `<div style="color:var(--text3);font-size:13px;padding:12px 0">Add staff profiles to see utilisation.</div>`;
+}
+
+function renderRadarOpportunities() {
+  const el = document.getElementById('radar-opportunities');
+  if (!el) return;
+
+  const opps = [];
+  const staff = getEffectiveStaff();
+
+  // TBD pay structures = planning gaps
+  const tbdPay = staff.filter(s => (s.pay||'TBD').includes('TBD'));
+  if (tbdPay.length > 0) {
+    opps.push({ icon: '📋', title: 'Pay structure not documented', text: tbdPay.map(s=>s.name).join(', ') + ' — formalise before scaling.' });
+  }
+
+  // Cross-business staff with no WWA assignments
+  const bothStaff = staff.filter(s => {
+    const biz = s.businesses || '';
+    return biz.includes('WWA') && (biz.includes('Poppadi') || biz.includes("Poppadi's"));
+  });
+  const unassignedCross = bothStaff.filter(s => DATA.wwaAssignments.filter(a => a.staff_name === s.name).length === 0);
+  if (unassignedCross.length > 0) {
+    opps.push({ icon: '⚡', title: 'Cross-business staff not assigned to WWA clients', text: unassignedCross.map(s=>s.name).join(', ') + ' — add them to WWA clients in the matrix.' });
+  }
+
+  // WWA clients with no team assigned
+  const noTeamClients = DATA.wwaClients.filter(c =>
+    (c.status === 'Active' || c.status === 'Onboarding') &&
+    DATA.wwaAssignments.filter(a => a.client_id === c.id).length === 0
+  );
+  if (noTeamClients.length > 0) {
+    opps.push({ icon: '👤', title: 'WWA clients with no team assigned', text: noTeamClients.map(c=>c.client_name).join(', ') + ' — Steven carrying 100% on these.' });
+  }
+
+  // Poppadi-only tutors who could be in WWA
+  const popOnlyTutors = staff.filter(s => {
+    const biz = s.businesses || '';
+    return (biz.includes('Poppadi') || biz.includes("Poppadi's")) && !biz.includes('WWA') && (s.type === 'Full-time' || s.type === 'Part-time');
+  });
+  if (popOnlyTutors.length > 0) {
+    opps.push({ icon: '🔍', title: 'Poppadi full/part-time staff not in WWA', text: popOnlyTutors.map(s=>s.name).join(', ') + ' — evaluate if WWA roles could utilise them.' });
+  }
+
+  if (opps.length === 0) {
+    opps.push({ icon: '✅', title: 'All clear', text: 'No immediate gaps detected. Add more clients and staff to generate insights.' });
+  }
+
+  el.innerHTML = opps.map(o => `<div class="opportunity-item">
+    <div class="opp-icon">${o.icon}</div>
+    <div class="opp-text"><strong>${o.title}</strong>${o.text}</div>
+  </div>`).join('');
+}
+
+function renderRadarInsights() {
+  const el = document.getElementById('radar-insights');
+  if (!el) return;
+
+  const staff    = getEffectiveStaff();
+  const active   = staff.filter(s => s.status !== 'Inactive');
+  const ftStaff  = active.filter(s => s.type === 'Full-time' || s.type === 'Partner');
+  const outStaff = active.filter(s => s.type === 'Outsourced');
+  const wwAClients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  const tbdCount = active.filter(s => (s.pay||'TBD').includes('TBD')).length;
+
+  const insights = [
+    { dot: 'blue',  text: `<strong>${active.length} active staff</strong> across all businesses — ${ftStaff.length} full-time/partner, ${outStaff.length} outsourced.` },
+    { dot: wwAClients.length > 0 ? 'green' : 'amber', text: `<strong>${wwAClients.length} active WWA client${wwAClients.length!==1?'s':''}</strong>${wwAClients.length === 0 ? ' — add clients to unlock WWA team matrix.' : '.' }` },
+    { dot: tbdCount > 0 ? 'amber' : 'green', text: tbdCount > 0 ? `<strong>${tbdCount} staff with undefined pay</strong> — document before scaling.` : '<strong>All staff pay structures documented.</strong>' },
+    { dot: 'blue', text: `<strong>Private Tutoring</strong> is Steven only — 100% take-home, no team dependency.` },
+  ];
+
+  el.innerHTML = insights.map(i => `<div class="insight-row">
+    <div class="insight-dot ${i.dot}"></div>
+    <div style="font-size:13px;color:var(--text2)">${i.text}</div>
+  </div>`).join('');
+}
+
+// ── STAFF MODAL ──────────────────────────────────────────
+function openAddStaff() {
+  document.getElementById('modal-staff-title').textContent = 'Add Staff Member';
+  document.getElementById('edit-staff-id').value = '';
+  document.getElementById('staff-name').value = '';
+  document.getElementById('staff-code').value = '';
+  document.getElementById('staff-type').value = 'Full-time';
+  document.getElementById('staff-status').value = 'Active';
+  document.getElementById('staff-biz-poppadi').checked = false;
+  document.getElementById('staff-biz-wwa').checked = false;
+  document.getElementById('staff-biz-private').checked = false;
+  document.getElementById('staff-roles').value = '';
+  document.getElementById('staff-pay').value = '';
+  document.getElementById('staff-notes').value = '';
+  document.getElementById('modal-add-staff').classList.add('open');
+}
+
+function editStaff(id) {
+  const s = getEffectiveStaff().find(r => r.id === id);
+  if (!s) return;
+  document.getElementById('modal-staff-title').textContent = 'Edit Staff Member';
+  document.getElementById('edit-staff-id').value = id;
+  document.getElementById('staff-name').value = s.name || '';
+  document.getElementById('staff-code').value = s.code || '';
+  document.getElementById('staff-type').value = s.type || 'Full-time';
+  document.getElementById('staff-status').value = s.status || 'Active';
+  const bizList = (s.businesses || '').split(',').map(b => b.trim());
+  document.getElementById('staff-biz-poppadi').checked = bizList.some(b => b === 'Poppadi' || b === "Poppadi's");
+  document.getElementById('staff-biz-wwa').checked = bizList.includes('WWA');
+  document.getElementById('staff-biz-private').checked = bizList.includes('Private');
+  document.getElementById('staff-roles').value = s.roles || '';
+  document.getElementById('staff-pay').value = s.pay || '';
+  document.getElementById('staff-notes').value = s.notes || '';
+  document.getElementById('modal-add-staff').classList.add('open');
+}
+
+async function saveStaff() {
+  const name   = document.getElementById('staff-name').value.trim();
+  const editId = document.getElementById('edit-staff-id').value;
+  if (!name) { showToast('⚠ Name is required'); return; }
+
+  const bizArr = [];
+  if (document.getElementById('staff-biz-poppadi').checked) bizArr.push('Poppadi');
+  if (document.getElementById('staff-biz-wwa').checked)     bizArr.push('WWA');
+  if (document.getElementById('staff-biz-private').checked) bizArr.push('Private');
+
+  const id  = editId || 'STAFF-' + Date.now();
+  const row = {
+    id,
+    name,
+    code:       document.getElementById('staff-code').value.trim(),
+    type:       document.getElementById('staff-type').value,
+    status:     document.getElementById('staff-status').value,
+    businesses: bizArr.join(','),
+    roles:      document.getElementById('staff-roles').value.trim(),
+    pay:        document.getElementById('staff-pay').value.trim(),
+    notes:      document.getElementById('staff-notes').value.trim(),
+    created_at: new Date().toISOString(),
+  };
+
+  if (editId) {
+    const idx = DATA.staffProfiles.findIndex(r => r.id === editId);
+    if (idx > -1) DATA.staffProfiles[idx] = row;
+    else DATA.staffProfiles.push(row);
+  } else {
+    DATA.staffProfiles.push(row);
+  }
+
+  renderTeam();
+  closeModal('modal-add-staff');
+  showToast(editId ? '✓ Staff updated' : '✓ Staff added');
+
+  try {
+    await webAppWrite('saveStaffProfile', { row });
+    localStorage.removeItem(CACHE_KEY);
+    loadAllData();
+  } catch(e) {
+    showToast('⚠ Saved locally — sync pending');
+  }
 }
 
 // ─── INIT ─────────────────────────────────────────────────
