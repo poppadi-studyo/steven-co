@@ -379,7 +379,12 @@ tr:hover td { background: var(--surface2); }
 .insight-dot.green  { background: var(--green); }
 .insight-dot.amber  { background: var(--amber); }
 .insight-dot.red    { background: var(--red); }
-.insight-dot.blue   { background: var(--blue); }
+.modal-section-label {
+  font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase;
+  letter-spacing: 0.7px; margin-bottom: 10px; margin-top: 4px;
+}
+.ess-green { background: var(--green-bg); color: var(--green); }
+.ess-red   { background: var(--red-bg);   color: var(--red);   }
 </style>
 </head>
 <body>
@@ -971,9 +976,12 @@ tr:hover td { background: var(--surface2); }
 
 <!-- ── ADD CLIENT MODAL ── -->
 <div class="modal-backdrop" id="modal-add-client">
-  <div class="modal">
+  <div class="modal" style="max-width:680px">
     <div class="modal-title" id="modal-client-title">Onboard WWA Client</div>
     <input type="hidden" id="edit-client-id">
+
+    <!-- SECTION 1: BASICS -->
+    <div class="modal-section-label">Client basics</div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Client Name *</label>
@@ -991,67 +999,163 @@ tr:hover td { background: var(--surface2); }
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Retainer Amount *</label>
-        <input class="form-input" id="client-retainer" type="number" placeholder="e.g. 1800">
+        <label class="form-label">Monthly Retainer *</label>
+        <input class="form-input" id="client-retainer" type="number" placeholder="e.g. 1800" oninput="updateClientCalc()">
       </div>
       <div class="form-group">
         <label class="form-label">Currency</label>
-        <select class="form-select" id="client-currency">
-          <option value="THB">THB (฿)</option>
+        <select class="form-select" id="client-currency" onchange="updateClientCalc()">
           <option value="SGD">SGD (S$)</option>
+          <option value="THB">THB (฿)</option>
         </select>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Tier / Package</label>
-        <select class="form-select" id="client-tier">
-          <option value="20-piece">20-piece (Standard)</option>
-          <option value="16-piece">16-piece</option>
-          <option value="12-piece">12-piece</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
-      <div class="form-group">
         <label class="form-label">Start Date</label>
         <input class="form-input" id="client-start-date" type="date">
       </div>
+      <div class="form-group">
+        <label class="form-label">Company % (off the top)</label>
+        <input class="form-input" id="client-company-pct" type="number" step="0.5" min="0" max="100" placeholder="e.g. 10" oninput="updateClientCalc()">
+        <div class="form-hint">Taken before team splits</div>
+      </div>
     </div>
 
-    <!-- Company % -->
-    <div class="form-group">
-      <label class="form-label">Company % (goes to company overhead)</label>
-      <input class="form-input" id="client-company-pct" type="number" step="0.5" min="0" max="100" placeholder="e.g. 10">
-      <div class="form-hint">Taken off the top before team splits</div>
-    </div>
-
-    <!-- Steven's role & involvement -->
-    <div style="border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">Steven's Involvement</div>
-      <div class="form-row">
+    <!-- SECTION 2: CONTENT SCOPE -->
+    <div class="modal-section-label" style="margin-top:8px">Content scope — what gets delivered each month</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">From the Content Intelligence System — 3 formats, specify quantity per month</div>
+      <div class="form-row" style="margin-bottom:10px">
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Steven's Role(s) on this client</label>
-          <input class="form-input" id="client-steven-roles" placeholder="e.g. Strategist, Account Manager">
-          <div class="form-hint">Comma-separated if multiple</div>
+          <label class="form-label">🎬 Reels (VO / Sit-down)</label>
+          <input class="form-input" id="scope-reels" type="number" min="0" max="30" placeholder="0" oninput="updateClientCalc()">
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Involvement Level</label>
-          <select class="form-select" id="client-steven-involvement">
-            <option value="High">High</option>
-            <option value="Medium" selected>Medium</option>
-            <option value="Low">Low</option>
+          <label class="form-label">🃏 Carousels</label>
+          <input class="form-input" id="scope-carousels" type="number" min="0" max="30" placeholder="0" oninput="updateClientCalc()">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">📝 Captions / Copy-only</label>
+          <input class="form-input" id="scope-captions" type="number" min="0" max="30" placeholder="0" oninput="updateClientCalc()">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+        <span style="font-size:11px;color:var(--text3)">Total pieces:</span>
+        <span id="scope-total-pieces" style="font-size:12px;font-weight:600;font-family:'DM Mono',monospace;color:var(--purple)">0</span>
+        <span style="font-size:11px;color:var(--text3);margin-left:4px">Rate per piece:</span>
+        <span id="scope-rate-per-piece" style="font-size:12px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text2)">—</span>
+      </div>
+    </div>
+
+    <!-- SECTION 3: STEVEN'S ROLE PER FORMAT -->
+    <div class="modal-section-label">Steven's role — by deliverable type</div>
+    <div style="background:var(--blue-bg);border:1px solid rgba(55,138,221,0.2);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px">
+      <div style="font-size:11px;color:var(--blue);margin-bottom:12px">Select Steven's role for each format. The system calculates your billing value from scope × role weight.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div>
+          <label class="form-label" style="margin-bottom:6px">🎬 Reels — Steven's role</label>
+          <select class="form-select" id="role-reels" onchange="updateClientCalc()">
+            <option value="none">Not involved</option>
+            <option value="strategy">Strategist</option>
+            <option value="copy">Copywriter</option>
+            <option value="am">Account Manager</option>
+            <option value="ops">Content Ops</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" style="margin-bottom:6px">🃏 Carousels — Steven's role</label>
+          <select class="form-select" id="role-carousels" onchange="updateClientCalc()">
+            <option value="none">Not involved</option>
+            <option value="strategy">Strategist</option>
+            <option value="copy">Copywriter</option>
+            <option value="am">Account Manager</option>
+            <option value="ops">Content Ops</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" style="margin-bottom:6px">📝 Captions — Steven's role</label>
+          <select class="form-select" id="role-captions" onchange="updateClientCalc()">
+            <option value="none">Not involved</option>
+            <option value="strategy">Strategist</option>
+            <option value="copy">Copywriter</option>
+            <option value="am">Account Manager</option>
+            <option value="ops">Content Ops</option>
           </select>
         </div>
       </div>
-      <div class="form-group" style="margin-top:10px;margin-bottom:0">
-        <label class="form-label">Notes <span style="color:var(--text3);font-weight:400">(context for future use)</span></label>
-        <textarea class="form-textarea" id="client-steven-notes" rows="2" placeholder="e.g. Client prefers bilingual content, Steven handles strategy calls directly..."></textarea>
+      <!-- Role weight legend -->
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(55,138,221,0.15);display:flex;gap:16px;flex-wrap:wrap">
+        <span style="font-size:10px;color:var(--blue);font-family:'DM Mono',monospace">Strategist = 1.0× (full)</span>
+        <span style="font-size:10px;color:var(--blue);font-family:'DM Mono',monospace">Copywriter = 0.85×</span>
+        <span style="font-size:10px;color:var(--blue);font-family:'DM Mono',monospace">Acct Mgr = 0.6×</span>
+        <span style="font-size:10px;color:var(--blue);font-family:'DM Mono',monospace">Ops = 0.35×</span>
       </div>
     </div>
 
+    <!-- LIVE CALC PREVIEW -->
+    <div id="client-calc-preview" style="background:var(--purple-bg);border:1px solid rgba(127,119,221,0.25);border-radius:var(--radius-lg);padding:14px;margin-bottom:14px;display:none">
+      <div style="font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Steven's billing estimate — this month</div>
+      <div id="client-calc-rows" style="font-size:12px;color:var(--text2);margin-bottom:10px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(127,119,221,0.2)">
+        <span style="font-size:12px;color:var(--text2)">Steven's billing value</span>
+        <span id="client-calc-total" style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--purple)">—</span>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px" id="client-calc-note"></div>
+    </div>
+
+    <!-- SECTION 4: ESSENTIALISM -->
+    <div class="modal-section-label" style="margin-top:8px">Essentialism — 90% Rule</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Score this client across 5 criteria (1–20 each). If total &lt; 90 → it is a Hard No.</div>
+      <div style="display:grid;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--text2);flex:1">1. Strategic alignment with current Essential Intent</span>
+          <input class="form-input" style="width:64px;text-align:center" id="ess-score-1" type="number" min="1" max="20" placeholder="—" oninput="updateEssScore()">
+          <span style="font-size:10px;color:var(--text3)">/20</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--text2);flex:1">2. High-status advantage — brand equity, not just revenue</span>
+          <input class="form-input" style="width:64px;text-align:center" id="ess-score-2" type="number" min="1" max="20" placeholder="—" oninput="updateEssScore()">
+          <span style="font-size:10px;color:var(--text3)">/20</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--text2);flex:1">3. Capability fit — 100% match to WWA core competence</span>
+          <input class="form-input" style="width:64px;text-align:center" id="ess-score-3" type="number" min="1" max="20" placeholder="—" oninput="updateEssScore()">
+          <span style="font-size:10px;color:var(--text3)">/20</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--text2);flex:1">4. High-yield efficiency — max impact, minimal friction</span>
+          <input class="form-input" style="width:64px;text-align:center" id="ess-score-4" type="number" min="1" max="20" placeholder="—" oninput="updateEssScore()">
+          <span style="font-size:10px;color:var(--text3)">/20</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--text2);flex:1">5. Inspiration — team genuinely energised by this client</span>
+          <input class="form-input" style="width:64px;text-align:center" id="ess-score-5" type="number" min="1" max="20" placeholder="—" oninput="updateEssScore()">
+          <span style="font-size:10px;color:var(--text3)">/20</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--text2)">Total score</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span id="ess-score-total" style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text3)">—</span>
+          <span id="ess-verdict" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:none"></span>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:12px;margin-bottom:0">
+        <label class="form-label">Essential Intent for this client</label>
+        <textarea class="form-textarea" id="ess-intent" rows="2" placeholder="e.g. Position Louis as the go-to wealth educator for Thai expats in Singapore by Q4 2026 via short-form video authority..."></textarea>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="ess-zero-based" style="cursor:pointer">
+        <label for="ess-zero-based" style="font-size:12px;color:var(--text2);cursor:pointer">Zero-based audit passed — if we didn't already have this client, we would actively pursue them today</label>
+      </div>
+    </div>
+
+    <!-- SECTION 5: NOTES -->
     <div class="form-group">
       <label class="form-label">Client Notes</label>
-      <textarea class="form-textarea" id="client-notes" rows="2" placeholder="Optional notes about this client..."></textarea>
+      <textarea class="form-textarea" id="client-notes" rows="2" placeholder="Any context, constraints, or preferences..."></textarea>
     </div>
 
     <div class="modal-footer">
@@ -1380,7 +1484,7 @@ async function loadAllData() {
       fetchSheet('PrivateSessions!A:K'),
       fetchSheet('PoppadiMirror!A:I'),
       fetchSheet('ProfitShare!A:I'),
-      fetchSheet('WWAClients!A:L'),
+      fetchSheet('WWAClients!A:N'),
       fetchSheet('WWATeamAssignments!A:J'),
       fetchSheet('WWAExpenses!A:G'),
       fetchSheet('StaffProfiles!A:J'),
@@ -1520,30 +1624,44 @@ function calcWWANet(month) {
   let totalRevenue = 0;
   let teamCosts    = 0;
   let companyCuts  = 0;
+  let stevenBilling = 0;
 
   activeClients.forEach(client => {
-    const retainer = Number(client.retainer_amount||0);
-    // For simplicity, retainer is in THB (SGD clients should be converted — Phase 4 uses manual THB input)
-    totalRevenue += retainer;
-
-    // Company %
+    const retainer   = Number(client.retainer_amount||0);
     const companyPct = Number(client.company_pct||0);
-    companyCuts += retainer * (companyPct / 100);
+    totalRevenue += retainer;
+    companyCuts  += retainer * (companyPct / 100);
 
-    // Team assignments for this client
+    // Team assignments % cuts
     const assignments = DATA.wwaAssignments.filter(a => a.client_id === client.id);
     assignments.forEach(a => {
       teamCosts += retainer * (Number(a.pct||0) / 100);
     });
+
+    // Steven's billing value from scope model
+    stevenBilling += calcStevenBillingValue(client);
   });
 
   // WWA fixed expenses this month
   const monthExpenses = DATA.wwaExpenses.filter(e => (e.month||'').startsWith(month));
-  const fixedExp = monthExpenses.reduce((s,e) => s + Number(e.amount||0), 0);
+  const fixedExp      = monthExpenses.reduce((s,e) => s + Number(e.amount||0), 0);
 
-  const stevenNet = totalRevenue - teamCosts - companyCuts - fixedExp;
+  // If scope data exists, use billing value. Otherwise fall back to % remainder.
+  const hasScopeData = activeClients.some(c => c.scope_json);
+  let stevenNet;
+  if (hasScopeData) {
+    stevenNet = stevenBilling - fixedExp;
+  } else {
+    stevenNet = totalRevenue - teamCosts - companyCuts - fixedExp;
+  }
 
-  return { totalRevenue, teamCosts, companyCuts, fixedExp, stevenNet: stevenNet > 0 ? stevenNet : 0, activeClients: activeClients.length };
+  return {
+    totalRevenue, teamCosts, companyCuts, fixedExp,
+    stevenNet: stevenNet > 0 ? stevenNet : 0,
+    stevenBilling,
+    activeClients: activeClients.length,
+    hasScopeData,
+  };
 }
 
 // ─── RENDER PRIVATE TUTORING ──────────────────────────────
@@ -1758,58 +1876,78 @@ function renderWWA() {
     clientsList.innerHTML = `<div class="empty-state"><div class="icon">✦</div><p>No clients yet.<br>Click "+ Add Client" to onboard your first client.</p></div>`;
   } else {
     clientsList.innerHTML = DATA.wwaClients.map(client => {
-      const assignments = DATA.wwaAssignments.filter(a => a.client_id === client.id);
-      const retainer    = Number(client.retainer_amount||0);
-      const currency    = client.currency || 'THB';
-      const retainerFmt = currency === 'SGD' ? fmtSGD(retainer) : fmt(retainer);
+      const assignments   = DATA.wwaAssignments.filter(a => a.client_id === client.id);
+      const retainer      = Number(client.retainer_amount||0);
+      const currency      = client.currency || 'THB';
+      const retainerFmt   = currency === 'SGD' ? fmtSGD(retainer) : fmt(retainer);
+      const cur           = currency === 'SGD' ? 'S$' : '฿';
+      const statusColor   = client.status === 'Active' ? 'completed' : client.status === 'Onboarding' ? 'scheduled' : client.status === 'Paused' ? 'pending' : 'cancelled';
 
-      // Total allocated %
-      const totalPct = assignments.reduce((s,a) => s + Number(a.pct||0), 0) + Number(client.company_pct||0);
-      const stevenPct = 100 - totalPct;
+      // Scope model
+      const billingVal = calcStevenBillingValue(client);
+      const essData    = getEssScore(client);
+      let scopeHtml = '';
+      if (client.scope_json) {
+        try {
+          const scope = JSON.parse(client.scope_json);
+          const total = (scope.reels||0) + (scope.carousels||0) + (scope.captions||0);
+          const parts = [];
+          if (scope.reels)     parts.push(`${scope.reels} Reel${scope.reels>1?'s':''}`);
+          if (scope.carousels) parts.push(`${scope.carousels} Carousel${scope.carousels>1?'s':''}`);
+          if (scope.captions)  parts.push(`${scope.captions} Caption${scope.captions>1?'s':''}`);
+          scopeHtml = `<div style="font-size:11px;color:var(--text3);margin-top:2px">
+            📦 ${total} pieces/mo · ${parts.join(' · ')}
+          </div>`;
+        } catch(e) {}
+      }
 
-      const invLevel = client.steven_involvement || 'Medium';
-      const invClass = invLevel === 'High' ? 'high' : invLevel === 'Low' ? 'low' : 'medium';
-
-      const statusColor = client.status === 'Active' ? 'completed' : client.status === 'Onboarding' ? 'scheduled' : client.status === 'Paused' ? 'pending' : 'cancelled';
+      // Essentialism badge
+      let essBadge = '';
+      if (essData && essData.total > 0) {
+        const col = essData.passed ? 'var(--green)' : 'var(--red)';
+        const bg  = essData.passed ? 'var(--green-bg)' : 'var(--red-bg)';
+        essBadge = `<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:${bg};color:${col};font-family:'DM Mono',monospace">${essData.total}/100</span>`;
+      }
 
       return `<div class="client-card">
         <div class="client-card-header">
-          <div>
-            <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
               <div class="client-card-name">${client.client_name}</div>
               <span class="status ${statusColor}" style="font-size:10px">${client.status}</span>
-              <span class="inv-badge ${invClass}">${invLevel} involvement</span>
+              ${essBadge}
             </div>
             <div class="client-card-meta">${client.tier||'—'} · ${currency} · Started ${client.start_date||'—'}</div>
-            ${client.steven_roles ? `<div style="font-size:11px;color:var(--blue);margin-top:3px">Steven: ${client.steven_roles}</div>` : ''}
+            ${client.steven_roles ? `<div style="font-size:11px;color:var(--blue);margin-top:2px">Steven: ${client.steven_roles}</div>` : ''}
+            ${scopeHtml}
           </div>
-          <div style="text-align:right">
+          <div style="text-align:right;flex-shrink:0;margin-left:12px">
             <div class="client-card-retainer">${retainerFmt}<span style="font-size:11px;color:var(--text3);font-family:'DM Sans',sans-serif">/mo</span></div>
-            <div style="font-size:11px;color:var(--teal);margin-top:2px">Steven's cut: ~${stevenPct.toFixed(0)}%</div>
+            ${billingVal > 0
+              ? `<div style="font-size:12px;color:var(--purple);font-weight:600;margin-top:2px;font-family:'DM Mono',monospace">Steven: ${cur}${billingVal.toFixed(0)}</div>
+                 <div style="font-size:10px;color:var(--text3)">billing value</div>`
+              : `<div style="font-size:11px;color:var(--text3);margin-top:2px">Set scope to calculate</div>`
+            }
             <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
               <button class="btn btn-ghost btn-sm" onclick="editClient('${client.id}')">Edit</button>
               <button class="btn btn-ghost btn-sm" onclick="openAddAssignment('${client.id}')">+ Team</button>
             </div>
           </div>
         </div>
+        ${essData && essData.intent ? `
+          <div style="margin-top:10px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius);font-size:11px;color:var(--text3);border-left:2px solid ${essData.passed ? 'var(--green)' : 'var(--amber)'}">
+            <span style="font-weight:600;color:var(--text2)">Essential Intent:</span> ${essData.intent}
+          </div>` : ''}
         ${assignments.length > 0 ? `
           <div class="client-card-team">
-            <div class="team-pill steven">
-              <span>👤</span> Steven · ${client.steven_roles||'Strategist'} · ~${stevenPct.toFixed(0)}%
-            </div>
-            ${assignments.map(a => `
-              <div class="team-pill">
-                ${a.staff_name} · ${a.role} · ${a.pct}%
-              </div>`).join('')}
+            ${billingVal > 0 ? `<div class="team-pill steven"><span>👤</span> Steven · ${client.steven_roles||'Strategist'} · ${cur}${billingVal.toFixed(0)}</div>` : ''}
+            ${assignments.map(a => `<div class="team-pill">${a.staff_name} · ${a.role} · ${a.pct}%</div>`).join('')}
             ${Number(client.company_pct||0) > 0 ? `<div class="team-pill" style="background:var(--amber-bg);color:var(--amber);border-color:transparent">Company · ${client.company_pct}%</div>` : ''}
-          </div>
-          <div id="assign-list-${client.id}"></div>
-        ` : `
+          </div>` : `
           <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
             <button class="btn btn-ghost btn-sm" onclick="openAddAssignment('${client.id}')">+ Assign team member</button>
             ${client.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:8px">${client.notes}</div>` : ''}
-          </div>
-        `}
+          </div>`}
       </div>`;
     }).join('');
   }
@@ -2020,47 +2158,249 @@ function updateStudentSuggestions() {
 }
 
 // ─── WWA CLIENT MODAL ─────────────────────────────────────
-function openAddClient() {
-  document.getElementById('modal-client-title').textContent = 'Onboard WWA Client';
+const ROLE_WEIGHTS = { strategy: 1.0, copy: 0.85, am: 0.6, ops: 0.35, none: 0 };
+const ROLE_LABELS  = { strategy: 'Strategist', copy: 'Copywriter', am: 'Account Manager', ops: 'Content Ops', none: 'Not involved' };
+
+function resetClientModal() {
   document.getElementById('edit-client-id').value = '';
   document.getElementById('client-name').value = '';
   document.getElementById('client-status').value = 'Active';
   document.getElementById('client-retainer').value = '';
-  document.getElementById('client-currency').value = 'THB';
-  document.getElementById('client-tier').value = '20-piece';
+  document.getElementById('client-currency').value = 'SGD';
   document.getElementById('client-start-date').value = new Date().toISOString().slice(0,10);
   document.getElementById('client-company-pct').value = '';
-  document.getElementById('client-steven-roles').value = 'Strategist';
-  document.getElementById('client-steven-involvement').value = 'Medium';
-  document.getElementById('client-steven-notes').value = '';
   document.getElementById('client-notes').value = '';
+  // Scope
+  document.getElementById('scope-reels').value = '';
+  document.getElementById('scope-carousels').value = '';
+  document.getElementById('scope-captions').value = '';
+  // Roles
+  document.getElementById('role-reels').value = 'strategy';
+  document.getElementById('role-carousels').value = 'strategy';
+  document.getElementById('role-captions').value = 'none';
+  // Essentialism
+  ['1','2','3','4','5'].forEach(n => { document.getElementById('ess-score-' + n).value = ''; });
+  document.getElementById('ess-intent').value = '';
+  document.getElementById('ess-zero-based').checked = false;
+  document.getElementById('ess-score-total').textContent = '—';
+  document.getElementById('ess-score-total').style.color = 'var(--text3)';
+  const v = document.getElementById('ess-verdict');
+  if (v) v.style.display = 'none';
+  document.getElementById('client-calc-preview').style.display = 'none';
+  updateClientCalc();
+}
+
+function openAddClient() {
+  document.getElementById('modal-client-title').textContent = 'Onboard WWA Client';
+  resetClientModal();
   document.getElementById('modal-add-client').classList.add('open');
 }
 
 function editClient(id) {
   const c = DATA.wwaClients.find(r => r.id === id);
   if (!c) return;
+  resetClientModal();
   document.getElementById('modal-client-title').textContent = 'Edit Client';
   document.getElementById('edit-client-id').value = id;
   document.getElementById('client-name').value = c.client_name||'';
   document.getElementById('client-status').value = c.status||'Active';
   document.getElementById('client-retainer').value = c.retainer_amount||'';
-  document.getElementById('client-currency').value = c.currency||'THB';
-  document.getElementById('client-tier').value = c.tier||'20-piece';
+  document.getElementById('client-currency').value = c.currency||'SGD';
   document.getElementById('client-start-date').value = c.start_date||'';
   document.getElementById('client-company-pct').value = c.company_pct||'';
-  document.getElementById('client-steven-roles').value = c.steven_roles||'Strategist';
-  document.getElementById('client-steven-involvement').value = c.steven_involvement||'Medium';
-  document.getElementById('client-steven-notes').value = c.steven_notes||'';
   document.getElementById('client-notes').value = c.notes||'';
+
+  // Restore scope from scope_json
+  if (c.scope_json) {
+    try {
+      const scope = JSON.parse(c.scope_json);
+      document.getElementById('scope-reels').value     = scope.reels || '';
+      document.getElementById('scope-carousels').value = scope.carousels || '';
+      document.getElementById('scope-captions').value  = scope.captions || '';
+      document.getElementById('role-reels').value      = scope.role_reels || 'strategy';
+      document.getElementById('role-carousels').value  = scope.role_carousels || 'strategy';
+      document.getElementById('role-captions').value   = scope.role_captions || 'none';
+      // Essentialism
+      if (scope.ess) {
+        ['1','2','3','4','5'].forEach(n => {
+          document.getElementById('ess-score-' + n).value = scope.ess['s' + n] || '';
+        });
+        document.getElementById('ess-intent').value = scope.ess.intent || '';
+        document.getElementById('ess-zero-based').checked = !!scope.ess.zero_based;
+      }
+    } catch(e) {}
+  }
+
+  updateClientCalc();
+  updateEssScore();
   document.getElementById('modal-add-client').classList.add('open');
+}
+
+function updateClientCalc() {
+  const reels     = parseInt(document.getElementById('scope-reels').value) || 0;
+  const carousels = parseInt(document.getElementById('scope-carousels').value) || 0;
+  const captions  = parseInt(document.getElementById('scope-captions').value) || 0;
+  const total     = reels + carousels + captions;
+
+  document.getElementById('scope-total-pieces').textContent = total || '0';
+
+  const retainer   = parseFloat(document.getElementById('client-retainer').value) || 0;
+  const currency   = document.getElementById('client-currency').value;
+  const companyPct = parseFloat(document.getElementById('client-company-pct').value) || 0;
+  const afterCompany = retainer * (1 - companyPct / 100);
+  const ratePerPiece = total > 0 ? afterCompany / total : 0;
+
+  const cur = currency === 'SGD' ? 'S$' : '฿';
+  document.getElementById('scope-rate-per-piece').textContent = total > 0 ? `${cur}${ratePerPiece.toFixed(0)}/piece` : '—';
+
+  if (total === 0 || retainer === 0) {
+    document.getElementById('client-calc-preview').style.display = 'none';
+    return;
+  }
+
+  const roleReels     = document.getElementById('role-reels').value;
+  const roleCarousels = document.getElementById('role-carousels').value;
+  const roleCaptions  = document.getElementById('role-captions').value;
+
+  const wReels     = ROLE_WEIGHTS[roleReels]     || 0;
+  const wCarousels = ROLE_WEIGHTS[roleCarousels] || 0;
+  const wCaptions  = ROLE_WEIGHTS[roleCaptions]  || 0;
+
+  const billingReels     = reels     * ratePerPiece * wReels;
+  const billingCarousels = carousels * ratePerPiece * wCarousels;
+  const billingCaptions  = captions  * ratePerPiece * wCaptions;
+  const billingTotal     = billingReels + billingCarousels + billingCaptions;
+
+  const rows = [];
+  if (reels > 0 && roleReels !== 'none')
+    rows.push(`🎬 ${reels} Reel${reels>1?'s':''} × ${ROLE_LABELS[roleReels]} (${wReels}×) = <strong>${cur}${billingReels.toFixed(0)}</strong>`);
+  if (carousels > 0 && roleCarousels !== 'none')
+    rows.push(`🃏 ${carousels} Carousel${carousels>1?'s':''} × ${ROLE_LABELS[roleCarousels]} (${wCarousels}×) = <strong>${cur}${billingCarousels.toFixed(0)}</strong>`);
+  if (captions > 0 && roleCaptions !== 'none')
+    rows.push(`📝 ${captions} Caption${captions>1?'s':''} × ${ROLE_LABELS[roleCaptions]} (${wCaptions}×) = <strong>${cur}${billingCaptions.toFixed(0)}</strong>`);
+
+  const preview = document.getElementById('client-calc-preview');
+  preview.style.display = 'block';
+  document.getElementById('client-calc-rows').innerHTML = rows.length
+    ? rows.map(r => `<div style="margin-bottom:5px;line-height:1.6">${r}</div>`).join('')
+    : `<div style="color:var(--text3)">Set Steven's role per format above to calculate.</div>`;
+  document.getElementById('client-calc-total').textContent = `${cur}${billingTotal.toFixed(0)}`;
+  document.getElementById('client-calc-note').textContent =
+    `From ${cur}${afterCompany.toFixed(0)} available after ${companyPct}% company cut · ${cur}${ratePerPiece.toFixed(0)}/piece × role weight`;
+}
+
+function updateEssScore() {
+  let total = 0;
+  let allFilled = true;
+  ['1','2','3','4','5'].forEach(n => {
+    const v = parseInt(document.getElementById('ess-score-' + n).value) || 0;
+    if (!v) allFilled = false;
+    total += v;
+  });
+  const totalEl   = document.getElementById('ess-score-total');
+  const verdictEl = document.getElementById('ess-verdict');
+  if (!allFilled && total === 0) {
+    totalEl.textContent = '—';
+    totalEl.style.color = 'var(--text3)';
+    verdictEl.style.display = 'none';
+    return;
+  }
+  totalEl.textContent = total;
+  if (total >= 90) {
+    totalEl.style.color = 'var(--green)';
+    verdictEl.textContent = '✓ Green Light';
+    verdictEl.className = 'ess-green';
+    verdictEl.style.display = 'inline-flex';
+  } else {
+    totalEl.style.color = 'var(--red)';
+    verdictEl.textContent = '✗ Hard No';
+    verdictEl.className = 'ess-red';
+    verdictEl.style.display = 'inline-flex';
+  }
+}
+
+function buildClientScopeJson() {
+  const reels     = parseInt(document.getElementById('scope-reels').value) || 0;
+  const carousels = parseInt(document.getElementById('scope-carousels').value) || 0;
+  const captions  = parseInt(document.getElementById('scope-captions').value) || 0;
+  const essScores = {};
+  ['1','2','3','4','5'].forEach(n => {
+    essScores['s' + n] = parseInt(document.getElementById('ess-score-' + n).value) || 0;
+  });
+  return JSON.stringify({
+    reels, carousels, captions,
+    role_reels:     document.getElementById('role-reels').value,
+    role_carousels: document.getElementById('role-carousels').value,
+    role_captions:  document.getElementById('role-captions').value,
+    ess: {
+      ...essScores,
+      intent:     document.getElementById('ess-intent').value,
+      zero_based: document.getElementById('ess-zero-based').checked,
+    },
+  });
+}
+
+// Derive a human-readable tier label from scope
+function scopeToTier(scope) {
+  try {
+    const s = typeof scope === 'string' ? JSON.parse(scope) : scope;
+    const total = (s.reels||0) + (s.carousels||0) + (s.captions||0);
+    if (total === 0) return 'Custom';
+    return `${total}-piece`;
+  } catch(e) { return 'Custom'; }
+}
+
+// Derive Steven's roles summary from scope
+function scopeToRoles(scope) {
+  try {
+    const s = typeof scope === 'string' ? JSON.parse(scope) : scope;
+    const parts = [];
+    if (s.reels > 0 && s.role_reels && s.role_reels !== 'none')
+      parts.push(`Reels: ${ROLE_LABELS[s.role_reels]||s.role_reels}`);
+    if (s.carousels > 0 && s.role_carousels && s.role_carousels !== 'none')
+      parts.push(`Carousels: ${ROLE_LABELS[s.role_carousels]||s.role_carousels}`);
+    if (s.captions > 0 && s.role_captions && s.role_captions !== 'none')
+      parts.push(`Captions: ${ROLE_LABELS[s.role_captions]||s.role_captions}`);
+    return parts.join(' · ') || 'No role set';
+  } catch(e) { return '—'; }
+}
+
+// Calculate Steven's billing value from scope
+function calcStevenBillingValue(client) {
+  if (!client.scope_json) return 0;
+  try {
+    const scope      = JSON.parse(client.scope_json);
+    const retainer   = parseFloat(client.retainer_amount||0);
+    const companyPct = parseFloat(client.company_pct||0);
+    const total      = (scope.reels||0) + (scope.carousels||0) + (scope.captions||0);
+    if (!total || !retainer) return 0;
+    const afterCompany = retainer * (1 - companyPct / 100);
+    const rpp = afterCompany / total;
+    return (
+      (scope.reels||0)     * rpp * (ROLE_WEIGHTS[scope.role_reels]||0) +
+      (scope.carousels||0) * rpp * (ROLE_WEIGHTS[scope.role_carousels]||0) +
+      (scope.captions||0)  * rpp * (ROLE_WEIGHTS[scope.role_captions]||0)
+    );
+  } catch(e) { return 0; }
+}
+
+// Essentialism score from stored scope
+function getEssScore(client) {
+  if (!client.scope_json) return null;
+  try {
+    const scope = JSON.parse(client.scope_json);
+    if (!scope.ess) return null;
+    const total = ['s1','s2','s3','s4','s5'].reduce((s,k) => s + (scope.ess[k]||0), 0);
+    return { total, passed: total >= 90, intent: scope.ess.intent||'', zero_based: !!scope.ess.zero_based };
+  } catch(e) { return null; }
 }
 
 async function saveClient() {
   const name   = document.getElementById('client-name').value.trim();
   const editId = document.getElementById('edit-client-id').value;
-
   if (!name) { showToast('⚠ Client name is required'); return; }
+
+  const scopeJson = buildClientScopeJson();
 
   const id  = editId || 'WWA-' + Date.now();
   const row = {
@@ -2069,13 +2409,14 @@ async function saveClient() {
     status:             document.getElementById('client-status').value,
     retainer_amount:    document.getElementById('client-retainer').value,
     currency:           document.getElementById('client-currency').value,
-    tier:               document.getElementById('client-tier').value,
+    tier:               scopeToTier(scopeJson),
     start_date:         document.getElementById('client-start-date').value,
     company_pct:        document.getElementById('client-company-pct').value || '0',
-    steven_roles:       document.getElementById('client-steven-roles').value,
-    steven_involvement: document.getElementById('client-steven-involvement').value,
-    steven_notes:       document.getElementById('client-steven-notes').value,
+    steven_roles:       scopeToRoles(scopeJson),
+    steven_involvement: '',   // retired — replaced by scope model
+    steven_notes:       '',
     notes:              document.getElementById('client-notes').value,
+    scope_json:         scopeJson,
     created_at:         new Date().toISOString(),
   };
 
@@ -2414,7 +2755,10 @@ function renderTeamProfiles() {
     const payTbd = (s.pay || 'TBD').includes('TBD');
 
     return `<div class="staff-card">
-      <button class="btn btn-ghost btn-sm staff-edit-btn" onclick="editStaff('${s.id}')">Edit</button>
+      <div style="position:absolute;top:14px;right:14px;display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="editStaff('${s.id}')">Edit</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteStaff('${s.id}','${s.name.replace(/'/g,"\\'")}')">Remove</button>
+      </div>
       <div class="staff-card-header">
         <div class="staff-avatar ${avatarClass}">${initials}</div>
         <div style="flex:1">
@@ -2762,7 +3106,27 @@ async function saveStaff() {
   }
 }
 
-// ─── INIT ─────────────────────────────────────────────────
+async function deleteStaff(id, name) {
+  if (!confirm(`Remove ${name} from staff profiles?`)) return;
+
+  // If using seed data and StaffProfiles tab is empty, seed gets shown — user
+  // needs to first save to sheet to be able to delete. Handle gracefully.
+  if (DATA.staffProfiles.length === 0) {
+    showToast('⚠ This profile is seeded — add staff via "+ Add Staff" to save and manage them');
+    return;
+  }
+
+  DATA.staffProfiles = DATA.staffProfiles.filter(s => s.id !== id);
+  renderTeam();
+  showToast(`✓ ${name} removed`);
+
+  try {
+    await webAppWrite('deleteStaffProfile', { id });
+    localStorage.removeItem(CACHE_KEY);
+  } catch(e) {
+    showToast('⚠ Removed locally — sync pending');
+  }
+}
 const savedTheme = localStorage.getItem('stevenco_theme');
 if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
 
