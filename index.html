@@ -282,7 +282,38 @@ tr:hover td { background: var(--surface2); }
 .assign-role { font-size: 12px; color: var(--text3); flex: 1; }
 .assign-pct { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600; color: var(--purple); min-width: 50px; text-align: right; }
 
-@media (max-width: 768px) {
+/* ── ADVISOR ── */
+.advisor-chip {
+  padding: 7px 13px; border-radius: 20px; border: 1px solid var(--border-strong);
+  font-size: 12px; cursor: pointer; color: var(--text2); background: var(--surface);
+  transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.advisor-chip:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+
+.advisor-msg { display: flex; gap: 10px; align-items: flex-start; }
+.advisor-msg.user { flex-direction: row-reverse; }
+
+.advisor-bubble {
+  max-width: 88%; padding: 12px 16px; border-radius: var(--radius-lg);
+  font-size: 13px; line-height: 1.65; white-space: pre-wrap; word-break: break-word;
+}
+.advisor-bubble.user {
+  background: var(--blue); color: #fff; border-bottom-right-radius: 4px;
+}
+.advisor-bubble.assistant {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); border-bottom-left-radius: 4px;
+}
+.advisor-bubble.assistant strong { color: var(--text); }
+.advisor-bubble.thinking {
+  background: var(--surface2); color: var(--text3); font-style: italic;
+}
+.advisor-avatar {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600;
+}
+.advisor-avatar.user  { background: var(--blue); color: #fff; }
+.advisor-avatar.ai    { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); font-size: 13px; }
   .two-col, .three-col { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
   .content { padding: 16px; }
@@ -443,6 +474,9 @@ tr:hover td { background: var(--surface2); }
         <span class="icon">📅</span><span>Schedule</span>
       </div>
       <div class="nav-section">System</div>
+      <div class="nav-item" data-page="advisor" onclick="showPage('advisor',this)">
+        <span class="icon">◈</span><span>Advisor</span>
+      </div>
       <div class="nav-item" data-page="settings" onclick="showPage('settings',this)">
         <span class="icon">⚙</span><span>Settings</span>
       </div>
@@ -552,6 +586,7 @@ tr:hover td { background: var(--surface2); }
             <button class="btn btn-secondary" onclick="showPage('poppadi',null)">🏫 View Poppadi's</button>
             <button class="btn btn-secondary" onclick="showPage('wwa',null);setTimeout(()=>openAddClient(),200)">✦ Add WWA Client</button>
           </div>
+          <div id="home-system-health" style="margin-top:12px"></div>
         </div>
       </div>
 
@@ -839,6 +874,58 @@ tr:hover td { background: var(--surface2); }
           </div>
         </div>
 
+      </div>
+
+      <!-- ── ADVISOR PAGE ── -->
+      <div class="page" id="page-advisor">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1>Advisor</h1>
+              <p>Your business ecosystem · Real-time analysis · Grounded in live data</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn btn-ghost btn-sm" onclick="clearAdvisorChat()" id="advisor-clear-btn" style="display:none">Clear conversation</button>
+              <div id="advisor-context-badge" style="font-size:10px;font-family:'DM Mono',monospace;padding:4px 10px;border-radius:20px;background:var(--surface2);color:var(--text3)">Loading context…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- API key gate -->
+        <div id="advisor-api-gate" class="card" style="max-width:520px">
+          <div class="card-title">Connect Anthropic API</div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+            The Advisor uses Claude with your full business context injected — financials, team, clients, ZBA verdicts, bottlenecks — before every session. It is not generic. It knows Steven.CO.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Anthropic API Key</label>
+            <input class="form-input" id="advisor-api-key-input" type="password" placeholder="sk-ant-…" autocomplete="off">
+            <div class="form-hint">Stored in localStorage only. Never sent anywhere except api.anthropic.com.</div>
+          </div>
+          <button class="btn btn-primary" onclick="saveAdvisorApiKey()">Connect</button>
+        </div>
+
+        <!-- Chat interface (shown after API key set) -->
+        <div id="advisor-chat-wrapper" style="display:none;max-width:760px">
+
+          <!-- Suggested prompts (shown when no messages yet) -->
+          <div id="advisor-suggested" style="margin-bottom:16px">
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Ask about your business</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px" id="advisor-chips"></div>
+          </div>
+
+          <!-- Message thread -->
+          <div id="advisor-thread" style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;min-height:0"></div>
+
+          <!-- Input -->
+          <div style="background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-lg);padding:12px 14px;position:sticky;bottom:20px">
+            <textarea id="advisor-input" rows="2" placeholder="Ask anything about your business…" style="width:100%;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);resize:none;line-height:1.5" onkeydown="advisorKeydown(event)"></textarea>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+              <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace" id="advisor-model-label">claude-sonnet-4-20250514</span>
+              <button class="btn btn-primary" onclick="sendAdvisorMessage()" id="advisor-send-btn" style="padding:6px 16px">Send</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ── SCHEDULE PAGE ── -->
@@ -1314,6 +1401,19 @@ tr:hover td { background: var(--surface2); }
       <input class="form-input" id="staff-pay" placeholder="e.g. ฿650/hr · or TBD">
     </div>
     <div class="form-group">
+      <label class="form-label">Essential Contribution <span style="font-weight:400;color:var(--text3)">— the one thing this person must deliver</span></label>
+      <input class="form-input" id="staff-essential" placeholder="e.g. All carousel copy delivered on time, every batch">
+      <div class="form-hint">McKeown: if you can't state it in one line, it's not essential yet</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <input type="checkbox" id="staff-zero-based" style="cursor:pointer;margin-top:2px">
+        <label for="staff-zero-based" style="font-size:12px;color:var(--text2);cursor:pointer;line-height:1.5">
+          <strong>Zero-Based Audit passed</strong> — if this person wasn't already on the team, we would actively bring them in today
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
       <label class="form-label">Notes</label>
       <textarea class="form-textarea" id="staff-notes" rows="2" placeholder="Anything useful to know about this person's role or arrangement..."></textarea>
     </div>
@@ -1607,6 +1707,31 @@ function renderHome() {
 
   const total = ptIncome + popTutorIncome + popShareDrawn + wwaNet.stevenNet;
   document.getElementById('th-total').textContent = fmt(total);
+
+  // System health signal
+  const healthEl = document.getElementById('home-system-health');
+  if (healthEl) {
+    const signals = [];
+    const bottleneck = detectBottleneck();
+    if (bottleneck) {
+      signals.push(`<span style="color:var(--amber)">⚠ Bottleneck: <strong>${bottleneck.name}</strong> is at ${bottleneck.load}/${bottleneck.cap} capacity — alter the system before adding clients.</span>`);
+    }
+    const staff = getEffectiveStaff();
+    const zbaFailed = staff.filter(s => s.zero_based === 'false');
+    if (zbaFailed.length > 0) {
+      signals.push(`<span style="color:var(--red)">✗ ZBA failed: <strong>${zbaFailed.map(s=>s.name).join(', ')}</strong> — would not actively recruit today.</span>`);
+    }
+    const noTeam = DATA.wwaClients.filter(c =>
+      (c.status === 'Active' || c.status === 'Onboarding') &&
+      DATA.wwaAssignments.filter(a => a.client_id === c.id).length === 0
+    );
+    if (noTeam.length > 0) {
+      signals.push(`<span style="color:var(--red)">👤 <strong>${noTeam.map(c=>c.client_name).join(', ')}</strong> — active client${noTeam.length>1?'s':''} with no team assigned.</span>`);
+    }
+    healthEl.innerHTML = signals.length
+      ? `<div style="display:flex;flex-direction:column;gap:5px;padding-top:10px;border-top:1px solid var(--border);font-size:12px">${signals.join('')}</div>`
+      : '';
+  }
 }
 
 // ─── TRUE PROFIT HELPER ───────────────────────────────────
@@ -2592,7 +2717,7 @@ function loadSettings() {
 const PAGE_TITLES = {
   home: 'Home', 'private-tutoring': 'Private Tutoring',
   poppadi: "Poppadi's Studyo", wwa: 'WealthWise Atelier',
-  team: 'Team', schedule: 'Schedule', settings: 'Settings'
+  team: 'Team', schedule: 'Schedule', advisor: 'Advisor', settings: 'Settings'
 };
 
 function showPage(id, btn) {
@@ -2612,6 +2737,7 @@ function showPage(id, btn) {
   if (id === 'private-tutoring') populateMonthPickers();
   if (id === 'wwa') { populateMonthPickers(); renderWWA(); }
   if (id === 'team') renderTeam();
+  if (id === 'advisor') initAdvisorUI();
 }
 
 // ─── SIDEBAR + THEME ──────────────────────────────────────
@@ -2700,8 +2826,8 @@ function renderTeamView(view) {
 
 // ── STAFF PROFILES ────────────────────────────────────────
 function renderTeamProfiles() {
-  const staff = getEffectiveStaff();
-  const grid  = document.getElementById('team-profiles-grid');
+  const staff   = getEffectiveStaff();
+  const grid    = document.getElementById('team-profiles-grid');
   if (!grid) return;
 
   if (staff.length === 0) {
@@ -2712,6 +2838,8 @@ function renderTeamProfiles() {
     </div>`;
     return;
   }
+
+  const bottleneck = detectBottleneck();
 
   // Steven always first
   const stevenCard = `<div class="staff-card" style="border-color:var(--blue)">
@@ -2740,7 +2868,7 @@ function renderTeamProfiles() {
     const hasWWA  = bizList.some(b => b === 'WWA');
     const hasPvt  = bizList.some(b => b === 'Private');
     const avatarClass = hasPop && hasWWA ? 'both' : hasWWA ? 'wwa' : hasPop ? 'poppadi' : 'private';
-    const initials = (s.name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const initials    = (s.name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
     const bizPills = [
       hasPop ? `<span class="biz-pill poppadi">🏫 Poppadi's</span>` : '',
@@ -2748,34 +2876,43 @@ function renderTeamProfiles() {
       hasPvt ? `<span class="biz-pill private">📚 Private</span>` : '',
     ].join('');
 
-    // How many WWA clients is this person on?
     const wwaCount = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
-    const wwaNote  = wwaCount > 0 ? `<div style="font-size:11px;color:var(--purple);margin-top:6px">On ${wwaCount} WWA client${wwaCount!==1?'s':''}</div>` : '';
+    const payTbd   = (s.pay || 'TBD').includes('TBD');
+    const isBottleneck = bottleneck && bottleneck.name === s.name;
+    const zbaFailed    = s.zero_based === 'false' || (s.zero_based !== 'true' && s.zero_based !== true && s.zero_based !== undefined && s.zero_based !== '');
+    const zbaSet       = s.zero_based !== undefined && s.zero_based !== '';
+    const zbaPassed    = s.zero_based === 'true' || s.zero_based === true;
 
-    const payTbd = (s.pay || 'TBD').includes('TBD');
+    // Border highlight: bottleneck = amber, ZBA failed = red/dim, normal
+    const cardBorder = isBottleneck ? 'border-color:var(--amber)' : (zbaSet && !zbaPassed) ? 'border-color:var(--red);opacity:0.85' : '';
 
-    return `<div class="staff-card">
+    return `<div class="staff-card" style="${cardBorder}">
       <div style="position:absolute;top:14px;right:14px;display:flex;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="editStaff('${s.id}')">Edit</button>
         <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteStaff('${s.id}','${s.name.replace(/'/g,"\\'")}')">Remove</button>
       </div>
       <div class="staff-card-header">
         <div class="staff-avatar ${avatarClass}">${initials}</div>
-        <div style="flex:1">
+        <div style="flex:1;padding-right:80px">
           <div class="staff-name-row">
             <div class="staff-fullname">${s.name}</div>
             ${s.code ? `<span class="staff-code">${s.code}</span>` : ''}
             <span class="staff-type-badge">${s.type || 'Staff'}</span>
+            ${isBottleneck ? `<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--amber-bg);color:var(--amber)">⚠ Bottleneck</span>` : ''}
           </div>
           <div class="staff-roles-row">${s.roles || '—'}</div>
         </div>
       </div>
       <div class="staff-biz-pills">${bizPills || '<span style="font-size:11px;color:var(--text3)">No business assigned</span>'}</div>
-      <div class="staff-pay-row" style="${payTbd?'color:var(--amber)':''}">
+      <div class="staff-pay-row" style="${payTbd ? 'color:var(--amber)' : ''}">
         ${payTbd ? '⚠ ' : ''}Pay: <strong>${s.pay || 'TBD'}</strong>
       </div>
-      ${wwaNote}
-      ${s.notes ? `<div class="staff-notes-row">${s.notes}</div>` : ''}
+      ${wwaCount > 0 ? `<div style="font-size:11px;color:var(--purple);margin-top:6px">On ${wwaCount} WWA client${wwaCount!==1?'s':''}</div>` : ''}
+      ${s.essential ? `<div style="font-size:11px;color:var(--blue);margin-top:6px;padding:6px 8px;background:var(--blue-bg);border-radius:6px">Essential: ${s.essential}</div>` : ''}
+      ${zbaSet ? `<div style="font-size:11px;margin-top:6px;color:${zbaPassed ? 'var(--green)' : 'var(--red)'}">
+        ${zbaPassed ? '✓ Zero-Based Audit passed' : '✗ Zero-Based Audit — would not actively recruit today'}
+      </div>` : ''}
+      ${s.notes ? `<div class="staff-notes-row" style="margin-top:6px">${s.notes}</div>` : ''}
     </div>`;
   });
 
@@ -2921,6 +3058,32 @@ function renderWWAMatrix() {
 }
 
 // ── OPPORTUNITY RADAR ─────────────────────────────────────
+// ── BOTTLENECK DETECTION ──────────────────────────────────
+// The "Slowest Hiker": the person whose load is most disproportionate to their type.
+// Full-time expected to carry 2+ clients. Outsourced healthy at 1–2. Partner = different model.
+function detectBottleneck() {
+  const staff   = getEffectiveStaff().filter(s => s.status !== 'Inactive' && s.type !== 'Partner');
+  const clients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  if (staff.length === 0 || clients.length === 0) return null;
+
+  // Expected capacity by type (# of WWA clients they should comfortably handle)
+  const capacity = { 'Full-time': 3, 'Part-time': 2, 'Outsourced': 2 };
+
+  let worst = null;
+  let worstScore = -Infinity;
+
+  staff.forEach(s => {
+    const load = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
+    if (load === 0) return;
+    const cap   = capacity[s.type] || 2;
+    const score = load / cap; // >1 = overloaded, <0.5 = underloaded
+    if (score > worstScore) { worstScore = score; worst = { ...s, load, cap, score }; }
+  });
+
+  // Only flag if genuinely overloaded (>= 1.5× expected capacity)
+  return worst && worst.score >= 1.5 ? worst : null;
+}
+
 function renderRadar() {
   renderRadarUtilisation();
   renderRadarOpportunities();
@@ -2931,73 +3094,110 @@ function renderRadarUtilisation() {
   const el = document.getElementById('radar-utilisation');
   if (!el) return;
 
-  const staff = getEffectiveStaff().filter(s => s.status !== 'Inactive');
-  const clients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  const staff      = getEffectiveStaff().filter(s => s.status !== 'Inactive');
+  const clients    = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  const bottleneck = detectBottleneck();
+  const capacity   = { 'Full-time': 3, 'Part-time': 2, 'Outsourced': 2, 'Partner': 3 };
 
-  const rows = staff.slice(0, 8).map(s => {
-    const wwaClients = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
-    const bizList    = (s.businesses || '').split(',').length;
-    const maxPossible = clients.length + 2; // clients + potential roles
-    const score = Math.min(100, Math.round(((wwaClients / Math.max(clients.length, 1)) * 60) + (bizList * 20)));
-    const color = score > 70 ? 'var(--teal)' : score > 40 ? 'var(--blue)' : 'var(--border-strong)';
+  if (staff.length === 0) {
+    el.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:12px 0">Add staff profiles to see utilisation.</div>`;
+    return;
+  }
+
+  const rows = staff.map(s => {
+    const load = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
+    const cap  = capacity[s.type] || 2;
+    const pct  = clients.length > 0 ? Math.min(100, Math.round((load / cap) * 100)) : 0;
+    const isOver = pct > 100;
+    const isBottleneck = bottleneck && bottleneck.name === s.name;
+    const color = isBottleneck ? 'var(--amber)' : isOver ? 'var(--red)' : pct >= 60 ? 'var(--teal)' : pct >= 30 ? 'var(--blue)' : 'var(--border-strong)';
+    const label = load === 0
+      ? `<span style="color:var(--text3)">not on any client</span>`
+      : `${load} of ${cap} capacity${isBottleneck ? ' ⚠' : ''}`;
+
     return `<div class="radar-bar-row">
-      <div class="radar-bar-label">${s.name.split(' ')[0]}</div>
-      <div class="radar-bar-track"><div class="radar-bar-fill" style="width:${score}%;background:${color}"></div></div>
-      <div class="radar-bar-value">${wwaClients > 0 ? wwaClients + ' client' + (wwaClients!==1?'s':'') : s.businesses.includes('WWA') ? 'WWA' : 'Poppadi'}</div>
+      <div class="radar-bar-label" style="${isBottleneck ? 'color:var(--amber);font-weight:600' : ''}">${s.name.split(' ')[0]}</div>
+      <div class="radar-bar-track"><div class="radar-bar-fill" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>
+      <div class="radar-bar-value" style="min-width:120px;font-size:10px">${label}</div>
     </div>`;
   });
 
-  el.innerHTML = rows.length ? rows.join('') : `<div style="color:var(--text3);font-size:13px;padding:12px 0">Add staff profiles to see utilisation.</div>`;
+  const note = bottleneck
+    ? `<div style="margin-top:14px;padding:10px 12px;background:var(--amber-bg);border-radius:var(--radius);font-size:12px;color:var(--amber)">⚠ <strong>${bottleneck.name}</strong> is your current Slowest Hiker — ${bottleneck.load} clients vs ${bottleneck.cap} expected capacity. Remove the bottleneck from the system, not push harder.</div>`
+    : clients.length > 0 ? `<div style="margin-top:12px;font-size:11px;color:var(--text3)">No critical bottleneck detected at current client load.</div>` : '';
+
+  el.innerHTML = rows.join('') + note;
 }
 
 function renderRadarOpportunities() {
   const el = document.getElementById('radar-opportunities');
   if (!el) return;
 
-  const opps = [];
-  const staff = getEffectiveStaff();
+  const opps   = [];
+  const staff  = getEffectiveStaff();
+  const active = staff.filter(s => s.status !== 'Inactive');
 
-  // TBD pay structures = planning gaps
-  const tbdPay = staff.filter(s => (s.pay||'TBD').includes('TBD'));
-  if (tbdPay.length > 0) {
-    opps.push({ icon: '📋', title: 'Pay structure not documented', text: tbdPay.map(s=>s.name).join(', ') + ' — formalise before scaling.' });
+  // 1. ZBA failed — explicit Hard No on a person
+  const zbaFailed = active.filter(s => s.zero_based === 'false');
+  if (zbaFailed.length > 0) {
+    opps.push({ icon: '✗', color: 'var(--red)', title: 'Zero-Based Audit failed', text: zbaFailed.map(s => s.name).join(', ') + ' — you would not actively recruit them today. Consider restructuring their role or initiating an offboarding plan.' });
   }
 
-  // Cross-business staff with no WWA assignments
-  const bothStaff = staff.filter(s => {
+  // 2. ZBA not yet assessed on full-time staff
+  const zbaUnset = active.filter(s =>
+    (s.type === 'Full-time' || s.type === 'Partner') &&
+    (s.zero_based === undefined || s.zero_based === '' || s.zero_based === null)
+  );
+  if (zbaUnset.length > 0) {
+    opps.push({ icon: '📋', color: 'var(--amber)', title: 'Zero-Based Audit not completed', text: zbaUnset.map(s => s.name).join(', ') + ' — run the audit for all full-time staff. Edit their profile to record the verdict.' });
+  }
+
+  // 3. Bottleneck — surfaced from detectBottleneck
+  const bottleneck = detectBottleneck();
+  if (bottleneck) {
+    opps.push({ icon: '⚠', color: 'var(--amber)', title: `${bottleneck.name} is the Slowest Hiker`, text: `On ${bottleneck.load} WWA clients vs expected capacity of ${bottleneck.cap}. Do not add more clients until the bottleneck is resolved — alter the system (delegate, offload, template).` });
+  }
+
+  // 4. TBD pay structures
+  const tbdPay = active.filter(s => (s.pay || 'TBD').includes('TBD'));
+  if (tbdPay.length > 0) {
+    opps.push({ icon: '💰', color: 'var(--amber)', title: 'Pay structure not documented', text: tbdPay.map(s => s.name).join(', ') + ' — undefined pay is a sunk-cost trap. Formalise before the next client onboards.' });
+  }
+
+  // 5. Essential Contribution missing on full-time staff
+  const noEssential = active.filter(s =>
+    (s.type === 'Full-time' || s.type === 'Partner') && !(s.essential || '').trim()
+  );
+  if (noEssential.length > 0) {
+    opps.push({ icon: '🎯', color: 'var(--blue)', title: 'Essential Contribution not defined', text: noEssential.map(s => s.name).join(', ') + ' — if you cannot state their essential contribution in one line, their role is not yet clarified.' });
+  }
+
+  // 6. Cross-business staff not on WWA clients
+  const bothStaff = active.filter(s => {
     const biz = s.businesses || '';
     return biz.includes('WWA') && (biz.includes('Poppadi') || biz.includes("Poppadi's"));
   });
-  const unassignedCross = bothStaff.filter(s => DATA.wwaAssignments.filter(a => a.staff_name === s.name).length === 0);
-  if (unassignedCross.length > 0) {
-    opps.push({ icon: '⚡', title: 'Cross-business staff not assigned to WWA clients', text: unassignedCross.map(s=>s.name).join(', ') + ' — add them to WWA clients in the matrix.' });
+  const unassigned = bothStaff.filter(s => DATA.wwaAssignments.filter(a => a.staff_name === s.name).length === 0);
+  if (unassigned.length > 0) {
+    opps.push({ icon: '⚡', color: 'var(--purple)', title: 'Cross-business staff not on any WWA client', text: unassigned.map(s => s.name).join(', ') + ' — capacity sitting unused in WWA.' });
   }
 
-  // WWA clients with no team assigned
-  const noTeamClients = DATA.wwaClients.filter(c =>
+  // 7. WWA clients with no team
+  const noTeam = DATA.wwaClients.filter(c =>
     (c.status === 'Active' || c.status === 'Onboarding') &&
     DATA.wwaAssignments.filter(a => a.client_id === c.id).length === 0
   );
-  if (noTeamClients.length > 0) {
-    opps.push({ icon: '👤', title: 'WWA clients with no team assigned', text: noTeamClients.map(c=>c.client_name).join(', ') + ' — Steven carrying 100% on these.' });
-  }
-
-  // Poppadi-only tutors who could be in WWA
-  const popOnlyTutors = staff.filter(s => {
-    const biz = s.businesses || '';
-    return (biz.includes('Poppadi') || biz.includes("Poppadi's")) && !biz.includes('WWA') && (s.type === 'Full-time' || s.type === 'Part-time');
-  });
-  if (popOnlyTutors.length > 0) {
-    opps.push({ icon: '🔍', title: 'Poppadi full/part-time staff not in WWA', text: popOnlyTutors.map(s=>s.name).join(', ') + ' — evaluate if WWA roles could utilise them.' });
+  if (noTeam.length > 0) {
+    opps.push({ icon: '👤', color: 'var(--red)', title: 'Active clients with no team assigned', text: noTeam.map(c => c.client_name).join(', ') + ' — Steven carrying 100%. Delegate before it becomes a bottleneck.' });
   }
 
   if (opps.length === 0) {
-    opps.push({ icon: '✅', title: 'All clear', text: 'No immediate gaps detected. Add more clients and staff to generate insights.' });
+    opps.push({ icon: '✅', color: 'var(--green)', title: 'No immediate gaps', text: 'All ZBA audits passed, no bottlenecks, all essential contributions defined.' });
   }
 
   el.innerHTML = opps.map(o => `<div class="opportunity-item">
-    <div class="opp-icon">${o.icon}</div>
-    <div class="opp-text"><strong>${o.title}</strong>${o.text}</div>
+    <div class="opp-icon" style="color:${o.color}">${o.icon}</div>
+    <div class="opp-text"><strong style="color:${o.color}">${o.title}</strong><br>${o.text}</div>
   </div>`).join('');
 }
 
@@ -3005,18 +3205,24 @@ function renderRadarInsights() {
   const el = document.getElementById('radar-insights');
   if (!el) return;
 
-  const staff    = getEffectiveStaff();
-  const active   = staff.filter(s => s.status !== 'Inactive');
-  const ftStaff  = active.filter(s => s.type === 'Full-time' || s.type === 'Partner');
-  const outStaff = active.filter(s => s.type === 'Outsourced');
-  const wwAClients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
-  const tbdCount = active.filter(s => (s.pay||'TBD').includes('TBD')).length;
+  const staff      = getEffectiveStaff();
+  const active     = staff.filter(s => s.status !== 'Inactive');
+  const ftStaff    = active.filter(s => s.type === 'Full-time' || s.type === 'Partner');
+  const outStaff   = active.filter(s => s.type === 'Outsourced');
+  const wwaClients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  const tbdCount   = active.filter(s => (s.pay || 'TBD').includes('TBD')).length;
+  const zbaPassed  = active.filter(s => s.zero_based === 'true' || s.zero_based === true).length;
+  const zbaFailed  = active.filter(s => s.zero_based === 'false').length;
+  const zbaUnset   = active.filter(s => !s.zero_based && s.zero_based !== 'true' && s.zero_based !== 'false').length;
+  const bottleneck = detectBottleneck();
 
   const insights = [
-    { dot: 'blue',  text: `<strong>${active.length} active staff</strong> across all businesses — ${ftStaff.length} full-time/partner, ${outStaff.length} outsourced.` },
-    { dot: wwAClients.length > 0 ? 'green' : 'amber', text: `<strong>${wwAClients.length} active WWA client${wwAClients.length!==1?'s':''}</strong>${wwAClients.length === 0 ? ' — add clients to unlock WWA team matrix.' : '.' }` },
-    { dot: tbdCount > 0 ? 'amber' : 'green', text: tbdCount > 0 ? `<strong>${tbdCount} staff with undefined pay</strong> — document before scaling.` : '<strong>All staff pay structures documented.</strong>' },
-    { dot: 'blue', text: `<strong>Private Tutoring</strong> is Steven only — 100% take-home, no team dependency.` },
+    { dot: 'blue', text: `<strong>${active.length} active staff</strong> — ${ftStaff.length} full-time/partner, ${outStaff.length} outsourced.` },
+    { dot: wwaClients.length > 0 ? 'green' : 'amber', text: `<strong>${wwaClients.length} active WWA client${wwaClients.length !== 1 ? 's' : ''}</strong>${wwaClients.length === 0 ? ' — no clients yet.' : '.'}` },
+    { dot: tbdCount > 0 ? 'amber' : 'green', text: tbdCount > 0 ? `<strong>${tbdCount} undefined pay structures</strong> — formalise before scaling.` : '<strong>All pay structures documented.</strong>' },
+    { dot: bottleneck ? 'amber' : 'green', text: bottleneck ? `<strong>Bottleneck: ${bottleneck.name}</strong> — ${bottleneck.load} clients, capacity ${bottleneck.cap}. Alter the system.` : '<strong>No bottleneck detected</strong> at current load.' },
+    { dot: zbaFailed > 0 ? 'red' : zbaPassed > 0 ? 'green' : 'blue', text: `<strong>Zero-Based Audit:</strong> ${zbaPassed} passed · ${zbaFailed} failed · ${zbaUnset} not assessed.` },
+    { dot: 'blue', text: '<strong>Private Tutoring</strong> — Steven only, 100% take-home, no team dependency.' },
   ];
 
   el.innerHTML = insights.map(i => `<div class="insight-row">
@@ -3038,6 +3244,8 @@ function openAddStaff() {
   document.getElementById('staff-biz-private').checked = false;
   document.getElementById('staff-roles').value = '';
   document.getElementById('staff-pay').value = '';
+  document.getElementById('staff-essential').value = '';
+  document.getElementById('staff-zero-based').checked = false;
   document.getElementById('staff-notes').value = '';
   document.getElementById('modal-add-staff').classList.add('open');
 }
@@ -3057,6 +3265,8 @@ function editStaff(id) {
   document.getElementById('staff-biz-private').checked = bizList.includes('Private');
   document.getElementById('staff-roles').value = s.roles || '';
   document.getElementById('staff-pay').value = s.pay || '';
+  document.getElementById('staff-essential').value = s.essential || '';
+  document.getElementById('staff-zero-based').checked = s.zero_based === 'true' || s.zero_based === true;
   document.getElementById('staff-notes').value = s.notes || '';
   document.getElementById('modal-add-staff').classList.add('open');
 }
@@ -3081,6 +3291,8 @@ async function saveStaff() {
     businesses: bizArr.join(','),
     roles:      document.getElementById('staff-roles').value.trim(),
     pay:        document.getElementById('staff-pay').value.trim(),
+    essential:  document.getElementById('staff-essential').value.trim(),
+    zero_based: document.getElementById('staff-zero-based').checked ? 'true' : 'false',
     notes:      document.getElementById('staff-notes').value.trim(),
     created_at: new Date().toISOString(),
   };
@@ -3127,6 +3339,261 @@ async function deleteStaff(id, name) {
     showToast('⚠ Removed locally — sync pending');
   }
 }
+
+// ─── ADVISOR ──────────────────────────────────────────────
+
+let ADVISOR_API_KEY = localStorage.getItem('stevenco_advisor_key') || '';
+let advisorHistory  = [];
+
+const ADVISOR_SUGGESTED = [
+  "What's my biggest bottleneck right now and what should I do about it?",
+  "Which WWA clients passed the 90% Rule and which ones should I review?",
+  "Where is my time generating the least return across all three streams?",
+  "Should I take on another WWA client this month?",
+  "Which staff member am I most dependent on and what's the risk?",
+  "What would the Essentialist cut from my current setup?",
+  "Give me a one-page CEO view of my business this month.",
+  "Which open items from my ecosystem are causing the most drag?",
+];
+
+function buildSystemBrief() {
+  const month      = selectedMonth;
+  const monthLabel = formatMonthLabel(month);
+
+  const ptSessions = DATA.privateSessions.filter(s =>
+    (s.date||'').startsWith(month) && s.status !== 'Cancelled' && s.status !== 'Missed'
+  );
+  const ptIncome   = ptSessions.reduce((s,r) => s + Number(r.fee||0), 0);
+  const ptHours    = ptSessions.reduce((s,r) => s + Number(r.duration_hrs||0), 0);
+  const ptStudents = [...new Set(ptSessions.map(s => s.student_name).filter(Boolean))];
+
+  const popRow     = DATA.poppadiMirror.find(r => r.month === month) || {};
+  const popIncome  = Number(popRow.t002_income||0);
+  const popSess    = Number(popRow.t002_sessions||0);
+  const grossRem   = Number(popRow.school_remainder_gross||0);
+  const ajPop20    = Number(popRow.aj_pop_20pct||0);
+  const fixedCosts = Number(popRow.fixed_costs||0);
+  const trueProfit = calcTrueProfit(popRow);
+  const drawRecord = DATA.profitShare.find(r => r.month === month);
+  const drawn      = drawRecord && drawRecord.drawn === 'TRUE';
+
+  let popAccum = 0;
+  DATA.poppadiMirror.forEach(r => {
+    const tp = calcTrueProfit(r);
+    const dr = DATA.profitShare.find(x => x.month === r.month);
+    if (!(dr && dr.drawn === 'TRUE')) popAccum += tp;
+  });
+
+  const wwaNet     = calcWWANet(month);
+  const wwaClients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  const wwaExpenses = DATA.wwaExpenses.filter(e => (e.month||'').startsWith(month));
+  const wwaExpTotal = wwaExpenses.reduce((s,e) => s + Number(e.amount||0), 0);
+
+  const clientDetails = wwaClients.map(c => {
+    const ess    = getEssScore(c);
+    const billing = calcStevenBillingValue(c);
+    const assigns = DATA.wwaAssignments.filter(a => a.client_id === c.id);
+    const scope  = c.scope_json ? (() => { try { return JSON.parse(c.scope_json); } catch(e) { return {}; } })() : {};
+    const pieces = (scope.reels||0) + (scope.carousels||0) + (scope.captions||0);
+    return `  - ${c.client_name} (${c.status}) · ${c.currency} ${c.retainer_amount}/mo · ${pieces} pieces/mo`
+      + (ess ? ` · 90% Rule: ${ess.total}/100 ${ess.passed ? 'PASS' : 'FAIL'}` : ' · 90% Rule: not scored')
+      + (billing > 0 ? ` · Steven billing: ${c.currency==='SGD'?'S$':'฿'}${billing.toFixed(0)}` : '')
+      + (c.steven_roles ? ` · Roles: ${c.steven_roles}` : '')
+      + (ess && ess.intent ? `\n    Intent: "${ess.intent}"` : '')
+      + (ess && !ess.zero_based ? '\n    ⚠ Zero-Based Audit: would not actively pursue today' : '')
+      + (assigns.length > 0
+          ? `\n    Team: ${assigns.map(a => `${a.staff_name} (${a.role} ${a.pct}%)`).join(', ')}`
+          : '\n    Team: NONE — Steven carrying 100%');
+  }).join('\n');
+
+  const staff      = getEffectiveStaff().filter(s => s.status !== 'Inactive');
+  const bottleneck = detectBottleneck();
+  const staffLines = staff.map(s => {
+    const load = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
+    const zba  = s.zero_based === 'true' ? 'ZBA ✓' : s.zero_based === 'false' ? 'ZBA ✗ FAILED' : 'ZBA unassessed';
+    return `  - ${s.name} (${s.type || '?'}) · ${s.businesses||'?'} · Pay: ${s.pay||'TBD'} · ${load} WWA client${load!==1?'s':''} · ${zba}`
+      + (s.essential ? ` · Essential: "${s.essential}"` : ' · Essential contribution: NOT DEFINED')
+      + (bottleneck && bottleneck.name === s.name ? ' ← SLOWEST HIKER / BOTTLENECK' : '');
+  }).join('\n');
+
+  const flags = [
+    bottleneck ? `BOTTLENECK: ${bottleneck.name} at ${bottleneck.load}/${bottleneck.cap} WWA capacity — system must change before adding clients` : null,
+    staff.filter(s => s.zero_based === 'false').length > 0
+      ? `ZBA FAILED: ${staff.filter(s => s.zero_based === 'false').map(s=>s.name).join(', ')} — zero-based audit says would not recruit today` : null,
+    wwaClients.filter(c => DATA.wwaAssignments.filter(a => a.client_id === c.id).length === 0).length > 0
+      ? `NO TEAM: ${wwaClients.filter(c => DATA.wwaAssignments.filter(a => a.client_id === c.id).length === 0).map(c=>c.client_name).join(', ')} — active clients fully on Steven` : null,
+    staff.filter(s => (s.pay||'TBD').includes('TBD')).length > 0
+      ? `PAY UNDEFINED: ${staff.filter(s => (s.pay||'TBD').includes('TBD')).map(s=>s.name).join(', ')}` : null,
+    wwaClients.filter(c => { const e = getEssScore(c); return e && !e.passed; }).length > 0
+      ? `90% RULE FAILED: ${wwaClients.filter(c => { const e = getEssScore(c); return e && !e.passed; }).map(c=>c.client_name).join(', ')} — scored below 90, should be exited` : null,
+  ].filter(Boolean);
+
+  return `You are the Advisor inside Steven.CO — Steven Gerdphol's personal operating system.
+
+You have full live access to his business data. Give direct, ecosystem-aware advice. Reference actual numbers. When you identify a problem, give the concrete next action — not a framework. Be terse. No filler. No "great question."
+
+Steven is transitioning from operator to CEO. Advice should reduce his personal involvement and optimise team capacity. Apply Essentialism (Slowest Hiker, Zero-Based Audit, 90% Rule, Essential Intent) only where the data actually triggers it.
+
+STRUCTURE: Prompt Language Studyo Co., Ltd. (Thai registered)
+  1. Private Tutoring — solo, 100% take-home, ฿900/hr. Outside company.
+  2. Poppadi's Studyo — Steven earns: tutor income (T002, ฿650/hr) + owner profit share (school remainder − AJ.Pop 20% − ฿45k/mo fixed costs). AJ.Pop is co-founder/partner.
+  3. WealthWise Atelier (WWA) — content retainers. Steven billing = scope × role weight (Strategist 1.0, Copywriter 0.85, Acct Mgr 0.6, Ops 0.35).
+
+LIVE DATA — ${monthLabel}
+Private Tutoring: ฿${ptIncome.toLocaleString()} · ${ptSessions.length} sessions · ${ptHours}h · Students: ${ptStudents.join(', ')||'none'}
+
+Poppadi's: T002 income ฿${popIncome.toLocaleString()} (${popSess} sessions) · Gross remainder ฿${grossRem.toLocaleString()} → AJ.Pop 20% ฿${ajPop20.toLocaleString()} → Fixed ฿${fixedCosts.toLocaleString()} → True profit ฿${trueProfit.toLocaleString()} (${drawn?'DRAWN':'not drawn'}) · Accumulated undrawn: ฿${popAccum.toLocaleString()}
+
+WWA: Revenue ${wwaNet.totalRevenue.toLocaleString()} · Team+company costs ${(wwaNet.teamCosts+wwaNet.companyCuts).toFixed(0)} · Fixed exp ${wwaExpTotal.toLocaleString()} · Steven net ${wwaNet.stevenNet.toFixed(0)}
+Active clients:
+${clientDetails||'  none'}
+
+TEAM:
+${staffLines||'  none loaded'}
+
+ACTIVE FLAGS:
+${flags.length > 0 ? flags.map(f=>'• '+f).join('\n') : '• No critical flags'}`;
+}
+
+function updateAdvisorContextBadge() {
+  const badge   = document.getElementById('advisor-context-badge');
+  if (!badge) return;
+  const clients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding').length;
+  const staff   = getEffectiveStaff().filter(s => s.status !== 'Inactive').length;
+  badge.textContent = `${formatMonthLabel(selectedMonth)} · ${clients} client${clients!==1?'s':''} · ${staff} staff`;
+  badge.style.color = 'var(--teal)';
+}
+
+function renderAdvisorChips() {
+  const el = document.getElementById('advisor-chips');
+  if (!el) return;
+  el.innerHTML = ADVISOR_SUGGESTED.map(q =>
+    `<button class="advisor-chip" onclick="sendAdvisorChip(this)">${q}</button>`
+  ).join('');
+}
+
+function sendAdvisorChip(btn) {
+  document.getElementById('advisor-input').value = btn.textContent;
+  sendAdvisorMessage();
+}
+
+function saveAdvisorApiKey() {
+  const key = document.getElementById('advisor-api-key-input').value.trim();
+  if (!key.startsWith('sk-ant-')) { showToast('⚠ Key should start with sk-ant-'); return; }
+  ADVISOR_API_KEY = key;
+  localStorage.setItem('stevenco_advisor_key', key);
+  initAdvisorUI();
+  showToast('✓ Advisor connected');
+}
+
+function initAdvisorUI() {
+  const hasKey = !!ADVISOR_API_KEY;
+  document.getElementById('advisor-api-gate').style.display     = hasKey ? 'none'  : 'block';
+  document.getElementById('advisor-chat-wrapper').style.display = hasKey ? 'block' : 'none';
+  document.getElementById('advisor-clear-btn').style.display    = hasKey ? ''      : 'none';
+  if (hasKey) { renderAdvisorChips(); updateAdvisorContextBadge(); renderAdvisorThread(); }
+}
+
+function renderAdvisorThread() {
+  const thread    = document.getElementById('advisor-thread');
+  const suggested = document.getElementById('advisor-suggested');
+  if (!thread) return;
+
+  if (advisorHistory.length === 0) {
+    thread.innerHTML = '';
+    if (suggested) suggested.style.display = 'block';
+    return;
+  }
+  if (suggested) suggested.style.display = 'none';
+
+  thread.innerHTML = advisorHistory.map(m => {
+    const isUser = m.role === 'user';
+    const avatar = isUser
+      ? `<div class="advisor-avatar user">SG</div>`
+      : `<div class="advisor-avatar ai">◈</div>`;
+    const content = isUser
+      ? m.content
+      : m.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    const cls = m.thinking ? 'thinking' : m.role;
+    return `<div class="advisor-msg ${m.role}">
+      ${avatar}
+      <div class="advisor-bubble ${cls}">${content}</div>
+    </div>`;
+  }).join('');
+
+  setTimeout(() => {
+    const last = thread.lastElementChild;
+    if (last) last.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
+}
+
+function advisorKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdvisorMessage(); }
+}
+
+async function sendAdvisorMessage() {
+  const input   = document.getElementById('advisor-input');
+  const text    = (input.value || '').trim();
+  if (!text) return;
+  if (!ADVISOR_API_KEY) { showToast('⚠ Connect your API key first'); return; }
+
+  input.value = '';
+  const sendBtn = document.getElementById('advisor-send-btn');
+  sendBtn.disabled = true;
+
+  advisorHistory.push({ role: 'user', content: text });
+  advisorHistory.push({ role: 'assistant', content: 'Thinking…', thinking: true });
+  renderAdvisorThread();
+
+  try {
+    const messages = advisorHistory
+      .filter(m => !m.thinking)
+      .map(m => ({ role: m.role, content: m.content }));
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ADVISOR_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: buildSystemBrief(),
+        messages,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+
+    const data  = await res.json();
+    const reply = data.content?.[0]?.text || '(no response)';
+    advisorHistory[advisorHistory.length - 1] = { role: 'assistant', content: reply };
+
+  } catch(e) {
+    advisorHistory[advisorHistory.length - 1] = {
+      role: 'assistant',
+      content: `⚠ ${e.message}\n\nCheck your API key or try again.`,
+    };
+  }
+
+  sendBtn.disabled = false;
+  renderAdvisorThread();
+}
+
+function clearAdvisorChat() {
+  if (!advisorHistory.length) return;
+  if (!confirm('Clear this conversation?')) return;
+  advisorHistory = [];
+  renderAdvisorThread();
+  document.getElementById('advisor-suggested').style.display = 'block';
+}
+
 const savedTheme = localStorage.getItem('stevenco_theme');
 if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
 
