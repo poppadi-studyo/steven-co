@@ -321,7 +321,73 @@ tr:hover td { background: var(--surface2); }
 }
 
 /* ── TEAM PAGE ── */
-.team-tab {
+.person-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 14px; border-radius: var(--radius-lg); border: 1.5px solid var(--border);
+  background: var(--surface); cursor: pointer; transition: all 0.15s; min-width: 72px;
+  position: relative;
+}
+.person-chip:hover  { border-color: var(--blue); background: var(--blue-bg); }
+.person-chip.active { border-color: var(--blue); background: var(--blue-bg); }
+.person-chip.bottleneck { border-color: var(--amber); }
+.person-chip.zba-fail   { border-color: var(--red); opacity: 0.8; }
+.person-chip-avatar {
+  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 12px; font-weight: 700;
+}
+.person-chip-name { font-size: 11px; font-weight: 500; text-align: center; color: var(--text2); }
+.person-chip-badge {
+  position: absolute; top: -4px; right: -4px; width: 14px; height: 14px;
+  border-radius: 50%; border: 2px solid var(--surface); font-size: 7px;
+  display: flex; align-items: center; justify-content: center; font-weight: 700;
+}
+.health-bar {
+  padding: 10px 14px; border-radius: var(--radius); font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+}
+.health-bar.green { background: var(--green-bg);  color: var(--green); }
+.health-bar.amber { background: var(--amber-bg);  color: var(--amber); }
+.health-bar.red   { background: var(--red-bg);    color: var(--red);   }
+.flag-item {
+  display: flex; align-items: flex-start; gap: 8px; padding: 8px 0;
+  border-bottom: 1px solid var(--border); font-size: 12px; line-height: 1.5;
+}
+.flag-item:last-child { border-bottom: none; }
+.flag-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.eco-lane { display: flex; flex-direction: column; gap: 5px; }
+.eco-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 4px 10px; border-radius: 6px; text-align: center; margin-bottom: 4px;
+}
+.eco-label.poppadi { background: var(--poppadi-bg); color: var(--poppadi); }
+.eco-label.wwa     { background: var(--wwa-bg); color: var(--wwa); }
+.eco-label.both    { background: var(--blue-bg); color: var(--blue); }
+.eco-node {
+  padding: 5px 10px; border-radius: var(--radius); font-size: 11px; font-weight: 500;
+  text-align: center; background: var(--surface2); color: var(--text2);
+  border: 1px solid var(--border);
+}
+.eco-node.steven     { background: var(--blue-bg); color: var(--blue); border-color: var(--blue); }
+.eco-node.bottleneck { border-color: var(--amber); color: var(--amber); background: var(--amber-bg); }
+.drawer-tag {
+  display: inline-flex; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; margin: 2px;
+}
+.drawer-tag.poppadi { background: var(--poppadi-bg); color: var(--poppadi); }
+.drawer-tag.wwa     { background: var(--wwa-bg); color: var(--wwa); }
+.drawer-tag.private { background: var(--blue-bg); color: var(--blue); }
+/* Keep these for modal compatibility */
+.biz-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.biz-pill.poppadi { background: var(--poppadi-bg); color: var(--poppadi); }
+.biz-pill.wwa     { background: var(--wwa-bg); color: var(--wwa); }
+.biz-pill.private { background: var(--blue-bg); color: var(--blue); }
+.modal-section-label {
+  font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase;
+  letter-spacing: 0.7px; margin-bottom: 10px; margin-top: 4px;
+}
+.ess-green { background: var(--green-bg); color: var(--green); }
+.ess-red   { background: var(--red-bg);   color: var(--red);   }
+</style>
+</head>
   padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 500;
   cursor: pointer; border: none; background: none; color: var(--text3);
   font-family: 'DM Sans', sans-serif; transition: all 0.15s;
@@ -810,67 +876,88 @@ tr:hover td { background: var(--surface2); }
           <div class="page-header-row">
             <div>
               <h1>Team</h1>
-              <p>Staff profiles · Ecosystem diagram · Opportunity radar</p>
+              <p id="team-summary-sub">Loading…</p>
             </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:3px;gap:2px" id="team-view-tabs">
-                <button class="team-tab active" onclick="switchTeamView('profiles')" id="tab-profiles">Profiles</button>
-                <button class="team-tab" onclick="switchTeamView('ecosystem')" id="tab-ecosystem">Ecosystem</button>
-                <button class="team-tab" onclick="switchTeamView('wwa-matrix')" id="tab-wwa-matrix">WWA Matrix</button>
-                <button class="team-tab" onclick="switchTeamView('radar')" id="tab-radar">Radar</button>
-              </div>
-              <button class="btn btn-secondary" onclick="openAddStaff()" id="team-add-btn">+ Add Staff</button>
+            <button class="btn btn-secondary" onclick="openAddStaff()">+ Add Staff</button>
+          </div>
+        </div>
+
+        <!-- ROW 1: System health bar + 3 stat rings -->
+        <div id="team-health-bar" style="margin-bottom:16px"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+          <div class="card" style="padding:18px 20px;display:flex;align-items:center;gap:16px">
+            <svg id="ring-staff" width="52" height="52" viewBox="0 0 52 52" style="flex-shrink:0">
+              <circle cx="26" cy="26" r="22" fill="none" stroke="var(--surface2)" stroke-width="5"/>
+              <circle id="ring-staff-arc" cx="26" cy="26" r="22" fill="none" stroke="var(--blue)" stroke-width="5" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 26 26)" style="transition:stroke-dashoffset 0.6s ease"/>
+              <text x="26" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)" id="ring-staff-num">0</text>
+            </svg>
+            <div>
+              <div style="font-size:13px;font-weight:600" id="ring-staff-label">Active Staff</div>
+              <div style="font-size:11px;color:var(--text3)" id="ring-staff-sub">—</div>
+            </div>
+          </div>
+          <div class="card" style="padding:18px 20px;display:flex;align-items:center;gap:16px">
+            <svg id="ring-zba" width="52" height="52" viewBox="0 0 52 52" style="flex-shrink:0">
+              <circle cx="26" cy="26" r="22" fill="none" stroke="var(--surface2)" stroke-width="5"/>
+              <circle id="ring-zba-arc" cx="26" cy="26" r="22" fill="none" stroke="var(--green)" stroke-width="5" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 26 26)" style="transition:stroke-dashoffset 0.6s ease"/>
+              <text x="26" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)" id="ring-zba-num">—</text>
+            </svg>
+            <div>
+              <div style="font-size:13px;font-weight:600">Zero-Based Audit</div>
+              <div style="font-size:11px;color:var(--text3)" id="ring-zba-sub">—</div>
+            </div>
+          </div>
+          <div class="card" style="padding:18px 20px;display:flex;align-items:center;gap:16px">
+            <svg id="ring-cap" width="52" height="52" viewBox="0 0 52 52" style="flex-shrink:0">
+              <circle cx="26" cy="26" r="22" fill="none" stroke="var(--surface2)" stroke-width="5"/>
+              <circle id="ring-cap-arc" cx="26" cy="26" r="22" fill="none" stroke="var(--teal)" stroke-width="5" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 26 26)" style="transition:stroke-dashoffset 0.6s ease"/>
+              <text x="26" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)" id="ring-cap-num">—</text>
+            </svg>
+            <div>
+              <div style="font-size:13px;font-weight:600">WWA Capacity</div>
+              <div style="font-size:11px;color:var(--text3)" id="ring-cap-sub">—</div>
             </div>
           </div>
         </div>
 
-        <!-- ── VIEW: STAFF PROFILES ── -->
-        <div id="team-view-profiles">
-          <div id="team-profiles-grid" class="two-col"></div>
-        </div>
-
-        <!-- ── VIEW: ECOSYSTEM DIAGRAM ── -->
-        <div id="team-view-ecosystem" style="display:none">
+        <!-- ROW 2: Ecosystem visual + Flags -->
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;margin-bottom:16px">
+          <!-- Ecosystem map -->
           <div class="card" style="padding:0;overflow:hidden">
-            <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-              <span style="font-size:13px;font-weight:500;color:var(--text2)">Who works where</span>
-              <div style="margin-left:auto;display:flex;gap:12px;font-size:11px;color:var(--text3)">
-                <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:var(--teal);display:inline-block"></span>Poppadi's</span>
-                <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:var(--purple);display:inline-block"></span>WWA</span>
-                <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:inline-block"></span>Both</span>
+            <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;font-weight:600">Ecosystem</span>
+              <div style="display:flex;gap:10px;font-size:10px;color:var(--text3)">
+                <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--teal);margin-right:4px"></span>Poppadi's</span>
+                <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--purple);margin-right:4px"></span>WWA</span>
+                <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:4px"></span>Both</span>
               </div>
             </div>
-            <div id="ecosystem-diagram" style="min-height:420px;padding:24px;position:relative;overflow:auto"></div>
+            <div id="team-ecosystem-visual" style="padding:20px"></div>
           </div>
-        </div>
 
-        <!-- ── VIEW: WWA MATRIX ── -->
-        <div id="team-view-wwa-matrix" style="display:none">
+          <!-- Flags panel -->
           <div class="card" style="padding:0;overflow:hidden">
-            <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
-              <span style="font-size:13px;font-weight:500;color:var(--text2)">Client × Team — % allocation per client</span>
+            <div style="padding:14px 18px;border-bottom:1px solid var(--border)">
+              <span style="font-size:13px;font-weight:600">Flags</span>
             </div>
-            <div class="table-wrap" style="padding:0">
-              <div id="wwa-matrix-container" style="padding:20px"></div>
-            </div>
+            <div id="team-flags-panel" style="padding:12px 16px"></div>
           </div>
         </div>
 
-        <!-- ── VIEW: OPPORTUNITY RADAR ── -->
-        <div id="team-view-radar" style="display:none">
-          <div class="two-col">
-            <div class="card">
-              <div class="card-title">Utilisation by Person</div>
-              <div id="radar-utilisation"></div>
-            </div>
-            <div class="card">
-              <div class="card-title">Cross-Business Opportunities</div>
-              <div id="radar-opportunities"></div>
-            </div>
+        <!-- ROW 3: Staff cards (compact visual, expand on click) -->
+        <div class="card" style="padding:0;overflow:hidden">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13px;font-weight:600">People</span>
+            <span style="font-size:11px;color:var(--text3)">Tap a card to see detail</span>
           </div>
-          <div class="card">
-            <div class="card-title">Capacity Insights</div>
-            <div id="radar-insights"></div>
+          <div id="team-people-strip" style="padding:16px;display:flex;flex-wrap:wrap;gap:10px"></div>
+        </div>
+
+        <!-- Staff detail drawer (shown below when card clicked) -->
+        <div id="team-staff-drawer" style="display:none;margin-top:12px">
+          <div class="card" style="border:1px solid var(--blue)">
+            <div id="team-staff-drawer-content"></div>
           </div>
         </div>
 
@@ -2799,437 +2886,316 @@ function getEffectiveStaff() {
 
 let currentTeamView = 'profiles';
 
-function switchTeamView(view) {
-  currentTeamView = view;
-  ['profiles','ecosystem','wwa-matrix','radar'].forEach(v => {
-    const el = document.getElementById('team-view-' + v);
-    if (el) el.style.display = v === view ? 'block' : 'none';
-    const tab = document.getElementById('tab-' + v);
-    if (tab) tab.classList.toggle('active', v === view);
-  });
-  // Show/hide add staff button (only relevant for profiles view)
-  const addBtn = document.getElementById('team-add-btn');
-  if (addBtn) addBtn.style.display = view === 'profiles' ? '' : 'none';
-  renderTeamView(view);
-}
+// ─── TEAM — VISUAL-FIRST REDESIGN ────────────────────────
+
+let activeStaffId = null;
 
 function renderTeam() {
-  renderTeamView(currentTeamView);
-}
-
-function renderTeamView(view) {
-  if (view === 'profiles')   renderTeamProfiles();
-  if (view === 'ecosystem')  renderEcosystem();
-  if (view === 'wwa-matrix') renderWWAMatrix();
-  if (view === 'radar')      renderRadar();
-}
-
-// ── STAFF PROFILES ────────────────────────────────────────
-function renderTeamProfiles() {
-  const staff   = getEffectiveStaff();
-  const grid    = document.getElementById('team-profiles-grid');
-  if (!grid) return;
-
-  if (staff.length === 0) {
-    grid.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:28px;margin-bottom:12px">👥</div>
-      <div style="font-size:14px;font-weight:500">No staff profiles yet</div>
-      <div style="font-size:12px;margin-top:6px">Click "+ Add Staff" to start building your team roster.</div>
-    </div>`;
-    return;
-  }
-
-  const bottleneck = detectBottleneck();
-
-  // Steven always first
-  const stevenCard = `<div class="staff-card" style="border-color:var(--blue)">
-    <div class="staff-card-header">
-      <div class="staff-avatar both">SG</div>
-      <div style="flex:1">
-        <div class="staff-name-row">
-          <div class="staff-fullname">Steven Gerdphol</div>
-          <span class="staff-code">T002</span>
-          <span class="staff-type-badge" style="background:var(--blue-bg);color:var(--blue)">Founder · CEO</span>
-        </div>
-        <div class="staff-roles-row">Strategist · Account Manager · Tutor (T002) · Admin</div>
-      </div>
-    </div>
-    <div class="staff-biz-pills">
-      <span class="biz-pill poppadi">🏫 Poppadi's Studyo</span>
-      <span class="biz-pill wwa">✦ WealthWise Atelier</span>
-      <span class="biz-pill private">📚 Private Tutoring</span>
-    </div>
-    <div class="staff-pay-row">All three income streams · Owner profit share + tutor income + private fees</div>
-  </div>`;
-
-  const cards = staff.filter(s => s.status !== 'Inactive').map(s => {
-    const bizList = (s.businesses || '').split(',').map(b => b.trim()).filter(Boolean);
-    const hasPop  = bizList.some(b => b === 'Poppadi' || b === "Poppadi's");
-    const hasWWA  = bizList.some(b => b === 'WWA');
-    const hasPvt  = bizList.some(b => b === 'Private');
-    const avatarClass = hasPop && hasWWA ? 'both' : hasWWA ? 'wwa' : hasPop ? 'poppadi' : 'private';
-    const initials    = (s.name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-
-    const bizPills = [
-      hasPop ? `<span class="biz-pill poppadi">🏫 Poppadi's</span>` : '',
-      hasWWA ? `<span class="biz-pill wwa">✦ WWA</span>` : '',
-      hasPvt ? `<span class="biz-pill private">📚 Private</span>` : '',
-    ].join('');
-
-    const wwaCount = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
-    const payTbd   = (s.pay || 'TBD').includes('TBD');
-    const isBottleneck = bottleneck && bottleneck.name === s.name;
-    const zbaFailed    = s.zero_based === 'false' || (s.zero_based !== 'true' && s.zero_based !== true && s.zero_based !== undefined && s.zero_based !== '');
-    const zbaSet       = s.zero_based !== undefined && s.zero_based !== '';
-    const zbaPassed    = s.zero_based === 'true' || s.zero_based === true;
-
-    // Border highlight: bottleneck = amber, ZBA failed = red/dim, normal
-    const cardBorder = isBottleneck ? 'border-color:var(--amber)' : (zbaSet && !zbaPassed) ? 'border-color:var(--red);opacity:0.85' : '';
-
-    return `<div class="staff-card" style="${cardBorder}">
-      <div style="position:absolute;top:14px;right:14px;display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" onclick="editStaff('${s.id}')">Edit</button>
-        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteStaff('${s.id}','${s.name.replace(/'/g,"\\'")}')">Remove</button>
-      </div>
-      <div class="staff-card-header">
-        <div class="staff-avatar ${avatarClass}">${initials}</div>
-        <div style="flex:1;padding-right:80px">
-          <div class="staff-name-row">
-            <div class="staff-fullname">${s.name}</div>
-            ${s.code ? `<span class="staff-code">${s.code}</span>` : ''}
-            <span class="staff-type-badge">${s.type || 'Staff'}</span>
-            ${isBottleneck ? `<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--amber-bg);color:var(--amber)">⚠ Bottleneck</span>` : ''}
-          </div>
-          <div class="staff-roles-row">${s.roles || '—'}</div>
-        </div>
-      </div>
-      <div class="staff-biz-pills">${bizPills || '<span style="font-size:11px;color:var(--text3)">No business assigned</span>'}</div>
-      <div class="staff-pay-row" style="${payTbd ? 'color:var(--amber)' : ''}">
-        ${payTbd ? '⚠ ' : ''}Pay: <strong>${s.pay || 'TBD'}</strong>
-      </div>
-      ${wwaCount > 0 ? `<div style="font-size:11px;color:var(--purple);margin-top:6px">On ${wwaCount} WWA client${wwaCount!==1?'s':''}</div>` : ''}
-      ${s.essential ? `<div style="font-size:11px;color:var(--blue);margin-top:6px;padding:6px 8px;background:var(--blue-bg);border-radius:6px">Essential: ${s.essential}</div>` : ''}
-      ${zbaSet ? `<div style="font-size:11px;margin-top:6px;color:${zbaPassed ? 'var(--green)' : 'var(--red)'}">
-        ${zbaPassed ? '✓ Zero-Based Audit passed' : '✗ Zero-Based Audit — would not actively recruit today'}
-      </div>` : ''}
-      ${s.notes ? `<div class="staff-notes-row" style="margin-top:6px">${s.notes}</div>` : ''}
-    </div>`;
-  });
-
-  grid.innerHTML = stevenCard + cards.join('');
-}
-
-// ── ECOSYSTEM DIAGRAM ─────────────────────────────────────
-function renderEcosystem() {
-  const container = document.getElementById('ecosystem-diagram');
-  if (!container) return;
-
-  const staff = getEffectiveStaff();
-  const popStaff = staff.filter(s => {
-    const biz = (s.businesses||'');
-    return (biz.includes('Poppadi') || biz.includes("Poppadi's")) && !biz.includes('WWA');
-  });
-  const wwaStaff = staff.filter(s => {
-    const biz = (s.businesses||'');
-    return biz.includes('WWA') && !(biz.includes('Poppadi') || biz.includes("Poppadi's"));
-  });
-  const bothStaff = staff.filter(s => {
-    const biz = (s.businesses||'');
-    return (biz.includes('Poppadi') || biz.includes("Poppadi's")) && biz.includes('WWA');
-  });
-
-  const makeNodes = (people, extra='') => people.map(s =>
-    `<div class="eco-person-node" title="${s.roles||''}">${s.name}${s.code ? ` <span style="opacity:0.5;font-size:10px">${s.code}</span>` : ''}</div>`
-  ).join('');
-
-  container.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;min-height:340px">
-      <div class="eco-business-col">
-        <div class="eco-business-header poppadi">🏫 Poppadi's Studyo</div>
-        <div class="eco-person-node steven">Steven Gerdphol <span style="opacity:0.5;font-size:10px">T002</span></div>
-        ${makeNodes(popStaff)}
-        ${bothStaff.length ? bothStaff.map(s => `<div class="eco-person-node" style="border-color:var(--blue);opacity:0.6" title="Also works in WWA">${s.name} ↔</div>`).join('') : ''}
-      </div>
-      <div class="eco-business-col" style="align-items:center">
-        <div style="padding:10px 0;text-align:center">
-          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Cross-business</div>
-          ${bothStaff.length
-            ? bothStaff.map(s => `
-              <div class="eco-person-node both" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue);margin-bottom:8px">
-                ↔ ${s.name}
-                <div style="font-size:10px;opacity:0.7;margin-top:2px">${s.roles||''}</div>
-              </div>`).join('')
-            : '<div style="font-size:12px;color:var(--text3);padding:20px">No cross-business staff yet</div>'
-          }
-        </div>
-        <div style="border-left:2px dashed var(--border);height:100%;position:absolute;left:50%;top:60px"></div>
-      </div>
-      <div class="eco-business-col">
-        <div class="eco-business-header wwa">✦ WealthWise Atelier</div>
-        <div class="eco-person-node steven">Steven Gerdphol <span style="opacity:0.5;font-size:10px">Strategist</span></div>
-        ${makeNodes(wwaStaff)}
-        ${bothStaff.length ? bothStaff.map(s => `<div class="eco-person-node" style="border-color:var(--blue);opacity:0.6" title="Also works in Poppadi's">${s.name} ↔</div>`).join('') : ''}
-      </div>
-    </div>
-    <div style="margin-top:24px;padding:14px;background:var(--surface2);border-radius:var(--radius);font-size:12px;color:var(--text3)">
-      <strong style="color:var(--text)">Prompt Language Studyo Co., Ltd.</strong> · All staff operate under one legal entity.
-      Private Tutoring (Steven only) is kept separate from the company structure.
-      <span style="margin-left:8px">↔ = cross-business staff</span>
-    </div>`;
-}
-
-// ── WWA MATRIX ────────────────────────────────────────────
-function renderWWAMatrix() {
-  const container = document.getElementById('wwa-matrix-container');
-  if (!container) return;
-
-  const clients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
-  if (clients.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">✦</div><p>No active WWA clients yet.<br>Add clients in the WealthWise Atelier page first.</p></div>`;
-    return;
-  }
-
-  // Gather all people who appear in assignments, plus Steven
-  const allPeople = ['Steven'];
-  DATA.wwaAssignments.forEach(a => {
-    if (!allPeople.includes(a.staff_name)) allPeople.push(a.staff_name);
-  });
-
-  let html = `<div class="table-wrap"><table>
-    <thead>
-      <tr>
-        <th style="min-width:100px">Person</th>
-        ${clients.map(c => `<th style="text-align:center">${c.client_name}<div style="font-weight:400;color:var(--text3);font-size:10px">${c.currency} ${c.tier||''}</div></th>`).join('')}
-        <th style="text-align:center">Clients</th>
-      </tr>
-    </thead>
-    <tbody>`;
-
-  allPeople.forEach(person => {
-    const isStevenRow = person === 'Steven';
-    let clientCount = 0;
-    const cells = clients.map(client => {
-      if (isStevenRow) {
-        // Steven's cut = 100% - company% - all team %
-        const totalPct = DATA.wwaAssignments
-          .filter(a => a.client_id === client.id)
-          .reduce((s,a) => s + Number(a.pct||0), 0) + Number(client.company_pct||0);
-        const stevenPct = 100 - totalPct;
-        clientCount++;
-        return `<td style="text-align:center">
-          <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--blue)">~${stevenPct.toFixed(0)}%</span>
-          <div style="font-size:10px;color:var(--text3)">${client.steven_roles||'Strategist'}</div>
-        </td>`;
-      }
-      const assign = DATA.wwaAssignments.find(a => a.client_id === client.id && a.staff_name === person);
-      if (!assign) return `<td style="text-align:center;color:var(--text3)">—</td>`;
-      clientCount++;
-      return `<td style="text-align:center">
-        <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--purple)">${assign.pct}%</span>
-        <div style="font-size:10px;color:var(--text3)">${assign.role||''}</div>
-      </td>`;
-    }).join('');
-
-    const rowStyle = isStevenRow ? 'background:var(--blue-bg)' : '';
-    html += `<tr style="${rowStyle}">
-      <td style="font-weight:${isStevenRow?'600':'500'};color:${isStevenRow?'var(--blue)':'var(--text)'}">${person}</td>
-      ${cells}
-      <td style="text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:var(--text3)">${clientCount}</td>
-    </tr>`;
-  });
-
-  // Company % row
-  const companyRow = clients.map(c =>
-    Number(c.company_pct||0) > 0
-      ? `<td style="text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:var(--amber)">${c.company_pct}%</td>`
-      : `<td style="text-align:center;color:var(--text3)">—</td>`
-  ).join('');
-  html += `<tr style="background:var(--amber-bg)">
-    <td style="font-weight:500;color:var(--amber)">Company overhead</td>
-    ${companyRow}
-    <td></td>
-  </tr>`;
-
-  html += `</tbody></table></div>
-    <div style="margin-top:12px;font-size:11px;color:var(--text3)">
-      % shown is each person's share of the client retainer. Steven's % is derived: 100% − team % − company %.
-    </div>`;
-  container.innerHTML = html;
-}
-
-// ── OPPORTUNITY RADAR ─────────────────────────────────────
-// ── BOTTLENECK DETECTION ──────────────────────────────────
-// The "Slowest Hiker": the person whose load is most disproportionate to their type.
-// Full-time expected to carry 2+ clients. Outsourced healthy at 1–2. Partner = different model.
-function detectBottleneck() {
-  const staff   = getEffectiveStaff().filter(s => s.status !== 'Inactive' && s.type !== 'Partner');
-  const clients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
-  if (staff.length === 0 || clients.length === 0) return null;
-
-  // Expected capacity by type (# of WWA clients they should comfortably handle)
-  const capacity = { 'Full-time': 3, 'Part-time': 2, 'Outsourced': 2 };
-
-  let worst = null;
-  let worstScore = -Infinity;
-
-  staff.forEach(s => {
-    const load = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
-    if (load === 0) return;
-    const cap   = capacity[s.type] || 2;
-    const score = load / cap; // >1 = overloaded, <0.5 = underloaded
-    if (score > worstScore) { worstScore = score; worst = { ...s, load, cap, score }; }
-  });
-
-  // Only flag if genuinely overloaded (>= 1.5× expected capacity)
-  return worst && worst.score >= 1.5 ? worst : null;
-}
-
-function renderRadar() {
-  renderRadarUtilisation();
-  renderRadarOpportunities();
-  renderRadarInsights();
-}
-
-function renderRadarUtilisation() {
-  const el = document.getElementById('radar-utilisation');
-  if (!el) return;
-
   const staff      = getEffectiveStaff().filter(s => s.status !== 'Inactive');
-  const clients    = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
+  const active     = staff;
   const bottleneck = detectBottleneck();
-  const capacity   = { 'Full-time': 3, 'Part-time': 2, 'Outsourced': 2, 'Partner': 3 };
+  const wwaClients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
 
-  if (staff.length === 0) {
-    el.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:12px 0">Add staff profiles to see utilisation.</div>`;
-    return;
-  }
+  // ── Subtitle ──
+  const ftCount  = active.filter(s => s.type === 'Full-time' || s.type === 'Partner').length;
+  const outCount = active.filter(s => s.type === 'Outsourced').length;
+  const sub = document.getElementById('team-summary-sub');
+  if (sub) sub.textContent = `${active.length} people · ${ftCount} full-time/partner · ${outCount} outsourced · ${wwaClients.length} WWA client${wwaClients.length!==1?'s':''}`;
 
-  const rows = staff.map(s => {
-    const load = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
-    const cap  = capacity[s.type] || 2;
-    const pct  = clients.length > 0 ? Math.min(100, Math.round((load / cap) * 100)) : 0;
-    const isOver = pct > 100;
-    const isBottleneck = bottleneck && bottleneck.name === s.name;
-    const color = isBottleneck ? 'var(--amber)' : isOver ? 'var(--red)' : pct >= 60 ? 'var(--teal)' : pct >= 30 ? 'var(--blue)' : 'var(--border-strong)';
-    const label = load === 0
-      ? `<span style="color:var(--text3)">not on any client</span>`
-      : `${load} of ${cap} capacity${isBottleneck ? ' ⚠' : ''}`;
+  // ── Health bar ──
+  renderTeamHealthBar(bottleneck, active);
 
-    return `<div class="radar-bar-row">
-      <div class="radar-bar-label" style="${isBottleneck ? 'color:var(--amber);font-weight:600' : ''}">${s.name.split(' ')[0]}</div>
-      <div class="radar-bar-track"><div class="radar-bar-fill" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>
-      <div class="radar-bar-value" style="min-width:120px;font-size:10px">${label}</div>
-    </div>`;
-  });
+  // ── Stat rings ──
+  renderTeamRings(active, bottleneck, wwaClients);
 
-  const note = bottleneck
-    ? `<div style="margin-top:14px;padding:10px 12px;background:var(--amber-bg);border-radius:var(--radius);font-size:12px;color:var(--amber)">⚠ <strong>${bottleneck.name}</strong> is your current Slowest Hiker — ${bottleneck.load} clients vs ${bottleneck.cap} expected capacity. Remove the bottleneck from the system, not push harder.</div>`
-    : clients.length > 0 ? `<div style="margin-top:12px;font-size:11px;color:var(--text3)">No critical bottleneck detected at current client load.</div>` : '';
+  // ── Ecosystem visual ──
+  renderTeamEcosystem(active, bottleneck);
 
-  el.innerHTML = rows.join('') + note;
+  // ── Flags ──
+  renderTeamFlags(active, bottleneck, wwaClients);
+
+  // ── People strip ──
+  renderPeopleStrip(active, bottleneck);
+
+  // Re-render drawer if one is open
+  if (activeStaffId) showStaffDrawer(activeStaffId);
 }
 
-function renderRadarOpportunities() {
-  const el = document.getElementById('radar-opportunities');
+function renderTeamHealthBar(bottleneck, active) {
+  const el = document.getElementById('team-health-bar');
   if (!el) return;
-
-  const opps   = [];
-  const staff  = getEffectiveStaff();
-  const active = staff.filter(s => s.status !== 'Inactive');
-
-  // 1. ZBA failed — explicit Hard No on a person
-  const zbaFailed = active.filter(s => s.zero_based === 'false');
-  if (zbaFailed.length > 0) {
-    opps.push({ icon: '✗', color: 'var(--red)', title: 'Zero-Based Audit failed', text: zbaFailed.map(s => s.name).join(', ') + ' — you would not actively recruit them today. Consider restructuring their role or initiating an offboarding plan.' });
-  }
-
-  // 2. ZBA not yet assessed on full-time staff
-  const zbaUnset = active.filter(s =>
-    (s.type === 'Full-time' || s.type === 'Partner') &&
-    (s.zero_based === undefined || s.zero_based === '' || s.zero_based === null)
-  );
-  if (zbaUnset.length > 0) {
-    opps.push({ icon: '📋', color: 'var(--amber)', title: 'Zero-Based Audit not completed', text: zbaUnset.map(s => s.name).join(', ') + ' — run the audit for all full-time staff. Edit their profile to record the verdict.' });
-  }
-
-  // 3. Bottleneck — surfaced from detectBottleneck
-  const bottleneck = detectBottleneck();
-  if (bottleneck) {
-    opps.push({ icon: '⚠', color: 'var(--amber)', title: `${bottleneck.name} is the Slowest Hiker`, text: `On ${bottleneck.load} WWA clients vs expected capacity of ${bottleneck.cap}. Do not add more clients until the bottleneck is resolved — alter the system (delegate, offload, template).` });
-  }
-
-  // 4. TBD pay structures
-  const tbdPay = active.filter(s => (s.pay || 'TBD').includes('TBD'));
-  if (tbdPay.length > 0) {
-    opps.push({ icon: '💰', color: 'var(--amber)', title: 'Pay structure not documented', text: tbdPay.map(s => s.name).join(', ') + ' — undefined pay is a sunk-cost trap. Formalise before the next client onboards.' });
-  }
-
-  // 5. Essential Contribution missing on full-time staff
-  const noEssential = active.filter(s =>
-    (s.type === 'Full-time' || s.type === 'Partner') && !(s.essential || '').trim()
-  );
-  if (noEssential.length > 0) {
-    opps.push({ icon: '🎯', color: 'var(--blue)', title: 'Essential Contribution not defined', text: noEssential.map(s => s.name).join(', ') + ' — if you cannot state their essential contribution in one line, their role is not yet clarified.' });
-  }
-
-  // 6. Cross-business staff not on WWA clients
-  const bothStaff = active.filter(s => {
-    const biz = s.businesses || '';
-    return biz.includes('WWA') && (biz.includes('Poppadi') || biz.includes("Poppadi's"));
-  });
-  const unassigned = bothStaff.filter(s => DATA.wwaAssignments.filter(a => a.staff_name === s.name).length === 0);
-  if (unassigned.length > 0) {
-    opps.push({ icon: '⚡', color: 'var(--purple)', title: 'Cross-business staff not on any WWA client', text: unassigned.map(s => s.name).join(', ') + ' — capacity sitting unused in WWA.' });
-  }
-
-  // 7. WWA clients with no team
-  const noTeam = DATA.wwaClients.filter(c =>
+  const zbaFailed = active.filter(s => s.zero_based === 'false').length;
+  const noTeam    = DATA.wwaClients.filter(c =>
     (c.status === 'Active' || c.status === 'Onboarding') &&
     DATA.wwaAssignments.filter(a => a.client_id === c.id).length === 0
-  );
-  if (noTeam.length > 0) {
-    opps.push({ icon: '👤', color: 'var(--red)', title: 'Active clients with no team assigned', text: noTeam.map(c => c.client_name).join(', ') + ' — Steven carrying 100%. Delegate before it becomes a bottleneck.' });
-  }
+  ).length;
 
-  if (opps.length === 0) {
-    opps.push({ icon: '✅', color: 'var(--green)', title: 'No immediate gaps', text: 'All ZBA audits passed, no bottlenecks, all essential contributions defined.' });
+  if (bottleneck) {
+    el.innerHTML = `<div class="health-bar amber">⚠ <strong>Slowest Hiker: ${bottleneck.name}</strong> — ${bottleneck.load}/${bottleneck.cap} WWA capacity. Do not add clients. Alter the system first.</div>`;
+  } else if (zbaFailed > 0) {
+    el.innerHTML = `<div class="health-bar red">✗ Zero-Based Audit failed for ${zbaFailed} staff member${zbaFailed>1?'s':''} — review before next hire or scope expansion.</div>`;
+  } else if (noTeam > 0) {
+    el.innerHTML = `<div class="health-bar amber">👤 ${noTeam} active WWA client${noTeam>1?'s':''} with no team assigned — Steven carrying 100%.</div>`;
+  } else {
+    el.innerHTML = `<div class="health-bar green">✓ No critical flags — system operating within capacity.</div>`;
   }
-
-  el.innerHTML = opps.map(o => `<div class="opportunity-item">
-    <div class="opp-icon" style="color:${o.color}">${o.icon}</div>
-    <div class="opp-text"><strong style="color:${o.color}">${o.title}</strong><br>${o.text}</div>
-  </div>`).join('');
 }
 
-function renderRadarInsights() {
-  const el = document.getElementById('radar-insights');
+function setRing(arcId, numId, subId, value, max, label, color) {
+  const circ = 138.2;
+  const pct  = max > 0 ? Math.min(value / max, 1) : 0;
+  const offset = circ - pct * circ;
+  const arc = document.getElementById(arcId);
+  const num = document.getElementById(numId);
+  const sub = document.getElementById(subId);
+  if (arc) { arc.style.strokeDashoffset = offset; arc.style.stroke = color; }
+  if (num) num.textContent = value;
+  if (sub) sub.textContent = label;
+}
+
+function renderTeamRings(active, bottleneck, wwaClients) {
+  // Ring 1: Active staff
+  setRing('ring-staff-arc', 'ring-staff-num', 'ring-staff-sub',
+    active.length, Math.max(active.length, 10),
+    `${active.filter(s=>s.type==='Full-time'||s.type==='Partner').length} FT · ${active.filter(s=>s.type==='Outsourced').length} outsourced`,
+    'var(--blue)');
+
+  // Ring 2: ZBA
+  const zbaPassed = active.filter(s => s.zero_based === 'true' || s.zero_based === true).length;
+  const zbaTotal  = active.filter(s => s.type === 'Full-time' || s.type === 'Partner').length;
+  const zbaColor  = zbaPassed < zbaTotal ? (active.filter(s=>s.zero_based==='false').length > 0 ? 'var(--red)' : 'var(--amber)') : 'var(--green)';
+  setRing('ring-zba-arc', 'ring-zba-num', 'ring-zba-sub',
+    zbaPassed, Math.max(zbaTotal, 1),
+    zbaTotal > 0 ? `${zbaPassed}/${zbaTotal} full-time assessed` : 'No full-time staff',
+    zbaColor);
+
+  // Ring 3: WWA capacity used
+  const totalAssignSlots = active.reduce((s,p) => {
+    const cap = { 'Full-time': 3, 'Part-time': 2, 'Outsourced': 2, 'Partner': 3 }[p.type] || 2;
+    return s + cap;
+  }, 0);
+  const usedSlots = DATA.wwaAssignments.filter(a =>
+    DATA.wwaClients.find(c => c.id === a.client_id && (c.status==='Active'||c.status==='Onboarding'))
+  ).length;
+  const capColor = bottleneck ? 'var(--amber)' : usedSlots / Math.max(totalAssignSlots,1) > 0.7 ? 'var(--teal)' : 'var(--teal)';
+  setRing('ring-cap-arc', 'ring-cap-num', 'ring-cap-sub',
+    usedSlots, Math.max(totalAssignSlots, 1),
+    `${usedSlots} of ~${totalAssignSlots} slots used`,
+    capColor);
+}
+
+function renderTeamEcosystem(active, bottleneck) {
+  const el = document.getElementById('team-ecosystem-visual');
   if (!el) return;
 
-  const staff      = getEffectiveStaff();
-  const active     = staff.filter(s => s.status !== 'Inactive');
-  const ftStaff    = active.filter(s => s.type === 'Full-time' || s.type === 'Partner');
-  const outStaff   = active.filter(s => s.type === 'Outsourced');
-  const wwaClients = DATA.wwaClients.filter(c => c.status === 'Active' || c.status === 'Onboarding');
-  const tbdCount   = active.filter(s => (s.pay || 'TBD').includes('TBD')).length;
-  const zbaPassed  = active.filter(s => s.zero_based === 'true' || s.zero_based === true).length;
-  const zbaFailed  = active.filter(s => s.zero_based === 'false').length;
-  const zbaUnset   = active.filter(s => !s.zero_based && s.zero_based !== 'true' && s.zero_based !== 'false').length;
-  const bottleneck = detectBottleneck();
+  const popStaff  = active.filter(s => {
+    const b = s.businesses||''; return (b.includes('Poppadi')) && !b.includes('WWA');
+  });
+  const wwaStaff  = active.filter(s => {
+    const b = s.businesses||''; return b.includes('WWA') && !b.includes('Poppadi');
+  });
+  const bothStaff = active.filter(s => {
+    const b = s.businesses||''; return b.includes('Poppadi') && b.includes('WWA');
+  });
 
-  const insights = [
-    { dot: 'blue', text: `<strong>${active.length} active staff</strong> — ${ftStaff.length} full-time/partner, ${outStaff.length} outsourced.` },
-    { dot: wwaClients.length > 0 ? 'green' : 'amber', text: `<strong>${wwaClients.length} active WWA client${wwaClients.length !== 1 ? 's' : ''}</strong>${wwaClients.length === 0 ? ' — no clients yet.' : '.'}` },
-    { dot: tbdCount > 0 ? 'amber' : 'green', text: tbdCount > 0 ? `<strong>${tbdCount} undefined pay structures</strong> — formalise before scaling.` : '<strong>All pay structures documented.</strong>' },
-    { dot: bottleneck ? 'amber' : 'green', text: bottleneck ? `<strong>Bottleneck: ${bottleneck.name}</strong> — ${bottleneck.load} clients, capacity ${bottleneck.cap}. Alter the system.` : '<strong>No bottleneck detected</strong> at current load.' },
-    { dot: zbaFailed > 0 ? 'red' : zbaPassed > 0 ? 'green' : 'blue', text: `<strong>Zero-Based Audit:</strong> ${zbaPassed} passed · ${zbaFailed} failed · ${zbaUnset} not assessed.` },
-    { dot: 'blue', text: '<strong>Private Tutoring</strong> — Steven only, 100% take-home, no team dependency.' },
-  ];
+  const node = (s) => {
+    const isBn = bottleneck && bottleneck.name === s.name;
+    return `<div class="eco-node${isBn?' bottleneck':''}" title="${s.roles||''}">${s.name.split(' ')[0]}${isBn?' ⚠':''}</div>`;
+  };
 
-  el.innerHTML = insights.map(i => `<div class="insight-row">
-    <div class="insight-dot ${i.dot}"></div>
-    <div style="font-size:13px;color:var(--text2)">${i.text}</div>
+  el.innerHTML = `<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:start">
+    <div class="eco-lane">
+      <div class="eco-label poppadi">🏫 Poppadi's</div>
+      <div class="eco-node steven">Steven T002</div>
+      ${popStaff.map(node).join('')}
+      ${bothStaff.map(s => `<div class="eco-node" style="opacity:0.5;font-size:10px" title="Also in WWA">${s.name.split(' ')[0]} ↔</div>`).join('')}
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;padding-top:32px;gap:6px">
+      <div style="width:1px;flex:1;background:var(--border);min-height:20px"></div>
+      <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap">Both</div>
+      ${bothStaff.map(s => {
+        const isBn = bottleneck && bottleneck.name === s.name;
+        return `<div class="eco-node both" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue);white-space:nowrap${isBn?';border-color:var(--amber);color:var(--amber);background:var(--amber-bg)':''}">${s.name.split(' ')[0]}${isBn?' ⚠':''}</div>`;
+      }).join('')}
+      ${bothStaff.length === 0 ? '<div style="font-size:10px;color:var(--text3)">none</div>' : ''}
+      <div style="width:1px;flex:1;background:var(--border);min-height:20px"></div>
+    </div>
+    <div class="eco-lane">
+      <div class="eco-label wwa">✦ WWA</div>
+      <div class="eco-node steven">Steven Strategist</div>
+      ${wwaStaff.map(node).join('')}
+      ${bothStaff.map(s => `<div class="eco-node" style="opacity:0.5;font-size:10px" title="Also in Poppadi's">${s.name.split(' ')[0]} ↔</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderTeamFlags(active, bottleneck, wwaClients) {
+  const el = document.getElementById('team-flags-panel');
+  if (!el) return;
+
+  const flags = [];
+
+  if (bottleneck)
+    flags.push({ color: 'var(--amber)', text: `<strong>${bottleneck.name}</strong> — Slowest Hiker at ${bottleneck.load}/${bottleneck.cap} capacity. Alter the system.` });
+
+  const zbaFailed = active.filter(s => s.zero_based === 'false');
+  if (zbaFailed.length)
+    flags.push({ color: 'var(--red)', text: `<strong>ZBA failed:</strong> ${zbaFailed.map(s=>s.name).join(', ')}` });
+
+  const zbaUnset = active.filter(s => (s.type==='Full-time'||s.type==='Partner') && !s.zero_based);
+  if (zbaUnset.length)
+    flags.push({ color: 'var(--amber)', text: `<strong>ZBA unassessed:</strong> ${zbaUnset.map(s=>s.name).join(', ')}` });
+
+  const noTeam = wwaClients.filter(c => DATA.wwaAssignments.filter(a => a.client_id===c.id).length===0);
+  if (noTeam.length)
+    flags.push({ color: 'var(--red)', text: `<strong>No team:</strong> ${noTeam.map(c=>c.client_name).join(', ')}` });
+
+  const tbdPay = active.filter(s => (s.pay||'TBD').includes('TBD'));
+  if (tbdPay.length)
+    flags.push({ color: 'var(--amber)', text: `<strong>Pay TBD:</strong> ${tbdPay.map(s=>s.name).join(', ')}` });
+
+  const noEssential = active.filter(s => (s.type==='Full-time'||s.type==='Partner') && !(s.essential||'').trim());
+  if (noEssential.length)
+    flags.push({ color: 'var(--blue)', text: `<strong>Essential Contribution missing:</strong> ${noEssential.map(s=>s.name).join(', ')}` });
+
+  if (flags.length === 0) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--green);padding:8px 0">✓ All clear</div>`;
+    return;
+  }
+
+  el.innerHTML = flags.map(f => `<div class="flag-item">
+    <div class="flag-dot" style="background:${f.color}"></div>
+    <div style="color:var(--text2)">${f.text}</div>
   </div>`).join('');
 }
+
+function renderPeopleStrip(active, bottleneck) {
+  const el = document.getElementById('team-people-strip');
+  if (!el) return;
+
+  const avatarColors = {
+    both:    { bg: 'var(--blue-bg)',    fg: 'var(--blue)'    },
+    wwa:     { bg: 'var(--wwa-bg)',     fg: 'var(--wwa)'     },
+    poppadi: { bg: 'var(--poppadi-bg)', fg: 'var(--poppadi)' },
+    private: { bg: 'var(--amber-bg)',   fg: 'var(--amber)'   },
+  };
+
+  // Steven first
+  const stevenChip = `<div class="person-chip active" onclick="showStaffDrawer('steven')" id="chip-steven">
+    <div class="person-chip-badge" style="background:var(--blue);color:#fff">✦</div>
+    <div class="person-chip-avatar" style="background:var(--blue-bg);color:var(--blue)">SG</div>
+    <div class="person-chip-name">Steven</div>
+  </div>`;
+
+  const chips = active.map(s => {
+    const biz = s.businesses || '';
+    const colorKey = biz.includes('Poppadi') && biz.includes('WWA') ? 'both'
+      : biz.includes('WWA') ? 'wwa' : biz.includes('Poppadi') ? 'poppadi' : 'private';
+    const colors    = avatarColors[colorKey];
+    const initials  = (s.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const isBn      = bottleneck && bottleneck.name === s.name;
+    const zbaFailed = s.zero_based === 'false';
+    const extraClass = isBn ? ' bottleneck' : zbaFailed ? ' zba-fail' : '';
+    const badge = isBn
+      ? `<div class="person-chip-badge" style="background:var(--amber);color:#fff">!</div>`
+      : zbaFailed
+      ? `<div class="person-chip-badge" style="background:var(--red);color:#fff">✗</div>`
+      : s.zero_based === 'true'
+      ? `<div class="person-chip-badge" style="background:var(--green);color:#fff">✓</div>` : '';
+
+    return `<div class="person-chip${extraClass}" onclick="showStaffDrawer('${s.id}')" id="chip-${s.id}">
+      ${badge}
+      <div class="person-chip-avatar" style="background:${colors.bg};color:${colors.fg}">${initials}</div>
+      <div class="person-chip-name">${s.name.split(' ')[0]}</div>
+    </div>`;
+  });
+
+  el.innerHTML = stevenChip + chips.join('');
+}
+
+function showStaffDrawer(id) {
+  activeStaffId = id;
+  // Deactivate all chips
+  document.querySelectorAll('.person-chip').forEach(c => c.classList.remove('active'));
+  const chip = document.getElementById('chip-' + id);
+  if (chip) chip.classList.add('active');
+
+  const drawer = document.getElementById('team-staff-drawer');
+  const content = document.getElementById('team-staff-drawer-content');
+  if (!drawer || !content) return;
+
+  if (id === 'steven') {
+    content.innerHTML = `<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div style="width:44px;height:44px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0">SG</div>
+      <div>
+        <div style="font-size:16px;font-weight:700">Steven Gerdphol</div>
+        <div style="font-size:12px;color:var(--text3)">T002 · Founder · CEO · All three income streams</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">
+      <span class="drawer-tag poppadi">🏫 Poppadi's</span>
+      <span class="drawer-tag wwa">✦ WWA</span>
+      <span class="drawer-tag private">📚 Private Tutoring</span>
+    </div>
+    <div style="font-size:12px;color:var(--text2)">Strategist · Account Manager · Tutor (T002) · Admin · Owner<br>Pay: All income streams — tutor income + profit share + private fees</div>`;
+    drawer.style.display = 'block';
+    return;
+  }
+
+  const s = getEffectiveStaff().find(r => r.id === id);
+  if (!s) { drawer.style.display = 'none'; return; }
+
+  const bizList  = (s.businesses||'').split(',').map(b=>b.trim()).filter(Boolean);
+  const hasPop   = bizList.some(b => b==='Poppadi' || b==="Poppadi's");
+  const hasWWA   = bizList.includes('WWA');
+  const hasPvt   = bizList.includes('Private');
+  const wwaLoad  = DATA.wwaAssignments.filter(a => a.staff_name === s.name).length;
+  const colorKey = hasPop && hasWWA ? 'both' : hasWWA ? 'wwa' : hasPop ? 'poppadi' : 'private';
+  const colors   = { both:{bg:'var(--blue-bg)',fg:'var(--blue)'}, wwa:{bg:'var(--wwa-bg)',fg:'var(--wwa)'}, poppadi:{bg:'var(--poppadi-bg)',fg:'var(--poppadi)'}, private:{bg:'var(--amber-bg)',fg:'var(--amber)'} }[colorKey];
+  const initials = (s.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const payTbd   = (s.pay||'TBD').includes('TBD');
+  const zbaCls   = s.zero_based==='true' ? 'color:var(--green)' : s.zero_based==='false' ? 'color:var(--red)' : 'color:var(--text3)';
+  const zbaText  = s.zero_based==='true' ? '✓ ZBA passed' : s.zero_based==='false' ? '✗ ZBA failed — would not recruit today' : 'ZBA not yet assessed';
+
+  content.innerHTML = `<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:44px;height:44px;border-radius:50%;background:${colors.bg};color:${colors.fg};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0">${initials}</div>
+      <div>
+        <div style="font-size:16px;font-weight:700">${s.name}</div>
+        <div style="font-size:12px;color:var(--text3)">${s.code ? s.code+' · ':''} ${s.type||'Staff'} · ${s.roles||'—'}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" onclick="editStaff('${s.id}')">Edit</button>
+      <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteStaff('${s.id}','${s.name.replace(/'/g,"\\'")}')">Remove</button>
+    </div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">
+    ${hasPop ? '<span class="drawer-tag poppadi">🏫 Poppadi\'s</span>' : ''}
+    ${hasWWA ? '<span class="drawer-tag wwa">✦ WWA</span>' : ''}
+    ${hasPvt ? '<span class="drawer-tag private">📚 Private</span>' : ''}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">
+    <div><span style="color:var(--text3)">Pay</span><br><strong style="${payTbd?'color:var(--amber)':''}">${payTbd?'⚠ ':''} ${s.pay||'TBD'}</strong></div>
+    <div><span style="color:var(--text3)">WWA clients</span><br><strong>${wwaLoad}</strong></div>
+    <div style="grid-column:1/-1"><span style="color:var(--text3)">Zero-Based Audit</span><br><span style="${zbaCls}">${zbaText}</span></div>
+    ${s.essential ? `<div style="grid-column:1/-1"><span style="color:var(--text3)">Essential Contribution</span><br><span style="color:var(--blue)">${s.essential}</span></div>` : ''}
+    ${s.notes ? `<div style="grid-column:1/-1"><span style="color:var(--text3)">Notes</span><br><span style="color:var(--text2)">${s.notes}</span></div>` : ''}
+  </div>`;
+
+  drawer.style.display = 'block';
+  setTimeout(() => drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+// Stubs kept for backward compatibility (called nowhere now but safe to keep)
+function switchTeamView() {}
+function renderTeamProfiles() { renderTeam(); }
+function renderEcosystem()    { renderTeam(); }
+function renderWWAMatrix()    { renderTeam(); }
+function renderRadar()        { renderTeam(); }
+function renderRadarUtilisation()  {}
+function renderRadarOpportunities() {}
+function renderRadarInsights()     {}
 
 // ── STAFF MODAL ──────────────────────────────────────────
 function openAddStaff() {
