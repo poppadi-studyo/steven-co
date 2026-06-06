@@ -23,7 +23,7 @@
   --red: #E24B4A; --red-bg: #FCEBEB;
   --green: #1D9E75; --green-bg: #E1F5EE;
   --radius: 10px; --radius-lg: 14px;
-  --poppadi: #1D9E75; --poppadi-bg: #E1F5EE;
+  --poppadi: #0E7A5A; --poppadi-bg: #D4EDDF;
   --private: #378ADD; --private-bg: #E6F1FB;
   --wwa: #7F77DD; --wwa-bg: #EEEDFE;
 }
@@ -39,7 +39,7 @@
   --gray: #6b6a63; --gray-bg: #2c2c29;
   --red: #f05555; --red-bg: #2e1010;
   --green: #2ecc93; --green-bg: #0f2e22;
-  --poppadi: #2ecc93; --poppadi-bg: #0f2e22;
+  --poppadi: #1DB87A; --poppadi-bg: #0a2518;
   --private: #5aa3f0; --private-bg: #0d1e33;
   --wwa: #9b93f0; --wwa-bg: #1a1830;
 }
@@ -51,8 +51,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
   z-index: 100; transition: width 0.2s ease; overflow: visible;
 }
-.sidebar.collapsed { width: 52px; }
+.sidebar.collapsed { width: 52px; overflow: hidden; }
 .sidebar .logo, .sidebar .sidebar-footer { overflow: hidden; white-space: nowrap; }
+.sidebar.collapsed .logo-mark,
+.sidebar.collapsed .logo-sub,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .nav-section,
+.sidebar.collapsed .user-name,
+.sidebar.collapsed .user-email { display: none; }
+.sidebar.collapsed .nav-item { justify-content: center; padding: 8px; gap: 0; }
+.sidebar.collapsed .user-row { justify-content: center; padding: 8px; }
+.sidebar.collapsed .logo { padding: 20px 0 16px; display: flex; justify-content: center; }
 .sidebar-toggle {
   position: absolute; right: -13px; top: 24px; width: 26px; height: 26px;
   border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong);
@@ -95,7 +104,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   font-family: 'DM Sans', sans-serif; transition: all 0.15s;
 }
 .icon-btn:hover { background: var(--surface); color: var(--text); }
-.content { padding: 28px; max-width: 1200px; width: 100%; }
+.content { padding: 28px; width: 100%; box-sizing: border-box; }
 .page { display: none; }
 .page.active { display: block; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
@@ -541,32 +550,24 @@ tr:hover td { background: var(--surface2); }
     <nav class="nav">
       <div class="nav-section">Overview</div>
       <div class="nav-item" data-page="home" onclick="showPage('home',this)">
-        <span class="icon">⌂</span><span>Home</span>
-      </div>
+        <span class="icon">⌂</span><span class="nav-label">Home</span></div>
       <div class="nav-section">Income</div>
       <div class="nav-item" data-page="private-tutoring" onclick="showPage('private-tutoring',this)">
-        <span class="icon">📚</span><span>Private Tutoring</span>
-      </div>
+        <span class="icon">📚</span><span class="nav-label">Private Tutoring</span></div>
       <div class="nav-item" data-page="poppadi" onclick="showPage('poppadi',this)">
-        <span class="icon">🏫</span><span>Poppadi's Studyo</span>
-      </div>
+        <span class="icon">🏫</span><span class="nav-label">Poppadi's Studyo</span></div>
       <div class="nav-item" data-page="wwa" onclick="showPage('wwa',this)">
-        <span class="icon">✦</span><span>WealthWise Atelier</span>
-      </div>
+        <span class="icon">✦</span><span class="nav-label">WealthWise Atelier</span></div>
       <div class="nav-section">Operations</div>
       <div class="nav-item" data-page="team" onclick="showPage('team',this)">
-        <span class="icon">👥</span><span>Team</span>
-      </div>
+        <span class="icon">👥</span><span class="nav-label">Team</span></div>
       <div class="nav-item" data-page="schedule" onclick="showPage('schedule',this)">
-        <span class="icon">📅</span><span>Schedule</span>
-      </div>
+        <span class="icon">📅</span><span class="nav-label">Schedule</span></div>
       <div class="nav-section">System</div>
       <div class="nav-item" data-page="advisor" onclick="showPage('advisor',this)">
-        <span class="icon">◈</span><span>Advisor</span>
-      </div>
+        <span class="icon">◈</span><span class="nav-label">Advisor</span></div>
       <div class="nav-item" data-page="settings" onclick="showPage('settings',this)">
-        <span class="icon">⚙</span><span>Settings</span>
-      </div>
+        <span class="icon">⚙</span><span class="nav-label">Settings</span></div>
     </nav>
     <div class="sidebar-footer">
       <div class="user-row">
@@ -578,8 +579,7 @@ tr:hover td { background: var(--surface2); }
       </div>
       <div style="padding: 0 4px; margin-top: 4px;">
         <div class="nav-item" onclick="logout()" style="color:var(--text3)">
-          <span class="icon">↩</span><span>Sign out</span>
-        </div>
+          <span class="icon">↩</span><span class="nav-label">Sign out</span></div>
       </div>
     </div>
   </aside>
@@ -4050,8 +4050,10 @@ function buildTimeBlockTable(days) {
 
       html += '<td class="swt-slot swt-slot-event"' + colspan + '>';
       var opacityStyle = (e.opacity && e.opacity < 1) ? 'opacity:' + e.opacity + ';' : '';
+      var isCompleted = (e.raw && e.raw.status === 'Completed');
+      var prefix = e.highlight ? '✦ ' : (isCompleted ? '✓ ' : '');
       html += '<div class="swt-block ' + typeCls + glowCls + '" style="' + blockStyle + opacityStyle + 'height:100%;display:flex;align-items:center;" onclick="openCalEventDetail(\'' + escAttr(e.id) + '\')" title="' + escHtml(e.title) + '">';
-      html += '<span class="swt-block-text">' + (e.highlight ? '✦ ' : '') + escHtml(e.title) + '</span>';
+      html += '<span class="swt-block-text">' + prefix + escHtml(e.title) + '</span>';
       html += '</div>';
       html += '</td>';
 
