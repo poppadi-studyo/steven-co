@@ -333,7 +333,7 @@ tr:hover td { background: var(--surface2); }
   .swt-corner { width: 36px; padding: 3px; font-size: 8px; }
   .swt-daylabel { width: 36px; padding: 0 3px; }
   .swt-hour { font-size: 8px; padding: 4px 1px; }
-  .swt-slot { height: 32px; }
+  .swt-slot { height: 32px; overflow: visible; }
   .swt-day-inline { font-size: 9px; }
   .swt-block { font-size: 9px; padding: 1px 3px; }
   .swt-break { font-size: 8px; }
@@ -430,7 +430,7 @@ tr:hover td { background: var(--surface2); }
 .swt-daylabel-today .swt-day-inline strong { color: var(--blue); }
 .swt-dayoff-dot { font-size: 9px; margin-left: 2px; }
 .swt-slot-event { vertical-align: middle; padding: 2px; }
-.swt-slot { height: 36px; vertical-align: top; padding: 1px; cursor: pointer; position: relative; overflow: hidden; }
+.swt-slot { height: 36px; vertical-align: top; padding: 1px; cursor: pointer; position: relative; overflow: visible; }
 .swt-slot:hover { background: var(--surface2); }
 .swt-slot-dayoff { background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(226,75,74,0.04) 4px, rgba(226,75,74,0.04) 8px) !important; cursor: not-allowed; }
 .swt-break {
@@ -556,8 +556,8 @@ tr:hover td { background: var(--surface2); }
 .swt-block-abs {
   position: absolute; top: 2px; bottom: 2px; border-radius: 3px;
   padding: 0 4px; font-size: 10px; font-weight: 500; overflow: hidden;
-  white-space: nowrap; text-overflow: ellipsis; cursor: pointer; z-index: 2;
-  display: flex; align-items: center; min-width: 0;
+  white-space: nowrap; text-overflow: ellipsis; cursor: pointer; z-index: 10;
+  display: flex; align-items: center; min-width: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 .swt-block-abs.poppadi { background: var(--poppadi); color: #fff; }
 .swt-block-abs.private  { background: var(--private); color: #fff; }
@@ -4217,7 +4217,7 @@ function buildTimeBlockTable(days) {
           // Width: duration in minutes as % of 60min column
           // Cap at end of column for width calc (overflow handled by overflow:hidden on cell)
           var durMin  = Math.max(30, endMin - startMin);
-          var widthPct = Math.min((durMin / 60) * 100, 100 - leftPct);
+          var widthPct = (durMin / 60) * 100; // allow overflow into next column for :30 starts
 
           var isCompleted  = (e.raw && e.raw.status === 'Completed');
           var prefix       = e.highlight ? '&#x2736; ' : (isCompleted ? '&#x2713; ' : '');
@@ -4457,7 +4457,10 @@ function getAllEvents() {
       var dispTitle = nick || subject || 'Poppadi';
       if (nick && subject) dispTitle = nick + ' \u00b7 ' + subject;
       var isGroup = row.is_group === 'true' || row.is_group === true || Number(row.is_group) > 1;
-      if (isGroup) dispTitle = '\uD83D\uDC65 ' + dispTitle;
+      if (isGroup) {
+        // Show "Group · Subject" — clear and practical
+        dispTitle = 'Group' + (subject ? ' · ' + subject : '');
+      }
       events.push({
         id: 'popsess_' + idx, date: row.date,
         title: dispTitle, start: startTime, end: endTime,
