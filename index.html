@@ -1727,6 +1727,7 @@ let selectedMonth  = getCurrentMonthStr();
 let DATA = {
   privateSessions: [],
   poppadiMirror:   [],
+  poppadiSessions: [],
   profitShare:     [],
   wwaClients:      [],
   wwaAssignments:  [],
@@ -1869,9 +1870,10 @@ async function loadAllData() {
   }
 
   try {
-    const [sessionRows, mirrorRows, profitRows, clientRows, assignRows, expenseRows, staffRows] = await Promise.all([
+    const [sessionRows, mirrorRows, sessRows, profitRows, clientRows, assignRows, expenseRows, staffRows] = await Promise.all([
       fetchSheet('PrivateSessions!A:K'),
       fetchSheet('PoppadiMirror!A:I'),
+      fetchSheet('PoppadiSessions!A:F'),
       fetchSheet('ProfitShare!A:I'),
       fetchSheet('WWAClients!A:N'),
       fetchSheet('WWATeamAssignments!A:J'),
@@ -1880,6 +1882,7 @@ async function loadAllData() {
     ]);
     DATA.privateSessions = parseSheet(sessionRows);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
+    DATA.poppadiSessions = parseSheet(sessRows || []);
     DATA.profitShare     = parseSheet(profitRows);
     DATA.wwaClients      = parseSheet(clientRows);
     DATA.wwaAssignments  = parseSheet(assignRows);
@@ -1898,12 +1901,14 @@ async function refreshPoppadiData() {
   btn.textContent = '↻ Syncing...';
   btn.disabled = true;
   try {
-    const [mirrorRows, profitRows] = await Promise.all([
+    const [mirrorRows, sessRows, profitRows] = await Promise.all([
       fetchSheet('PoppadiMirror!A:I'),
+      fetchSheet('PoppadiSessions!A:F'),
       fetchSheet('ProfitShare!A:I'),
     ]);
-    DATA.poppadiMirror = parseSheet(mirrorRows);
-    DATA.profitShare   = parseSheet(profitRows);
+    DATA.poppadiMirror   = parseSheet(mirrorRows);
+    DATA.poppadiSessions = parseSheet(sessRows || []);
+    DATA.profitShare     = parseSheet(profitRows);
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
     renderPoppadi();
     showToast('✓ Poppadi data refreshed');
@@ -4126,21 +4131,43 @@ function getAllEvents() {
     });
   });
 
-  // Poppadi mirror - individual session data is not available (mirror stores monthly totals)
-  // Sessions show as a summary block on the 1st of each month
-  DATA.poppadiMirror.forEach(function(row) {
-    if (!row.month) return;
-    var sess = Number(row.t002_sessions || 0);
-    if (sess > 0) {
+  // Poppadi individual sessions (from PoppadiSessions tab via mirror)
+  if (DATA.poppadiSessions && DATA.poppadiSessions.length > 0) {
+    DATA.poppadiSessions.forEach(function(row, idx) {
+      if (!row.date) return;
+      var startTime = row.start_time || '09:00';
+      var hours     = Number(row.hours || 1);
+      var endH      = parseInt(startTime.split(':')[0]) + Math.floor(hours);
+      var endM      = parseInt((startTime.split(':')[1] || '0')) + Math.round((hours % 1) * 60);
+      if (endM >= 60) { endH++; endM -= 60; }
+      var endTime   = (endH < 10 ? '0' : '') + endH + ':' + (endM < 10 ? '0' : '') + endM;
+      var subject   = row.subject ? ' · ' + row.subject : '';
       events.push({
-        id: 'pop_' + row.month,
-        date: row.month + '-01',
-        title: 'Poppadi: ' + sess + ' sessions this month',
-        start: '08:00', end: '09:00',
-        type: 'poppadi', source: 'mirror', allDay: false, raw: row
+        id: 'popsess_' + idx,
+        date: row.date,
+        title: 'Poppadi' + subject,
+        start: startTime,
+        end: endTime,
+        type: 'poppadi', source: 'mirror',
+        raw: row
       });
-    }
-  });
+    });
+  } else {
+    // Fallback: show monthly summary dot on 1st if no individual sessions yet
+    DATA.poppadiMirror.forEach(function(row) {
+      if (!row.month) return;
+      var sess = Number(row.t002_sessions || 0);
+      if (sess > 0) {
+        events.push({
+          id: 'pop_' + row.month,
+          date: row.month + '-01',
+          title: 'Poppadi: ' + sess + ' sessions',
+          start: '08:00', end: '09:00',
+          type: 'poppadi', source: 'mirror', raw: row
+        });
+      }
+    });
+  }
 
   // Google Calendar events
   var special = getSpecial();
