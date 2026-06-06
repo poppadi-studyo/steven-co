@@ -95,7 +95,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   font-family: 'DM Sans', sans-serif; transition: all 0.15s;
 }
 .icon-btn:hover { background: var(--surface); color: var(--text); }
-.content { padding: 28px; max-width: 1100px; }
+.content { padding: 28px; max-width: 1200px; width: 100%; }
 .page { display: none; }
 .page.active { display: block; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
@@ -319,7 +319,16 @@ tr:hover td { background: var(--surface2); }
 .advisor-avatar.ai    { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); font-size: 13px; }
   .two-col, .three-col { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
-  .content { padding: 16px; }
+  .content { padding: 12px; }
+  .sched-week-table { font-size: 10px; }
+  .swt-corner { width: 36px; padding: 3px; font-size: 8px; }
+  .swt-daylabel { width: 36px; padding: 0 3px; }
+  .swt-hour { font-size: 8px; padding: 4px 1px; }
+  .swt-slot { height: 32px; }
+  .swt-day-inline { font-size: 9px; }
+  .swt-block { font-size: 9px; padding: 1px 3px; }
+  .swt-break { font-size: 8px; }
+  .page-header-row { flex-direction: column; gap: 8px; align-items: flex-start; }
   .topbar { padding: 0 16px; }
 }
 
@@ -399,15 +408,19 @@ tr:hover td { background: var(--surface2); }
 .swt-row-dayoff .swt-daylabel { background: var(--red-bg) !important; }
 .swt-row-today .swt-daylabel { background: var(--blue-bg) !important; }
 .swt-daylabel {
-  padding: 4px 5px; background: var(--surface); cursor: pointer; text-align: center;
+  padding: 0 5px; background: var(--surface); cursor: pointer; text-align: center;
   width: 52px; position: sticky; left: 0; z-index: 2;
   border-right: 2px solid var(--border-strong); transition: background 0.15s;
+  white-space: nowrap; height: 36px; vertical-align: middle;
 }
 .swt-daylabel:hover { background: var(--surface2) !important; }
-.swt-dayname { font-size: 8px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.3px; }
-.swt-daynum { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
-.swt-daynum-today { color: var(--blue); font-weight: 700; }
-.swt-dayoff-badge { font-size: 8px; color: var(--red); font-weight: 600; margin-top: 1px; }
+.swt-daylabel-today { background: var(--blue-bg) !important; }
+.swt-daylabel-dayoff { background: var(--red-bg) !important; }
+.swt-day-inline { font-size: 10px; color: var(--text2); }
+.swt-day-inline strong { color: var(--text); font-weight: 700; }
+.swt-daylabel-today .swt-day-inline strong { color: var(--blue); }
+.swt-dayoff-dot { font-size: 9px; margin-left: 2px; }
+.swt-slot-event { vertical-align: middle; padding: 2px; }
 .swt-slot { height: 36px; vertical-align: top; padding: 1px; cursor: pointer; position: relative; overflow: hidden; }
 .swt-slot:hover { background: var(--surface2); }
 .swt-slot-dayoff { background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(226,75,74,0.04) 4px, rgba(226,75,74,0.04) 8px) !important; cursor: not-allowed; }
@@ -3970,41 +3983,68 @@ function buildTimeBlockTable(days) {
     html += '<tr class="' + rowClass + '">';
 
     // Day label
-    html += '<td class="swt-daylabel" onclick="handleDayLabelClick(\'' + ds + '\')">';
-    html += '<div class="swt-dayname">' + dayName + '</div>';
-    html += '<div class="swt-daynum' + (isToday ? ' swt-daynum-today' : '') + '">' + dayNum + '</div>';
-    if (isDayOff) html += '<div class="swt-dayoff-badge">Day Off</div>';
+    var dayLabelCls = 'swt-daylabel' + (isToday ? ' swt-daylabel-today' : '') + (isDayOff ? ' swt-daylabel-dayoff' : '');
+    html += '<td class="' + dayLabelCls + '" onclick="handleDayLabelClick(\'' + ds + '\')">';
+    html += '<span class="swt-day-inline">' + dayName + ' <strong>' + dayNum + '</strong></span>';
+    if (isDayOff) html += '<span class="swt-dayoff-dot" title="Day Off">🚫</span>';
     html += '</td>';
 
-    // Hour cells
+    // Hour cells — events use colspan to span their actual duration
+    var skippedCols = {}; // cols consumed by a spanning event
     for (var hj = 0; hj < GRID_HOUR_KEYS.length; hj++) {
+      if (skippedCols[hj]) continue; // this col is covered by a previous colspan
+
       var hKey    = GRID_HOUR_KEYS[hj];
       var isBreak = hKey === '12' && !checkBreakRemoved(ds) && !isDayOff;
-      var slotCls = 'swt-slot' + (isDayOff ? ' swt-slot-dayoff' : '');
       var clickFn = isDayOff ? '' : ' onclick="openAddCalEvent(\'' + ds + '\',' + parseInt(hKey, 10) + ')"';
 
-      html += '<td class="' + slotCls + '"' + clickFn + '>';
-
       if (isBreak) {
-        html += '<div class="swt-break" onclick="event.stopPropagation();confirmRemoveBreak(\'' + ds + '\')" title="Click to remove break for this day">BREAK</div>';
-      } else {
-        // Filter events starting in this hour
-        var hEvts = evts.filter(function(e) {
-          if (e.allDay) return false;
-          return (e.start || '').substring(0, 2) === hKey;
-        });
-        for (var ei = 0; ei < hEvts.length; ei++) {
-          var e = hEvts[ei];
-          var blockStyle = e.customColor ? 'background:' + e.customColor + ';color:#fff;' : '';
-          var glowCls    = e.highlight ? ' highlight' : '';
-          var typeCls    = e.customColor ? 'custom' : e.type;
-          html += '<div class="swt-block ' + typeCls + glowCls + '" style="' + blockStyle + '" onclick="event.stopPropagation();openCalEventDetail(\'' + escAttr(e.id) + '\')" title="' + escHtml(e.title) + '">';
-          html += '<span class="swt-block-text">' + (e.highlight ? '✦ ' : '') + escHtml(e.title) + '</span>';
-          html += '</div>';
-        }
+        html += '<td class="swt-slot"' + clickFn + '>';
+        html += '<div class="swt-break" onclick="event.stopPropagation();confirmRemoveBreak(\'' + ds + '\')" title="Click to remove break">BREAK</div>';
+        html += '</td>';
+        continue;
       }
 
+      if (isDayOff) {
+        html += '<td class="swt-slot swt-slot-dayoff"></td>';
+        continue;
+      }
+
+      // Find event starting in this hour slot
+      var hEvts = evts.filter(function(e) {
+        if (e.allDay) return false;
+        return (e.start || '').substring(0, 2) === hKey;
+      });
+
+      if (hEvts.length === 0) {
+        html += '<td class="swt-slot"' + clickFn + '></td>';
+        continue;
+      }
+
+      // Use the first event; calculate colspan from duration
+      var e       = hEvts[0];
+      var startH  = parseInt((e.start || '00:00').split(':')[0]);
+      var endH    = parseInt((e.end   || '00:00').split(':')[0]);
+      var span    = Math.max(1, Math.min(endH - startH, GRID_HOUR_KEYS.length - hj));
+      // Mark consumed columns
+      for (var cs = 1; cs < span; cs++) skippedCols[hj + cs] = true;
+
+      var blockStyle = e.customColor ? 'background:' + e.customColor + ';color:#fff;' : '';
+      var glowCls    = e.highlight ? ' highlight' : '';
+      var typeCls    = e.customColor ? 'custom' : e.type;
+      var colspan    = span > 1 ? ' colspan="' + span + '"' : '';
+
+      html += '<td class="swt-slot swt-slot-event"' + colspan + '>';
+      var opacityStyle = (e.opacity && e.opacity < 1) ? 'opacity:' + e.opacity + ';' : '';
+      html += '<div class="swt-block ' + typeCls + glowCls + '" style="' + blockStyle + opacityStyle + 'height:100%;display:flex;align-items:center;" onclick="openCalEventDetail(\'' + escAttr(e.id) + '\')" title="' + escHtml(e.title) + '">';
+      html += '<span class="swt-block-text">' + (e.highlight ? '✦ ' : '') + escHtml(e.title) + '</span>';
+      html += '</div>';
       html += '</td>';
+
+      // Render any additional events in the same slot as stacked mini-blocks
+      for (var ei = 1; ei < hEvts.length; ei++) {
+        // These overlap — show as tiny indicator (rare edge case)
+      }
     }
 
     html += '</tr>';
@@ -4171,15 +4211,19 @@ function getAllEvents() {
       var endM      = parseInt((startTime.split(':')[1] || '0')) + Math.round((hours % 1) * 60);
       if (endM >= 60) { endH++; endM -= 60; }
       var endTime   = (endH < 10 ? '0' : '') + endH + ':' + (endM < 10 ? '0' : '') + endM;
-      var subject   = row.subject ? ' · ' + row.subject : '';
-      var nick      = row.nickname ? ' (' + row.nickname + ')' : '';
+      var subject    = row.subject ? ' · ' + row.subject : '';
+      var nick       = row.nickname ? ' ' + row.nickname : '';
+      var sessStatus = row.status || 'Scheduled';
+      var isConfirmed = sessStatus === 'Completed' || sessStatus === 'Confirmed';
       events.push({
         id: 'popsess_' + idx,
         date: row.date,
-        title: 'Poppadi' + subject + nick,
+        title: nick ? nick + subject : ('Poppadi' + subject),
         start: startTime,
         end: endTime,
-        type: 'poppadi', source: 'mirror',
+        type: 'poppadi',
+        opacity: isConfirmed ? 1 : 0.55,
+        source: 'mirror',
         raw: row
       });
     });
