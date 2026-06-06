@@ -3056,7 +3056,7 @@ function showPage(id, btn) {
   if (id === 'wwa') { populateMonthPickers(); renderWWA(); }
   if (id === 'team') renderTeam();
   if (id === 'advisor') initAdvisorUI();
-  if (id === 'schedule') { if (typeof initSchedule === 'function') initSchedule(); }
+  if (id === 'schedule') { if (typeof initSchedule === 'function') initSchedule(); else if (typeof renderGrid === 'function') renderGrid(); }
 }
 
 // ─── SIDEBAR + THEME ──────────────────────────────────────
@@ -3878,19 +3878,19 @@ function initGCalTokenClient() {
 }
 
 function initSchedule() {
-  schedMonthCursor = new Date();
+  // Always render from DATA immediately — GCal events layer in asynchronously
+  initColorPicker();
+  renderAvailSlots();
+  renderGrid();
+  // Then init GCal in background
   initGCalTokenClient();
   if (!localStorage.getItem('sched_gcal_connected')) {
     var b = document.getElementById('sched-gcal-banner');
     if (b) b.style.display = 'block';
   } else {
     hideBanner();
-    if (!gcalAccessToken && gcalTokenClient) gcalTokenClient.requestAccessToken({ prompt: '' });
-    else if (gcalAccessToken) renderGrid();
+    if (gcalTokenClient && !gcalAccessToken) gcalTokenClient.requestAccessToken({ prompt: '' });
   }
-  initColorPicker();
-  renderAvailSlots();
-  renderGrid();
 }
 
 function hideBanner() {
@@ -4211,14 +4211,17 @@ function getAllEvents() {
       var endM      = parseInt((startTime.split(':')[1] || '0')) + Math.round((hours % 1) * 60);
       if (endM >= 60) { endH++; endM -= 60; }
       var endTime   = (endH < 10 ? '0' : '') + endH + ':' + (endM < 10 ? '0' : '') + endM;
-      var subject    = row.subject ? ' · ' + row.subject : '';
-      var nick       = row.nickname ? ' ' + row.nickname : '';
+      var subject    = row.subject ? row.subject : '';
+      var nick       = (row.nickname || '').trim();
       var sessStatus = row.status || 'Scheduled';
       var isConfirmed = sessStatus === 'Completed' || sessStatus === 'Confirmed';
+      // Title priority: nickname > subject > "Poppadi"
+      var dispTitle  = nick || subject || 'Poppadi';
+      if (nick && subject) dispTitle = nick + ' · ' + subject;
       events.push({
         id: 'popsess_' + idx,
         date: row.date,
-        title: nick ? nick + subject : ('Poppadi' + subject),
+        title: dispTitle,
         start: startTime,
         end: endTime,
         type: 'poppadi',
