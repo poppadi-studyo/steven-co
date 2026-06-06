@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Steven.CO</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1870,7 +1873,7 @@ async function loadAllData() {
     const [sessionRows, mirrorRows, sessRows, profitRows, clientRows, assignRows, expenseRows, staffRows] = await Promise.all([
       fetchSheetSafe('PrivateSessions!A:K'),
       fetchSheetSafe('PoppadiMirror!A:I'),
-      fetchSheetSafe('PoppadiSessions!A:F'),
+      fetchSheetSafe('PoppadiSessions!A:G'),
       fetchSheetSafe('ProfitShare!A:I'),
       fetchSheetSafe('WWAClients!A:N'),
       fetchSheetSafe('WWATeamAssignments!A:J'),
@@ -1900,7 +1903,7 @@ async function refreshPoppadiData() {
   try {
     const [mirrorRows, sessRows, profitRows] = await Promise.all([
       fetchSheetSafe('PoppadiMirror!A:I'),
-      fetchSheetSafe('PoppadiSessions!A:F'),
+      fetchSheetSafe('PoppadiSessions!A:G'),
       fetchSheetSafe('ProfitShare!A:I'),
     ]);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
@@ -3106,6 +3109,27 @@ let currentTeamView = 'profiles';
 
 let activeStaffId = null;
 
+// Essentialism: Slowest Hiker — find staff member at >= 1.5x capacity
+function detectBottleneck() {
+  const active = getEffectiveStaff().filter(s => s.status !== 'Inactive');
+  const TYPE_CAP = { 'Full-time': 3, 'Part-time': 2, 'Outsourced': 2, 'Partner': 3 };
+  let worst = null;
+  let worstRatio = 1.5; // threshold
+  active.forEach(function(s) {
+    const cap  = TYPE_CAP[s.type] || 2;
+    const load = DATA.wwaAssignments.filter(a =>
+      a.staff_id === s.id &&
+      DATA.wwaClients.find(c => c.id === a.client_id && (c.status === 'Active' || c.status === 'Onboarding'))
+    ).length;
+    const ratio = load / cap;
+    if (ratio >= worstRatio) {
+      worstRatio = ratio;
+      worst = { name: s.name, load: load, cap: cap, ratio: ratio };
+    }
+  });
+  return worst;
+}
+
 function renderTeam() {
   const staff      = getEffectiveStaff().filter(s => s.status !== 'Inactive');
   const active     = staff;
@@ -4148,10 +4172,11 @@ function getAllEvents() {
       if (endM >= 60) { endH++; endM -= 60; }
       var endTime   = (endH < 10 ? '0' : '') + endH + ':' + (endM < 10 ? '0' : '') + endM;
       var subject   = row.subject ? ' · ' + row.subject : '';
+      var nick      = row.nickname ? ' (' + row.nickname + ')' : '';
       events.push({
         id: 'popsess_' + idx,
         date: row.date,
-        title: 'Poppadi' + subject,
+        title: 'Poppadi' + subject + nick,
         start: startTime,
         end: endTime,
         type: 'poppadi', source: 'mirror',
