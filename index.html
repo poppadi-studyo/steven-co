@@ -1844,7 +1844,7 @@ tr:hover td { background: var(--surface2); }
     </div>
     <div id="ppd-modal-body" style="display:flex;flex-direction:column;gap:10px"></div>
     <div class="modal-footer" style="margin-top:16px">
-      <a id="ppd-open-poppadi-link" href="#" onclick="showPage('poppadi');closeModal('modal-poppadi-detail');return false;" class="btn btn-secondary btn-sm">Open Poppadi's →</a>
+      <a href="#" onclick="showPage('poppadi');closeModal('modal-poppadi-detail');return false;" class="btn btn-secondary btn-sm">Open Poppadi&#x2019;s &#x2192;</a>
       <button class="btn btn-primary" onclick="closeModal('modal-poppadi-detail')">Done</button>
     </div>
   </div>
@@ -4636,7 +4636,7 @@ function openPoppadiDetail(e) {
   body += row('Status', '<span style="background:' + statusBg + ';color:' + statusColor + ';padding:2px 10px;border-radius:10px;font-size:11px">'
     + (isComp ? '&#x2713; ' : '') + status + '</span>');
   if (isGroup) body += row('Type', '&#x1F465; Group class');
-  body += '<div style="font-size:11px;color:var(--text3);padding-top:6px">Manage this session in Poppadi's Studyo dashboard.</div>';
+  body += '<div style="font-size:11px;color:var(--text3);padding-top:6px">Manage this session in Poppadi&#x2019;s Studyo dashboard.</div>';
 
   document.getElementById('ppd-modal-body').innerHTML = body;
   document.getElementById('modal-poppadi-detail').classList.add('open');
