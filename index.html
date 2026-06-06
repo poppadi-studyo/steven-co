@@ -1868,14 +1868,14 @@ async function loadAllData() {
 
   try {
     const [sessionRows, mirrorRows, sessRows, profitRows, clientRows, assignRows, expenseRows, staffRows] = await Promise.all([
-      fetchSheet('PrivateSessions!A:K'),
-      fetchSheet('PoppadiMirror!A:I'),
+      fetchSheetSafe('PrivateSessions!A:K'),
+      fetchSheetSafe('PoppadiMirror!A:I'),
       fetchSheetSafe('PoppadiSessions!A:F'),
-      fetchSheet('ProfitShare!A:I'),
-      fetchSheet('WWAClients!A:N'),
-      fetchSheet('WWATeamAssignments!A:J'),
-      fetchSheet('WWAExpenses!A:G'),
-      fetchSheet('StaffProfiles!A:J'),
+      fetchSheetSafe('ProfitShare!A:I'),
+      fetchSheetSafe('WWAClients!A:N'),
+      fetchSheetSafe('WWATeamAssignments!A:J'),
+      fetchSheetSafe('WWAExpenses!A:G'),
+      fetchSheetSafe('StaffProfiles!A:J'),
     ]);
     DATA.privateSessions = parseSheet(sessionRows);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
@@ -1888,8 +1888,8 @@ async function loadAllData() {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
     renderAll();
   } catch(e) {
-    console.error('Load error:', e);
-    showToast('Could not refresh data — showing cached version');
+    console.error('Load error:', e.message || e);
+    showToast('Could not refresh data — ' + (e.message || 'check console'));
   }
 }
 
@@ -1899,9 +1899,9 @@ async function refreshPoppadiData() {
   btn.disabled = true;
   try {
     const [mirrorRows, sessRows, profitRows] = await Promise.all([
-      fetchSheet('PoppadiMirror!A:I'),
+      fetchSheetSafe('PoppadiMirror!A:I'),
       fetchSheetSafe('PoppadiSessions!A:F'),
-      fetchSheet('ProfitShare!A:I'),
+      fetchSheetSafe('ProfitShare!A:I'),
     ]);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
     DATA.poppadiSessions = parseSheet(sessRows || []);
