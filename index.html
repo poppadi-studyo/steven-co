@@ -474,10 +474,7 @@ tr:hover td { background: var(--surface2); }
   font-family: 'DM Sans', sans-serif; transition: all 0.15s;
 }
 .sched-dur-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-.swt-slot-label {
-  font-size: 9px; color: var(--text3); position: absolute; bottom: 1px; right: 2px;
-  line-height: 1; pointer-events: none; opacity: 0.6;
-}
+
 
 
 .biz-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
@@ -1873,7 +1870,7 @@ async function loadAllData() {
     const [sessionRows, mirrorRows, sessRows, profitRows, clientRows, assignRows, expenseRows, staffRows] = await Promise.all([
       fetchSheet('PrivateSessions!A:K'),
       fetchSheet('PoppadiMirror!A:I'),
-      fetchSheet('PoppadiSessions!A:F'),
+      fetchSheetSafe('PoppadiSessions!A:F'),
       fetchSheet('ProfitShare!A:I'),
       fetchSheet('WWAClients!A:N'),
       fetchSheet('WWATeamAssignments!A:J'),
@@ -1903,7 +1900,7 @@ async function refreshPoppadiData() {
   try {
     const [mirrorRows, sessRows, profitRows] = await Promise.all([
       fetchSheet('PoppadiMirror!A:I'),
-      fetchSheet('PoppadiSessions!A:F'),
+      fetchSheetSafe('PoppadiSessions!A:F'),
       fetchSheet('ProfitShare!A:I'),
     ]);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
@@ -1926,6 +1923,17 @@ async function fetchSheet(range) {
   if (!r.ok) throw new Error(`Failed to fetch ${range}: ${r.status}`);
   const d = await r.json();
   return d.values || [];
+}
+
+// Like fetchSheet but returns [] instead of throwing when the tab doesn't exist yet
+async function fetchSheetSafe(range) {
+  try {
+    const url = `${BASE}/${range}?key=${API_KEY}`;
+    const r = await fetch(url);
+    if (!r.ok) return [];
+    const d = await r.json();
+    return d.values || [];
+  } catch(e) { return []; }
 }
 
 function parseSheet(rows) {
@@ -3951,9 +3959,7 @@ function buildTimeBlockTable(days) {
       var slotCls = 'swt-slot' + (isDayOff ? ' swt-slot-dayoff' : '');
       var clickFn = isDayOff ? '' : ' onclick="openAddCalEvent(\'' + ds + '\',' + parseInt(hKey, 10) + ')"';
 
-      var hrLabel = parseInt(hKey, 10) + ':00';
       html += '<td class="' + slotCls + '"' + clickFn + '>';
-      html += '<div class="swt-slot-label">' + hrLabel + '</div>';
 
       if (isBreak) {
         html += '<div class="swt-break" onclick="event.stopPropagation();confirmRemoveBreak(\'' + ds + '\')" title="Click to remove break for this day">BREAK</div>';
