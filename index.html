@@ -379,33 +379,33 @@ tr:hover td { background: var(--surface2); }
 .sched-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
 
 /* Excel-style time-block table (shared by month + week) */
-.sched-week-table { border-collapse: collapse; width: 100%; font-size: 12px; }
+.sched-week-table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 11px; }
 .sched-week-table th, .sched-week-table td { border: 1px solid var(--border); padding: 0; }
 .swt-corner {
-  background: var(--surface2); padding: 8px 10px; font-size: 10px; font-weight: 700;
-  color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px;
-  white-space: nowrap; min-width: 76px; position: sticky; left: 0; z-index: 3;
+  background: var(--surface2); padding: 6px 6px; font-size: 9px; font-weight: 700;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 0.3px;
+  width: 52px; position: sticky; left: 0; z-index: 3;
   border-right: 2px solid var(--border-strong);
 }
 .swt-hour {
-  background: var(--surface2); padding: 6px 4px; font-size: 10px; font-weight: 600;
-  color: var(--text3); text-align: center; white-space: nowrap; min-width: 66px;
+  background: var(--surface2); padding: 5px 2px; font-size: 9px; font-weight: 600;
+  color: var(--text3); text-align: center; overflow: hidden;
 }
 .swt-row { transition: background 0.1s; }
 .swt-row-dayoff { background: rgba(226,75,74,0.06) !important; }
 .swt-row-dayoff .swt-daylabel { background: var(--red-bg) !important; }
 .swt-row-today .swt-daylabel { background: var(--blue-bg) !important; }
 .swt-daylabel {
-  padding: 6px 8px; background: var(--surface); cursor: pointer; text-align: center;
-  white-space: nowrap; min-width: 76px; position: sticky; left: 0; z-index: 2;
+  padding: 4px 5px; background: var(--surface); cursor: pointer; text-align: center;
+  width: 52px; position: sticky; left: 0; z-index: 2;
   border-right: 2px solid var(--border-strong); transition: background 0.15s;
 }
 .swt-daylabel:hover { background: var(--surface2) !important; }
-.swt-dayname { font-size: 9px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
-.swt-daynum { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.2; }
+.swt-dayname { font-size: 8px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.3px; }
+.swt-daynum { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
 .swt-daynum-today { color: var(--blue); font-weight: 700; }
-.swt-dayoff-badge { font-size: 9px; color: var(--red); font-weight: 600; margin-top: 1px; }
-.swt-slot { height: 48px; vertical-align: top; padding: 2px; cursor: pointer; min-width: 66px; position: relative; }
+.swt-dayoff-badge { font-size: 8px; color: var(--red); font-weight: 600; margin-top: 1px; }
+.swt-slot { height: 36px; vertical-align: top; padding: 1px; cursor: pointer; position: relative; overflow: hidden; }
 .swt-slot:hover { background: var(--surface2); }
 .swt-slot-dayoff { background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(226,75,74,0.04) 4px, rgba(226,75,74,0.04) 8px) !important; cursor: not-allowed; }
 .swt-break {
@@ -468,6 +468,16 @@ tr:hover td { background: var(--surface2); }
   transition: all 0.15s; user-select: none;
 }
 .avail-slot.on { background: var(--teal-bg); color: var(--teal); border-color: var(--teal); }
+.sched-dur-btn {
+  padding: 5px 14px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text2); font-size: 12px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.sched-dur-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.swt-slot-label {
+  font-size: 9px; color: var(--text3); position: absolute; bottom: 1px; right: 2px;
+  line-height: 1; pointer-events: none; opacity: 0.6;
+}
 
 
 .biz-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
@@ -1599,6 +1609,15 @@ tr:hover td { background: var(--surface2); }
       </div>
     </div>
 
+    <!-- Slot duration toggle -->
+    <div class="form-group">
+      <label class="form-label">Duration</label>
+      <div style="display:flex;gap:6px;margin-top:4px">
+        <button type="button" class="sched-dur-btn active" data-dur="1" onclick="setSlotDuration(1)">1 hr</button>
+        <button type="button" class="sched-dur-btn" data-dur="2" onclick="setSlotDuration(2)">2 hrs</button>
+      </div>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Start Time *</label>
@@ -1773,7 +1792,7 @@ function initAuth() {
   if (stored) {
     try {
       const parsed = JSON.parse(stored);
-      if (parsed._savedAt && (Date.now() - parsed._savedAt) < 7 * 24 * 60 * 60 * 1000) {
+      if (parsed._savedAt && (Date.now() - parsed._savedAt) < 30 * 24 * 60 * 60 * 1000) {
         currentUser = parsed;
         showApp();
         return;
@@ -1802,6 +1821,14 @@ function handleGoogleLogin(response) {
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-wrapper').style.display = 'block';
+  // Pre-init GCal token client so it is ready when Schedule page is opened
+  try {
+    if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+      initGCalTokenClient();
+    } else {
+      window.addEventListener('load', function() { initGCalTokenClient(); });
+    }
+  } catch(e) {}
   if (currentUser) {
     const name  = currentUser.given_name || currentUser.name || 'Steven';
     const email = currentUser.email || '';
@@ -3774,27 +3801,42 @@ var CAL_COLORS = [
 var PREFIX_DAYOFF   = '[DAY OFF]';
 var PREFIX_BREAK_RM = '[BREAK REMOVED]';
 var PREFIX_HIGHLIGHT= '[HIGHLIGHT]';
+var schedSlotDuration = 1; // hours: 1 or 2
 
 // ── INIT ──────────────────────────────────────────────────
+function initGCalTokenClient() {
+  if (gcalTokenClient) return; // already initialised
+  try {
+    gcalTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GCAL_CLIENT_ID,
+      scope: GCAL_SCOPE,
+      callback: function(response) {
+        if (response.access_token) {
+          gcalAccessToken = response.access_token;
+          localStorage.setItem('sched_gcal_connected', '1');
+          hideBanner();
+          fetchGCalEvents();
+        }
+      }
+    });
+    // Auto-request silently if previously connected
+    if (localStorage.getItem('sched_gcal_connected')) {
+      hideBanner();
+      gcalTokenClient.requestAccessToken({ prompt: '' });
+    }
+  } catch(e) { console.warn('GCal token client init failed:', e); }
+}
+
 function initSchedule() {
   schedMonthCursor = new Date();
-  gcalTokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: GCAL_CLIENT_ID,
-    scope: GCAL_SCOPE,
-    callback: function(response) {
-      if (response.access_token) {
-        gcalAccessToken = response.access_token;
-        localStorage.setItem('sched_gcal_connected', '1');
-        hideBanner();
-        fetchGCalEvents();
-      }
-    }
-  });
-  if (localStorage.getItem('sched_gcal_connected')) {
-    hideBanner();
-    gcalTokenClient.requestAccessToken({ prompt: '' });
+  initGCalTokenClient();
+  if (!localStorage.getItem('sched_gcal_connected')) {
+    var b = document.getElementById('sched-gcal-banner');
+    if (b) b.style.display = 'block';
   } else {
-    document.getElementById('sched-gcal-banner').style.display = 'block';
+    hideBanner();
+    if (!gcalAccessToken && gcalTokenClient) gcalTokenClient.requestAccessToken({ prompt: '' });
+    else if (gcalAccessToken) renderGrid();
   }
   initColorPicker();
   renderAvailSlots();
@@ -3868,8 +3910,7 @@ function renderGrid() {
 function buildTimeBlockTable(days) {
   var todayStr = dateToStr(new Date());
   // days = array of Date objects to show as rows
-  var minW = 76 + GRID_HOURS.length * 68;
-  var html = '<table class="sched-week-table" style="min-width:' + minW + 'px">';
+  var html = '<table class="sched-week-table">';
 
   // Header: corner + hour labels
   html += '<thead><tr>';
@@ -3905,7 +3946,9 @@ function buildTimeBlockTable(days) {
       var slotCls = 'swt-slot' + (isDayOff ? ' swt-slot-dayoff' : '');
       var clickFn = isDayOff ? '' : ' onclick="openAddCalEvent(\'' + ds + '\',' + parseInt(hKey, 10) + ')"';
 
+      var hrLabel = parseInt(hKey, 10) + ':00';
       html += '<td class="' + slotCls + '"' + clickFn + '>';
+      html += '<div class="swt-slot-label">' + hrLabel + '</div>';
 
       if (isBreak) {
         html += '<div class="swt-break" onclick="event.stopPropagation();confirmRemoveBreak(\'' + ds + '\')" title="Click to remove break for this day">BREAK</div>';
@@ -4172,13 +4215,31 @@ function openCalEventDetail(eventId) {
   document.getElementById('modal-add-cal-event').classList.add('open');
 }
 
+function setSlotDuration(d) {
+  schedSlotDuration = d;
+  // Update UI
+  document.querySelectorAll('.sched-dur-btn').forEach(function(b) {
+    b.classList.toggle('active', parseInt(b.dataset.dur) === d);
+  });
+  // Update end time if start is already set
+  var startEl = document.getElementById('cal-event-start');
+  if (startEl && startEl.value) {
+    var h = parseInt(startEl.value.split(':')[0]);
+    document.getElementById('cal-event-end').value = pad2(Math.min(h + d, 22)) + ':00';
+  }
+}
+
 function openAddCalEvent(dateStr, hour) {
   document.getElementById('modal-cal-event-title').textContent = 'Add Event';
   document.getElementById('cal-event-gcal-id').value   = '';
   document.getElementById('cal-event-title').value     = '';
   document.getElementById('cal-event-date').value      = dateStr || dateToStr(new Date());
   document.getElementById('cal-event-start').value     = hour ? pad2(hour) + ':00' : '';
-  document.getElementById('cal-event-end').value       = hour ? pad2(hour + 1) + ':00' : '';
+  document.getElementById('cal-event-end').value       = hour ? pad2(Math.min(hour + schedSlotDuration, 22)) + ':00' : '';
+  // Update duration toggle UI
+  document.querySelectorAll('.sched-dur-btn').forEach(function(b) {
+    b.classList.toggle('active', parseInt(b.dataset.dur) === schedSlotDuration);
+  });
   document.getElementById('cal-event-type').value      = 'wwa';
   document.getElementById('cal-event-notes').value     = '';
   document.getElementById('cal-event-highlight').checked = false;
