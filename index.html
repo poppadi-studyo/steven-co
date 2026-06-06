@@ -1986,6 +1986,11 @@ function renderAll() {
   renderPoppadi();
   renderWWA();
   renderTeam();
+  // Refresh schedule grid if it's currently visible
+  if (typeof renderGrid === 'function') {
+    var schedPage = document.getElementById('page-schedule');
+    if (schedPage && schedPage.classList.contains('active')) renderGrid();
+  }
 }
 
 // ─── RENDER HOME ──────────────────────────────────────────
@@ -3877,19 +3882,27 @@ function initGCalTokenClient() {
   } catch(e) { console.warn('GCal token client init failed:', e); }
 }
 
+var schedInitialised = false;
+
 function initSchedule() {
-  // Always render from DATA immediately — GCal events layer in asynchronously
-  initColorPicker();
-  renderAvailSlots();
+  // Always re-render grid from current DATA (fast, no flicker)
   renderGrid();
-  // Then init GCal in background
-  initGCalTokenClient();
-  if (!localStorage.getItem('sched_gcal_connected')) {
-    var b = document.getElementById('sched-gcal-banner');
-    if (b) b.style.display = 'block';
-  } else {
-    hideBanner();
-    if (gcalTokenClient && !gcalAccessToken) gcalTokenClient.requestAccessToken({ prompt: '' });
+  renderAvailSlots();
+
+  // Only init GCal token client once per session
+  if (!schedInitialised) {
+    schedInitialised = true;
+    initColorPicker();
+    initGCalTokenClient();
+    if (!localStorage.getItem('sched_gcal_connected')) {
+      var b = document.getElementById('sched-gcal-banner');
+      if (b) b.style.display = 'block';
+    } else {
+      hideBanner();
+      if (gcalTokenClient && !gcalAccessToken) {
+        gcalTokenClient.requestAccessToken({ prompt: '' });
+      }
+    }
   }
 }
 
@@ -3937,6 +3950,7 @@ function showSchedMonthView() {
 
 // ── MASTER RENDER ─────────────────────────────────────────
 function renderGrid() {
+  if (!DATA || !DATA.privateSessions) return; // DATA not loaded yet
   var label = document.getElementById('sched-period-label');
   var title = document.getElementById('sched-main-title');
   var sub   = document.getElementById('sched-main-sub');
@@ -4424,8 +4438,8 @@ async function fetchGCalEvents() {
   if (!gcalAccessToken) return;
   try {
     var now  = new Date();
-    var tMin = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-    var tMax = new Date(now.getFullYear(), now.getMonth() + 3, 1).toISOString();
+    var tMin = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString();
+    var tMax = new Date(now.getFullYear(), now.getMonth() + 4, 1).toISOString();
     var url  = 'https://www.googleapis.com/calendar/v3/calendars/primary/events'
       + '?maxResults=500&orderBy=startTime&singleEvents=true'
       + '&timeMin=' + encodeURIComponent(tMin)
