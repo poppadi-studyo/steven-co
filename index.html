@@ -326,9 +326,11 @@ tr:hover td { background: var(--surface2); }
 }
 .advisor-avatar.user  { background: var(--blue); color: #fff; }
 .advisor-avatar.ai    { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); font-size: 13px; }
+
+@media (max-width: 768px) {
   .two-col, .three-col { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
-  .content { padding: 12px; }
+  .content { padding: 12px 12px 80px; }
   .sched-week-table { font-size: 10px; }
   .swt-corner { width: 36px; padding: 3px; font-size: 8px; }
   .swt-daylabel { width: 36px; padding: 0 3px; }
@@ -339,11 +341,8 @@ tr:hover td { background: var(--surface2); }
   .swt-break { font-size: 8px; }
   .page-header-row { flex-direction: column; gap: 8px; align-items: flex-start; }
   .topbar { padding: 0 16px; }
-  /* Hide sidebar on mobile — use bottom nav instead */
   .sidebar { display: none !important; }
   .main { margin-left: 0 !important; }
-  .content { padding: 12px 12px 80px; } /* bottom padding for nav bar */
-  /* Show bottom nav */
   .mobile-bottom-nav { display: flex !important; }
 }
 
