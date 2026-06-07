@@ -4414,9 +4414,7 @@ function getSmartTimeRange() {
   if (schedFilter === 'all' && minH <= 12 && maxH >= 13) { /* break already in range */ }
   // Defaults if no events
   if (minH > maxH) { minH = 9; maxH = 18; }
-  // Add 1 col buffer each side
-  minH = Math.max(7, minH - 1);
-  maxH = Math.min(21, maxH + 1);
+  // No buffer — exact range only
   return { minH: minH, maxH: maxH };
 }
 
@@ -4607,74 +4605,98 @@ function downloadGridPDF() {
   var title = schedMode === 'month'
     ? schedMonthCursor.toLocaleString('en-US', { month: 'long', year: 'numeric' })
     : 'Week of ' + getMonday(schedWeekCursor).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  var isMonth  = schedMode === 'month';
-  var tableHtml = document.getElementById('sched-main-grid').innerHTML;
-  // For month view: scale to fit A4 landscape. Week fits naturally.
-  var scaleStyle = isMonth ? 'transform-origin:top left;' : '';
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Steven.CO - ' + title + '</title><style>';
-  html += '*, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }';
-  html += 'html, body { margin: 0; padding: 0; font-family: -apple-system, Arial, sans-serif; }';
-  html += '.page-wrap { padding: 6mm; box-sizing: border-box; }';
-  html += 'h2 { font-size: 12px; margin: 0 0 4px; font-weight: 700; }';
-  html += 'p  { font-size: 9px; color: #888; margin: 0 0 6px; }';
-  html += 'table { border-collapse: collapse; width: 100%; table-layout: fixed; }';
-  html += 'th, td { border: 1px solid #ddd; padding: 0; }';
-  html += '.swt-corner { background: #f0f0f0 !important; padding: 3px 2px; font-size: 7px; font-weight: 700; text-transform: uppercase; width: 36px; text-align: center; }';
-  html += '.swt-hour { background: #f0f0f0 !important; padding: 3px 1px; font-size: 7px; font-weight: 600; text-align: center; }';
-  html += '.swt-daylabel, .swt-daylabel-today, .swt-daylabel-dayoff { padding: 1px 3px; text-align: center; font-size: 8px; width: 36px; background: #fafafa !important; border-right: 2px solid #bbb; }';
-  html += '.swt-daylabel-today { background: #e8f0fe !important; }';
-  html += '.swt-daylabel-dayoff { background: #fde8e8 !important; }';
-  html += '.swt-day-inline { font-size: 8px; }';
-  html += '.swt-half-line { display: none; }';
-  html += '.swt-slot { height: ' + (isMonth ? '16' : '22') + 'px; position: relative; vertical-align: top; padding: 0; overflow: visible; }';
-  html += '.swt-break { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: 700; color: #aaa; letter-spacing: 0.5px; background: #f5f5f5 !important; }';
-  html += '.swt-block-abs { position: absolute; top: 1px; bottom: 1px; border-radius: 2px; padding: 0 3px; font-size: 7px; font-weight: 600; overflow: hidden; white-space: nowrap; display: flex; align-items: center; color: white !important; }';
-  html += '.swt-block-abs.poppadi  { background: #0E7A5A !important; }';
-  html += '.swt-block-abs.private  { background: #2563EB !important; }';
-  html += '.swt-block-abs.wwa      { background: #7C3AED !important; }';
-  html += '.swt-block-abs.personal { background: #6B7280 !important; }';
-  html += '.swt-block-abs.meeting  { background: #B45309 !important; }';
-  html += '.swt-block-abs.custom   { }'; // custom uses inline style
-  html += '.swt-row-dayoff td { background: rgba(226,75,74,0.06) !important; }';
-  html += '@media print { @page { size: A4 landscape; margin: 0; } body { margin: 0; } }';
-  html += '</style></head><body>';
-  html += '<div class="page-wrap">';
-  html += '<h2>&#x1F4C5; Steven.CO — ' + title + '</h2>';
-  html += '<p>Exported ' + new Date().toLocaleString('en-US') + (schedFilter !== 'all' ? ' · Filter: ' + schedFilter : '') + '</p>';
-  html += tableHtml;
-  html += '</div>';
-  html += '<script>window.onload = function() {';
-  if (isMonth) {
-    // Auto-scale to fit page width
-    html += 'var table = document.querySelector("table");';
-    html += 'if (table) {';
-    html += '  var pageW = 277; var tableW = table.scrollWidth;';
-    html += '  if (tableW > pageW) {';
-    html += '    var scale = pageW / tableW;';
-    html += '    table.style.transformOrigin = "top left";';
-    html += '    table.style.transform = "scale(" + scale + ")";';
-    html += '    document.querySelector(".page-wrap").style.height = (table.offsetHeight * scale + 20) + "mm";';
-    html += '  }';
-    html += '}';
-  }
-  html += 'setTimeout(function(){ window.print(); }, 400);';
-  html += '}<\/script></body></html>';
-  var blob = new Blob([html], { type: 'text/html' });
-  var url  = URL.createObjectURL(blob);
-  window.open(url, '_blank');
-  setTimeout(function() { URL.revokeObjectURL(url); }, 15000);
-}
 
-function downloadListPDF() {
-  var title = schedMode === 'month'
-    ? schedMonthCursor.toLocaleString('en-US', { month: 'long', year: 'numeric' })
-    : 'Week of ' + getMonday(schedWeekCursor).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  var rows    = document.getElementById('sched-list-body').innerHTML;
-  var headers = document.querySelector('#sched-list-table thead').innerHTML;
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Steven.CO \u2014 ' + title + '</title>';
-  html += '<style>body{font-family:-apple-system,sans-serif;font-size:11px;margin:0;padding:20px}h2{font-size:16px;margin:0 0 4px}p{font-size:10px;color:#666;margin:0 0 14px}table{border-collapse:collapse;width:100%}th{background:#f5f5f5;padding:7px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #ddd}td{padding:7px 10px;border-bottom:1px solid #eee;vertical-align:middle}tr:nth-child(even) td{background:#fafafa}.sched-type-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}.sched-status-badge{padding:2px 7px;border-radius:10px;font-size:9px;font-weight:600}.completed{background:#D4EDDF;color:#0E7A5A}.scheduled{background:#FEF3C7;color:#B45309}.confirmed{background:#DBEAFE;color:#1D4ED8}@media print{@page{size:A4 portrait;margin:10mm}}</style>';
-  html += '</head><body><h2>' + title + '</h2><p>Steven.CO \u00b7 ' + new Date().toLocaleString('en-US') + '</p><table><thead>' + headers + '</thead><tbody>' + rows + '</tbody></table>';
-  html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  var days  = getViewDays();
+  var range = getSmartTimeRange();
+  var hours = [];
+  for (var h = range.minH; h < range.maxH; h++) hours.push(h);
+  var todayStr = dateToStr(new Date());
+
+  var COLORS = { poppadi:'#0E7A5A', private:'#2563EB', wwa:'#7C3AED', meeting:'#B45309', personal:'#6B7280' };
+
+  // Build table rows from data (not DOM clone)
+  var headerCols = '<th style="background:#f0f0f0;padding:3px 2px;font-size:7px;font-weight:700;text-transform:uppercase;border:1px solid #ddd;width:38px;text-align:center">DATE</th>';
+  hours.forEach(function(h) {
+    headerCols += '<th style="background:#f0f0f0;padding:3px 1px;font-size:7px;font-weight:600;text-align:center;border:1px solid #ddd">' + pad2(h) + ':00</th>';
+  });
+
+  var bodyRows = '';
+  days.forEach(function(d) {
+    var ds       = dateToStr(d);
+    var isToday  = ds === todayStr;
+    var isDayOff = checkDayOff(ds);
+    var dayName  = d.toLocaleString('en-US', { weekday: 'short' });
+    var evts     = eventsForDate(ds).filter(function(e) { return !e.allDay; });
+    if (schedFilter !== 'all') evts = evts.filter(function(e) { return e.type === schedFilter; });
+
+    var rowBg    = isToday ? '#eff6ff' : isDayOff ? '#fef2f2' : '#fff';
+    bodyRows += '<tr style="background:' + rowBg + '">';
+    bodyRows += '<td style="padding:1px 3px;text-align:center;font-size:8px;font-weight:700;border:1px solid #ddd;border-right:2px solid #aaa;width:38px;white-space:nowrap;color:' + (isToday ? '#2563EB' : '#333') + '">' + dayName + ' ' + d.getDate() + '</td>';
+
+    var skipped = {};
+    for (var hj = 0; hj < hours.length; hj++) {
+      if (skipped[hj]) continue;
+      var hourInt = hours[hj];
+      var isBreak = hourInt === 12 && !checkBreakRemoved(ds) && !isDayOff && schedFilter === 'all';
+
+      if (isBreak) {
+        bodyRows += '<td style="border:1px solid #ddd;height:16px;font-size:6px;color:#bbb;text-align:center;letter-spacing:0.5px;background:#f9f9f9">BREAK</td>';
+        continue;
+      }
+      if (isDayOff) {
+        bodyRows += '<td style="border:1px solid #ddd;background:#fef2f2"></td>';
+        continue;
+      }
+
+      var cellEvts = evts.filter(function(e) {
+        var sm = timeToMinutes(e.start || '00:00');
+        return sm >= hourInt * 60 && sm < (hourInt + 1) * 60;
+      });
+
+      if (cellEvts.length === 0) {
+        bodyRows += '<td style="border:1px solid #ddd;height:16px"></td>';
+        continue;
+      }
+
+      var e = cellEvts[0];
+      var startMin  = timeToMinutes(e.start || '00:00');
+      var endMin    = timeToMinutes(e.end   || '00:00');
+      var durMin    = Math.max(30, endMin - startMin);
+      var startsMins = startMin - (hourInt * 60);
+      var isOnHour   = startsMins < 5;
+      var bg = e.customColor || COLORS[e.type] || '#888';
+      var isComp = (e.raw && e.raw.status === 'Completed');
+      var label  = (isComp ? '\u2713 ' : '') + e.title;
+
+      if (isOnHour) {
+        var span = Math.round(durMin / 60);
+        span = Math.max(1, Math.min(span, hours.length - hj));
+        for (var cs = 1; cs < span; cs++) skipped[hj + cs] = true;
+        bodyRows += '<td colspan="' + span + '" style="border:1px solid #ddd;height:16px;padding:1px 3px;background:' + bg + ';color:#fff;font-size:7px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + label + '</td>';
+      } else {
+        var leftPct  = Math.round((startsMins / 60) * 100);
+        bodyRows += '<td style="border:1px solid #ddd;height:16px;position:relative">';
+        bodyRows += '<div style="position:absolute;top:1px;bottom:1px;left:' + leftPct + '%;right:0;background:' + bg + ';border-radius:2px;padding:0 3px;color:#fff;font-size:7px;font-weight:600;overflow:hidden;white-space:nowrap">' + label + '</div>';
+        bodyRows += '</td>';
+      }
+    }
+    bodyRows += '</tr>';
+  });
+
+  var tableW = 38 + hours.length * 60; // approx px at screen res
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Steven.CO - ' + title + '</title>';
+  html += '<style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}';
+  html += 'body{margin:0;padding:6mm;font-family:Arial,sans-serif;font-size:8px}';
+  html += 'h2{font-size:11px;margin:0 0 3px;font-weight:700}p{font-size:8px;color:#888;margin:0 0 5px}';
+  html += 'table{border-collapse:collapse;width:100%;table-layout:fixed}';
+  html += '@media print{@page{size:A4 landscape;margin:6mm}}</style>';
+  html += '</head><body>';
+  html += '<h2>Steven.CO \u2014 ' + title + '</h2>';
+  html += '<p>Schedule \u00b7 ' + new Date().toLocaleString('en-US') + '</p>';
+  html += '<table><thead><tr>' + headerCols + '</tr></thead><tbody>' + bodyRows + '</tbody></table>';
+  html += '<script>window.onload=function(){setTimeout(function(){window.print();},300);}<\/script>';
+  html += '</body></html>';
+
   var blob = new Blob([html], { type: 'text/html' });
   window.open(URL.createObjectURL(blob), '_blank');
 }
@@ -4683,61 +4705,86 @@ function downloadCardsPDF() {
   var title = schedMode === 'month'
     ? schedMonthCursor.toLocaleString('en-US', { month: 'long', year: 'numeric' })
     : 'Week of ' + getMonday(schedWeekCursor).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  var isMonth  = schedMode === 'month';
-  var cardsHtml = document.getElementById('sched-cards-grid').innerHTML;
 
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Steven.CO - ' + title + '</title><style>';
-  html += '*, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }';
-  html += 'html, body { margin: 0; padding: 0; font-family: -apple-system, Arial, sans-serif; }';
-  html += '.page-wrap { padding: 5mm; box-sizing: border-box; }';
-  html += 'h2 { font-size: 11px; margin: 0 0 4px; } p { font-size: 8px; color: #888; margin: 0 0 5px; }';
-  // Day names header
-  html += '.sched-cards-daynames { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 0 0 2px; font-size: 8px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.3px; }';
-  html += '.sched-cards-daynames span { text-align: center; }';
-  // Month grid
-  html += '.sched-cards-month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }';
-  html += '.sched-cards-week  { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }';
-  html += '.sched-day-card { border: 1px solid #ddd; border-radius: 4px; overflow: hidden; background: #fff; min-height: ' + (isMonth ? '60' : '100') + 'px; }';
-  html += '.sched-day-card.today { border-color: #2563EB; background: #eff6ff !important; }';
-  html += '.sched-day-card.dayoff { border-color: #16a34a; background: #f0fdf4 !important; opacity: 0.8; }';
-  html += '.sched-day-card.other-month { opacity: 0.25; }';
-  html += '.sched-card-header { padding: 2px 4px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; }';
-  html += '.sched-card-date { font-size: ' + (isMonth ? '9' : '12') + 'px; font-weight: 700; color: #333; }';
-  html += '.sched-day-card.today .sched-card-date { color: #2563EB; }';
-  html += '.sched-card-day { font-size: 8px; color: #888; text-transform: uppercase; }';
-  html += '.sched-card-sessions { padding: 2px 3px; display: flex; flex-direction: column; gap: 1px; }';
-  html += '.sched-session-chip { border-radius: 2px; padding: 1px 4px; font-size: 7px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white !important; line-height: 1.4; }';
-  html += '.sched-session-chip.private  { background: #2563EB !important; }';
-  html += '.sched-session-chip.poppadi  { background: #0E7A5A !important; }';
-  html += '.sched-session-chip.wwa      { background: #7C3AED !important; }';
-  html += '.sched-session-chip.meeting  { background: #B45309 !important; }';
-  html += '.sched-session-chip.personal { background: #6B7280 !important; }';
-  html += '.sched-card-more { font-size: 7px; color: #999; padding: 0 3px 1px; }';
-  html += '@media print { @page { size: A4 ' + (isMonth ? 'landscape' : 'portrait') + '; margin: 0; } body { margin: 0; } }';
-  html += '</style></head><body><div class="page-wrap">';
-  html += '<h2>&#x1F4C5; Steven.CO — ' + title + '</h2>';
-  html += '<p>Exported ' + new Date().toLocaleString('en-US') + '</p>';
-  html += cardsHtml;
-  html += '</div>';
-  html += '<script>window.onload = function() {';
+  var days     = getViewDays();
+  var isMonth  = schedMode === 'month';
+  var todayStr = dateToStr(new Date());
+  var COLORS   = { poppadi:'#0E7A5A', private:'#2563EB', wwa:'#7C3AED', meeting:'#B45309', personal:'#6B7280' };
+
+  // For month view: pad days to start on Monday
+  var gridDays = days.slice();
   if (isMonth) {
-    html += 'var grid = document.querySelector(".sched-cards-month");';
-    html += 'if (grid) {';
-    html += '  var pageW = 277; var gridW = grid.scrollWidth;';
-    html += '  if (gridW > pageW) {';
-    html += '    var scale = pageW / gridW;';
-    html += '    grid.style.transformOrigin = "top left";';
-    html += '    grid.style.transform = "scale(" + scale + ")";';
-    html += '    document.querySelector(".page-wrap").style.height = (grid.offsetHeight * scale + 20) + "mm";';
-    html += '  }';
-    html += '}';
+    var firstDow = gridDays[0].getDay();
+    var padBefore = (firstDow === 0) ? 6 : firstDow - 1;
+    for (var p = padBefore - 1; p >= 0; p--) {
+      gridDays.unshift(new Date(gridDays[0].getTime() - 86400000));
+    }
+    while (gridDays.length % 7 !== 0) {
+      gridDays.push(new Date(gridDays[gridDays.length - 1].getTime() + 86400000));
+    }
   }
-  html += 'setTimeout(function(){ window.print(); }, 400);';
-  html += '}<\/script></body></html>';
+
+  // Build day cells
+  var cells = '';
+  gridDays.forEach(function(d) {
+    var ds       = dateToStr(d);
+    var isToday  = ds === todayStr;
+    var isDayOff = checkDayOff(ds);
+    var isOther  = isMonth && (d.getMonth() !== schedMonthCursor.getMonth());
+    var evts     = eventsForDate(ds).filter(function(e) { return !e.allDay; });
+    if (schedFilter !== 'all') evts = evts.filter(function(e) { return e.type === schedFilter; });
+
+    var border  = isToday ? '2px solid #2563EB' : isDayOff ? '1.5px solid #16a34a' : '1px solid #ddd';
+    var cellBg  = isToday ? '#eff6ff' : isDayOff ? '#f0fdf4' : '#fff';
+    var opacity = isOther ? '0.25' : '1';
+
+    cells += '<div style="border:' + border + ';border-radius:4px;background:' + cellBg + ';overflow:hidden;opacity:' + opacity + ';min-height:' + (isMonth ? '58' : '100') + 'px">';
+    // Header
+    cells += '<div style="padding:2px 4px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between">';
+    cells += '<span style="font-size:' + (isMonth ? '9' : '12') + 'px;font-weight:700;color:' + (isToday ? '#2563EB' : '#333') + '">' + d.getDate() + '</span>';
+    if (!isMonth) cells += '<span style="font-size:8px;color:#888;text-transform:uppercase">' + d.toLocaleString('en-US',{weekday:'short'}) + '</span>';
+    cells += '</div>';
+    // Session chips
+    cells += '<div style="padding:2px 3px;display:flex;flex-direction:column;gap:1px">';
+    var maxShow = isMonth ? 4 : 7;
+    var shown = 0;
+    evts.forEach(function(e) {
+      if (shown >= maxShow) return;
+      var bg = e.customColor || COLORS[e.type] || '#888';
+      var isComp = (e.raw && e.raw.status === 'Completed');
+      var label  = (isComp ? '\u2713 ' : '') + (isMonth ? '' : (e.start ? e.start + ' ' : '')) + e.title;
+      cells += '<div style="border-radius:2px;padding:1px 4px;font-size:7px;font-weight:600;color:#fff;background:' + bg + ';overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.4">' + label + '</div>';
+      shown++;
+    });
+    if (evts.length > maxShow) {
+      cells += '<div style="font-size:7px;color:#999;padding:0 3px">+' + (evts.length - maxShow) + ' more</div>';
+    }
+    cells += '</div></div>';
+  });
+
+  // Day name headers
+  var dayNames = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px">';
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(function(dn) {
+    dayNames += '<div style="text-align:center;font-size:8px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.3px">' + dn + '</div>';
+  });
+  dayNames += '</div>';
+
+  var grid = '<div style="display:grid;grid-template-columns:repeat(' + (isMonth ? 7 : 7) + ',1fr);gap:2px">' + cells + '</div>';
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Steven.CO - ' + title + '</title>';
+  html += '<style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}';
+  html += 'body{margin:0;padding:5mm;font-family:Arial,sans-serif;font-size:8px}';
+  html += 'h2{font-size:11px;margin:0 0 2px;font-weight:700}p{font-size:8px;color:#888;margin:0 0 5px}';
+  html += '@media print{@page{size:A4 ' + (isMonth ? 'landscape' : 'portrait') + ';margin:5mm}}</style>';
+  html += '</head><body>';
+  html += '<h2>Steven.CO \u2014 ' + title + '</h2>';
+  html += '<p>Day Cards \u00b7 ' + new Date().toLocaleString('en-US') + '</p>';
+  html += (isMonth ? dayNames : '') + grid;
+  html += '<script>window.onload=function(){setTimeout(function(){window.print();},300);}<\/script>';
+  html += '</body></html>';
+
   var blob = new Blob([html], { type: 'text/html' });
-  var url  = URL.createObjectURL(blob);
-  window.open(url, '_blank');
-  setTimeout(function() { URL.revokeObjectURL(url); }, 15000);
+  window.open(URL.createObjectURL(blob), '_blank');
 }
 
 // ── EVENT DATA ────────────────────────────────────────────
