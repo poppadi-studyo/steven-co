@@ -339,7 +339,69 @@ tr:hover td { background: var(--surface2); }
   .swt-break { font-size: 8px; }
   .page-header-row { flex-direction: column; gap: 8px; align-items: flex-start; }
   .topbar { padding: 0 16px; }
+  /* Hide sidebar on mobile — use bottom nav instead */
+  .sidebar { display: none !important; }
+  .main { margin-left: 0 !important; }
+  .content { padding: 12px 12px 80px; } /* bottom padding for nav bar */
+  /* Show bottom nav */
+  .mobile-bottom-nav { display: flex !important; }
 }
+
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-bottom-nav {
+  display: none; /* hidden on desktop */
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 6px 0 env(safe-area-inset-bottom, 8px);
+  justify-content: space-around; align-items: center;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+}
+.mbn-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 4px 12px; border-radius: 8px; cursor: pointer;
+  transition: all 0.15s; min-width: 52px;
+}
+.mbn-item.active { background: var(--blue-bg); }
+.mbn-icon {
+  font-size: 18px; line-height: 1.2;
+}
+.mbn-label {
+  font-size: 9px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.3px;
+}
+.mbn-item.active .mbn-label { color: var(--blue); }
+.mbn-item.active .mbn-icon  { filter: none; }
+
+/* Mobile More drawer */
+.mobile-more-drawer {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+}
+.mobile-more-drawer.open { display: block; }
+.mobile-more-backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+}
+.mobile-more-sheet {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--surface); border-radius: 16px 16px 0 0;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+}
+.mobile-more-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border-strong); margin: 0 auto 16px;
+}
+.mobile-more-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+.mobile-more-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; border-radius: 12px; cursor: pointer;
+  background: var(--surface2); transition: background 0.15s;
+  font-size: 10px; font-weight: 600; color: var(--text2);
+}
+.mobile-more-item span:first-child { font-size: 22px; }
+.mobile-more-item:hover { background: var(--blue-bg); color: var(--blue); }
 
 /* ── TEAM PAGE ── */
 .person-chip {
@@ -3302,6 +3364,10 @@ const PAGE_TITLES = {
 function showPage(id, btn) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Sync mobile bottom nav
+  document.querySelectorAll('.mbn-item').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.page === id);
+  });
   const page = document.getElementById('page-' + id);
   if (page) page.classList.add('active');
   if (btn) btn.classList.add('active');
@@ -5258,7 +5324,119 @@ function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
 
 
+function toggleMobileMore() {
+  var drawer = document.getElementById('mobile-more-drawer');
+  if (drawer) drawer.classList.toggle('open');
+}
+function closeMobileMore() {
+  var drawer = document.getElementById('mobile-more-drawer');
+  if (drawer) drawer.classList.remove('open');
+}
+
+
+function toggleMobileMore() {
+  var drawer = document.getElementById('mobile-more-drawer');
+  if (drawer) drawer.classList.toggle('open');
+}
+function closeMobileMore() {
+  var drawer = document.getElementById('mobile-more-drawer');
+  if (drawer) drawer.classList.remove('open');
+}
+
 initAuth();
 </script>
+<!-- ── MOBILE BOTTOM NAV ── -->
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <div class="mbn-item active" data-page="home" onclick="showPage('home',this)">
+    <span class="mbn-icon">⌂</span>
+    <span class="mbn-label">Home</span>
+  </div>
+  <div class="mbn-item" data-page="poppadi" onclick="showPage('poppadi',this)">
+    <span class="mbn-icon">🏫</span>
+    <span class="mbn-label">Poppadi's</span>
+  </div>
+  <div class="mbn-item" data-page="schedule" onclick="showPage('schedule',this)">
+    <span class="mbn-icon">📅</span>
+    <span class="mbn-label">Schedule</span>
+  </div>
+  <div class="mbn-item" data-page="private-tutoring" onclick="showPage('private-tutoring',this)">
+    <span class="mbn-icon">📚</span>
+    <span class="mbn-label">Private</span>
+  </div>
+  <div class="mbn-item" data-page="more-menu" onclick="toggleMobileMore()">
+    <span class="mbn-icon">···</span>
+    <span class="mbn-label">More</span>
+  </div>
+</nav>
+
+<!-- Mobile "More" drawer -->
+<div class="mobile-more-drawer" id="mobile-more-drawer">
+  <div class="mobile-more-backdrop" onclick="closeMobileMore()"></div>
+  <div class="mobile-more-sheet">
+    <div class="mobile-more-handle"></div>
+    <div class="mobile-more-grid">
+      <div class="mobile-more-item" onclick="showPage('wwa',null);closeMobileMore()">
+        <span>✦</span><span>WWA</span>
+      </div>
+      <div class="mobile-more-item" onclick="showPage('team',null);closeMobileMore()">
+        <span>👥</span><span>Team</span>
+      </div>
+      <div class="mobile-more-item" onclick="showPage('advisor',null);closeMobileMore()">
+        <span>◈</span><span>Advisor</span>
+      </div>
+      <div class="mobile-more-item" onclick="showPage('settings',null);closeMobileMore()">
+        <span>⚙</span><span>Settings</span>
+      </div>
+      <div class="mobile-more-item" onclick="logout();closeMobileMore()">
+        <span>↩</span><span>Sign out</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <div class="mbn-item active" data-page="home" onclick="showPage('home',this)">
+    <span class="mbn-icon">⌂</span><span class="mbn-label">Home</span>
+  </div>
+  <div class="mbn-item" data-page="poppadi" onclick="showPage('poppadi',this)">
+    <span class="mbn-icon">🏫</span><span class="mbn-label">Poppadi's</span>
+  </div>
+  <div class="mbn-item" data-page="schedule" onclick="showPage('schedule',this)">
+    <span class="mbn-icon">📅</span><span class="mbn-label">Schedule</span>
+  </div>
+  <div class="mbn-item" data-page="private-tutoring" onclick="showPage('private-tutoring',this)">
+    <span class="mbn-icon">📚</span><span class="mbn-label">Private</span>
+  </div>
+  <div class="mbn-item" data-page="more-menu" onclick="toggleMobileMore()">
+    <span class="mbn-icon" style="font-size:14px;letter-spacing:2px">•••</span><span class="mbn-label">More</span>
+  </div>
+</nav>
+
+<!-- Mobile More drawer -->
+<div class="mobile-more-drawer" id="mobile-more-drawer">
+  <div class="mobile-more-backdrop" onclick="closeMobileMore()"></div>
+  <div class="mobile-more-sheet">
+    <div class="mobile-more-handle"></div>
+    <div class="mobile-more-grid">
+      <div class="mobile-more-item" onclick="showPage('wwa',null);closeMobileMore()">
+        <span>✦</span><span>WWA</span>
+      </div>
+      <div class="mobile-more-item" onclick="showPage('team',null);closeMobileMore()">
+        <span>👥</span><span>Team</span>
+      </div>
+      <div class="mobile-more-item" onclick="showPage('advisor',null);closeMobileMore()">
+        <span>◈</span><span>Advisor</span>
+      </div>
+      <div class="mobile-more-item" onclick="showPage('settings',null);closeMobileMore()">
+        <span>⚙</span><span>Settings</span>
+      </div>
+      <div class="mobile-more-item" onclick="logout();closeMobileMore()">
+        <span>↩</span><span>Sign out</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
