@@ -534,6 +534,7 @@ tr:hover td { background: var(--surface2); }
   letter-spacing: 0.4px;
 }
 .sched-cards-daynames span { text-align: center; }
+.sched-card-dimmed { opacity: 0.2; pointer-events: none; }
 
 /* ── DAY CARDS VIEW ── */
 .sched-cards-month {
@@ -1241,7 +1242,7 @@ tr:hover td { background: var(--surface2); }
               <button class="btn btn-ghost btn-sm" id="sched-nav-next" onclick="schedNav(1)">›</button>
               <button class="btn btn-secondary btn-sm" onclick="schedGoToday()">Today</button>
               <div style="width:1px;height:20px;background:var(--border);margin:0 2px"></div>
-              <button class="btn btn-ghost btn-sm" onclick="openMarkDayOff()" title="Mark Day Off">🚫 Day Off</button>
+              <button class="btn btn-ghost btn-sm" onclick="openMarkDayOff()" title="Mark Day Off">🍃 Day Off</button>
               <button class="btn btn-primary btn-sm" onclick="openAddCalEvent()">+ Add Event</button>
             </div>
           </div>
@@ -1249,20 +1250,21 @@ tr:hover td { background: var(--surface2); }
           <!-- Filter + View toggle row -->
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:10px">
             <div style="display:flex;gap:4px;flex-wrap:wrap" id="sched-filter-btns">
-              <button class="sched-filter-btn active" data-filter="all"    onclick="setSchedFilter('all')">All</button>
+              <button class="sched-filter-btn active" data-filter="all"     onclick="setSchedFilter('all')">All</button>
               <button class="sched-filter-btn"        data-filter="poppadi" onclick="setSchedFilter('poppadi')">🏫 Poppadi's</button>
               <button class="sched-filter-btn"        data-filter="private" onclick="setSchedFilter('private')">📚 Private</button>
               <button class="sched-filter-btn"        data-filter="wwa"     onclick="setSchedFilter('wwa')">✦ WWA</button>
               <button class="sched-filter-btn"        data-filter="personal" onclick="setSchedFilter('personal')">Personal</button>
+              <button class="sched-filter-btn"        data-filter="dayoff"  onclick="setSchedFilter('dayoff')" style="border-color:var(--red-bg)">🍃 Day Off</button>
             </div>
             <div style="display:flex;gap:4px;align-items:center">
               <div style="display:flex;gap:2px;background:var(--surface2);border-radius:var(--radius);padding:3px">
-                <button class="sched-view-toggle active" id="sched-toggle-cards"    onclick="setSchedViewMode('cards')">⊟ Day Cards</button>
-                <button class="sched-view-toggle"        id="sched-toggle-schedule" onclick="setSchedViewMode('schedule')">⊞ Schedule</button>
+                <button class="sched-view-toggle"        id="sched-toggle-cards"    onclick="setSchedViewMode('cards')">⊟ Day Cards</button>
+                <button class="sched-view-toggle active" id="sched-toggle-schedule" onclick="setSchedViewMode('schedule')">⊞ Schedule</button>
                 <button class="sched-view-toggle"        id="sched-toggle-list"     onclick="setSchedViewMode('list')">☰ List</button>
               </div>
               <!-- Zoom controls (Schedule view only) -->
-              <div id="sched-zoom-controls" style="display:none;gap:4px;align-items:center">
+              <div id="sched-zoom-controls" style="display:flex;gap:4px;align-items:center">
                 <button class="btn btn-ghost btn-sm" onclick="adjustSchedZoom(-0.15)" style="font-size:14px;padding:2px 8px">−</button>
                 <span id="sched-zoom-label" style="font-size:10px;color:var(--text3);min-width:32px;text-align:center">100%</span>
                 <button class="btn btn-ghost btn-sm" onclick="adjustSchedZoom(0.15)"  style="font-size:14px;padding:2px 8px">+</button>
@@ -1291,17 +1293,17 @@ tr:hover td { background: var(--surface2); }
           <span><span class="sched-dot" style="background:var(--wwa)"></span>WWA / Meetings</span>
           <span><span class="sched-dot" style="background:var(--gray)"></span>Personal</span>
           <span><span class="sched-dot" style="background:#888;opacity:0.5"></span>Break</span>
-          <span><span class="sched-dot" style="background:#E24B4A"></span>Day Off</span>
+          <span><span>🍃</span> Day Off</span>
           <span>✦ <span style="background:linear-gradient(90deg,#f0c27f,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Highlight</span></span>
         </div>
 
         <!-- DAY CARDS VIEW (default) -->
-        <div id="sched-cards-container">
+        <div id="sched-cards-container" style="display:none">
           <div id="sched-cards-grid"></div>
         </div>
 
         <!-- SCHEDULE VIEW (time-block grid) -->
-        <div id="sched-grid-container" class="card" style="display:none;padding:0;overflow:hidden">
+        <div id="sched-grid-container" class="card" style="padding:0;overflow:hidden">
           <div id="sched-zoom-wrapper" style="transform-origin:top left;transition:transform 0.15s">
             <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" id="sched-grid-scroll">
               <div id="sched-main-grid"></div>
@@ -4092,7 +4094,7 @@ var gcalAccessToken = null;
 var gcalEvents      = [];
 
 var schedMode        = 'month';
-var schedViewMode    = 'cards';   // 'cards' | 'schedule' | 'list'
+var schedViewMode    = 'schedule'; // 'cards' | 'schedule' | 'list'
 var schedFilter      = 'all';
 var schedMonthCursor = new Date();
 var schedWeekCursor  = new Date();
@@ -4238,6 +4240,9 @@ function setSchedFilter(f) {
   renderScheduleView();
 }
 
+// Day Off filter view — highlight day-off days, grey everything else
+function isDayOffFilterActive() { return schedFilter === 'dayoff'; }
+
 // ── NAVIGATION ────────────────────────────────────────────
 function schedNav(dir) {
   if (schedMode === 'month') {
@@ -4341,11 +4346,17 @@ function renderCardsView() {
     var isDayOff = checkDayOff(ds);
     var isOther  = !isWeek && (d.getMonth() !== schedMonthCursor.getMonth());
     var allEvts  = eventsForDate(ds);
-    var evts     = schedFilter === 'all' ? allEvts : allEvts.filter(function(e) { return e.type === schedFilter; });
-    // Exclude break system events from cards
-    evts = evts.filter(function(e) { return !e.allDay; });
+    var evts;
+    if (schedFilter === 'dayoff') {
+      evts = []; // Day Off filter: show structure only, highlight day-off days
+    } else {
+      evts = schedFilter === 'all' ? allEvts : allEvts.filter(function(e) { return e.type === schedFilter; });
+      evts = evts.filter(function(e) { return !e.allDay; });
+    }
 
     var cardCls = 'sched-day-card' + (isToday ? ' today' : '') + (isDayOff ? ' dayoff' : '') + (isOther ? ' other-month' : '');
+    // Day off filter: dim non-dayoff days strongly
+    if (isDayOffFilterActive() && !isDayOff && !isOther) cardCls += ' sched-card-dimmed';
     var dayName = d.toLocaleString('en-US', { weekday: 'short' });
 
     html += '<div class="' + cardCls + '" onclick="handleDayCardClick(\'' + ds + '\')">';
@@ -4394,8 +4405,7 @@ function getSmartTimeRange() {
       if (e.allDay) return;
       var sh = parseInt((e.start || '09:00').split(':')[0]);
       var eh = parseInt((e.end   || '10:00').split(':')[0]);
-      var em = parseInt(((e.end || '10:00').split(':')[1]) || 0);
-      if (em > 0) eh++; // round up if ends mid-hour
+      // Don't round up — buffer handles the extra half-hour
       minH = Math.min(minH, sh);
       maxH = Math.max(maxH, eh);
     });
@@ -4453,7 +4463,7 @@ function buildTimeBlockTable(days) {
     var dlCls = 'swt-daylabel' + (isToday ? ' swt-daylabel-today' : '') + (isDayOff ? ' swt-daylabel-dayoff' : '');
     html += '<td class="' + dlCls + '" onclick="handleDayLabelClick(\'' + ds + '\')">';
     html += '<span class="swt-day-inline">' + dayName + ' <strong>' + d.getDate() + '</strong></span>';
-    if (isDayOff) html += '<span class="swt-dayoff-dot">&#x1F6AB;</span>';
+    if (isDayOff) html += '<span class="swt-dayoff-dot">&#x1F343;</span>';
     html += '</td>';
 
     var skippedCols = {};
@@ -4597,15 +4607,62 @@ function downloadGridPDF() {
   var title = schedMode === 'month'
     ? schedMonthCursor.toLocaleString('en-US', { month: 'long', year: 'numeric' })
     : 'Week of ' + getMonday(schedWeekCursor).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  var isMonth  = schedMode === 'month';
   var tableHtml = document.getElementById('sched-main-grid').innerHTML;
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Steven.CO \u2014 ' + title + '</title>';
-  html += '<style>body{font-family:-apple-system,sans-serif;font-size:10px;margin:0;padding:12px}h2{font-size:14px;margin:0 0 8px}p{font-size:10px;color:#666;margin:0 0 10px}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #ddd;padding:0}.swt-corner{background:#f5f5f5;padding:4px;font-size:8px;font-weight:700;text-transform:uppercase;width:40px;text-align:center}.swt-hour{background:#f5f5f5;padding:4px 2px;font-size:8px;font-weight:600;text-align:center}.swt-daylabel,.swt-daylabel-today,.swt-daylabel-dayoff{padding:2px 4px;text-align:center;font-size:9px;width:40px;background:#fafafa;border-right:2px solid #ccc}.swt-daylabel-today{background:#e8f0fe}.swt-day-inline{font-size:9px}.swt-slot{height:22px;position:relative;vertical-align:top;padding:0}.swt-break{height:100%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:600;color:#aaa;background:#f9f9f9}.swt-block-abs{position:absolute;top:1px;bottom:1px;border-radius:2px;padding:0 3px;font-size:8px;font-weight:500;overflow:hidden;white-space:nowrap;display:flex;align-items:center;color:white}.poppadi{background:#0E7A5A}.private{background:#2563EB}.wwa{background:#7C3AED}.personal{background:#666}.meeting{background:#B45309}@media print{@page{size:A4 landscape;margin:8mm}}</style>';
-  html += '</head><body><h2>' + title + '</h2><p>Steven.CO Schedule \u00b7 ' + new Date().toLocaleString('en-US') + '</p>' + tableHtml;
-  html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  // For month view: scale to fit A4 landscape. Week fits naturally.
+  var scaleStyle = isMonth ? 'transform-origin:top left;' : '';
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Steven.CO - ' + title + '</title><style>';
+  html += '*, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }';
+  html += 'html, body { margin: 0; padding: 0; font-family: -apple-system, Arial, sans-serif; }';
+  html += '.page-wrap { padding: 6mm; box-sizing: border-box; }';
+  html += 'h2 { font-size: 12px; margin: 0 0 4px; font-weight: 700; }';
+  html += 'p  { font-size: 9px; color: #888; margin: 0 0 6px; }';
+  html += 'table { border-collapse: collapse; width: 100%; table-layout: fixed; }';
+  html += 'th, td { border: 1px solid #ddd; padding: 0; }';
+  html += '.swt-corner { background: #f0f0f0 !important; padding: 3px 2px; font-size: 7px; font-weight: 700; text-transform: uppercase; width: 36px; text-align: center; }';
+  html += '.swt-hour { background: #f0f0f0 !important; padding: 3px 1px; font-size: 7px; font-weight: 600; text-align: center; }';
+  html += '.swt-daylabel, .swt-daylabel-today, .swt-daylabel-dayoff { padding: 1px 3px; text-align: center; font-size: 8px; width: 36px; background: #fafafa !important; border-right: 2px solid #bbb; }';
+  html += '.swt-daylabel-today { background: #e8f0fe !important; }';
+  html += '.swt-daylabel-dayoff { background: #fde8e8 !important; }';
+  html += '.swt-day-inline { font-size: 8px; }';
+  html += '.swt-half-line { display: none; }';
+  html += '.swt-slot { height: ' + (isMonth ? '16' : '22') + 'px; position: relative; vertical-align: top; padding: 0; overflow: visible; }';
+  html += '.swt-break { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: 700; color: #aaa; letter-spacing: 0.5px; background: #f5f5f5 !important; }';
+  html += '.swt-block-abs { position: absolute; top: 1px; bottom: 1px; border-radius: 2px; padding: 0 3px; font-size: 7px; font-weight: 600; overflow: hidden; white-space: nowrap; display: flex; align-items: center; color: white !important; }';
+  html += '.swt-block-abs.poppadi  { background: #0E7A5A !important; }';
+  html += '.swt-block-abs.private  { background: #2563EB !important; }';
+  html += '.swt-block-abs.wwa      { background: #7C3AED !important; }';
+  html += '.swt-block-abs.personal { background: #6B7280 !important; }';
+  html += '.swt-block-abs.meeting  { background: #B45309 !important; }';
+  html += '.swt-block-abs.custom   { }'; // custom uses inline style
+  html += '.swt-row-dayoff td { background: rgba(226,75,74,0.06) !important; }';
+  html += '@media print { @page { size: A4 landscape; margin: 0; } body { margin: 0; } }';
+  html += '</style></head><body>';
+  html += '<div class="page-wrap">';
+  html += '<h2>&#x1F4C5; Steven.CO — ' + title + '</h2>';
+  html += '<p>Exported ' + new Date().toLocaleString('en-US') + (schedFilter !== 'all' ? ' · Filter: ' + schedFilter : '') + '</p>';
+  html += tableHtml;
+  html += '</div>';
+  html += '<script>window.onload = function() {';
+  if (isMonth) {
+    // Auto-scale to fit page width
+    html += 'var table = document.querySelector("table");';
+    html += 'if (table) {';
+    html += '  var pageW = 277; var tableW = table.scrollWidth;';
+    html += '  if (tableW > pageW) {';
+    html += '    var scale = pageW / tableW;';
+    html += '    table.style.transformOrigin = "top left";';
+    html += '    table.style.transform = "scale(" + scale + ")";';
+    html += '    document.querySelector(".page-wrap").style.height = (table.offsetHeight * scale + 20) + "mm";';
+    html += '  }';
+    html += '}';
+  }
+  html += 'setTimeout(function(){ window.print(); }, 400);';
+  html += '}<\/script></body></html>';
   var blob = new Blob([html], { type: 'text/html' });
   var url  = URL.createObjectURL(blob);
   window.open(url, '_blank');
-  setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 15000);
 }
 
 function downloadListPDF() {
@@ -4623,8 +4680,64 @@ function downloadListPDF() {
 }
 
 function downloadCardsPDF() {
-  // Print the cards view as-is using browser print
-  window.print();
+  var title = schedMode === 'month'
+    ? schedMonthCursor.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+    : 'Week of ' + getMonday(schedWeekCursor).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  var isMonth  = schedMode === 'month';
+  var cardsHtml = document.getElementById('sched-cards-grid').innerHTML;
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Steven.CO - ' + title + '</title><style>';
+  html += '*, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }';
+  html += 'html, body { margin: 0; padding: 0; font-family: -apple-system, Arial, sans-serif; }';
+  html += '.page-wrap { padding: 5mm; box-sizing: border-box; }';
+  html += 'h2 { font-size: 11px; margin: 0 0 4px; } p { font-size: 8px; color: #888; margin: 0 0 5px; }';
+  // Day names header
+  html += '.sched-cards-daynames { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 0 0 2px; font-size: 8px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.3px; }';
+  html += '.sched-cards-daynames span { text-align: center; }';
+  // Month grid
+  html += '.sched-cards-month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }';
+  html += '.sched-cards-week  { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }';
+  html += '.sched-day-card { border: 1px solid #ddd; border-radius: 4px; overflow: hidden; background: #fff; min-height: ' + (isMonth ? '60' : '100') + 'px; }';
+  html += '.sched-day-card.today { border-color: #2563EB; background: #eff6ff !important; }';
+  html += '.sched-day-card.dayoff { border-color: #16a34a; background: #f0fdf4 !important; opacity: 0.8; }';
+  html += '.sched-day-card.other-month { opacity: 0.25; }';
+  html += '.sched-card-header { padding: 2px 4px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; }';
+  html += '.sched-card-date { font-size: ' + (isMonth ? '9' : '12') + 'px; font-weight: 700; color: #333; }';
+  html += '.sched-day-card.today .sched-card-date { color: #2563EB; }';
+  html += '.sched-card-day { font-size: 8px; color: #888; text-transform: uppercase; }';
+  html += '.sched-card-sessions { padding: 2px 3px; display: flex; flex-direction: column; gap: 1px; }';
+  html += '.sched-session-chip { border-radius: 2px; padding: 1px 4px; font-size: 7px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white !important; line-height: 1.4; }';
+  html += '.sched-session-chip.private  { background: #2563EB !important; }';
+  html += '.sched-session-chip.poppadi  { background: #0E7A5A !important; }';
+  html += '.sched-session-chip.wwa      { background: #7C3AED !important; }';
+  html += '.sched-session-chip.meeting  { background: #B45309 !important; }';
+  html += '.sched-session-chip.personal { background: #6B7280 !important; }';
+  html += '.sched-card-more { font-size: 7px; color: #999; padding: 0 3px 1px; }';
+  html += '@media print { @page { size: A4 ' + (isMonth ? 'landscape' : 'portrait') + '; margin: 0; } body { margin: 0; } }';
+  html += '</style></head><body><div class="page-wrap">';
+  html += '<h2>&#x1F4C5; Steven.CO — ' + title + '</h2>';
+  html += '<p>Exported ' + new Date().toLocaleString('en-US') + '</p>';
+  html += cardsHtml;
+  html += '</div>';
+  html += '<script>window.onload = function() {';
+  if (isMonth) {
+    html += 'var grid = document.querySelector(".sched-cards-month");';
+    html += 'if (grid) {';
+    html += '  var pageW = 277; var gridW = grid.scrollWidth;';
+    html += '  if (gridW > pageW) {';
+    html += '    var scale = pageW / gridW;';
+    html += '    grid.style.transformOrigin = "top left";';
+    html += '    grid.style.transform = "scale(" + scale + ")";';
+    html += '    document.querySelector(".page-wrap").style.height = (grid.offsetHeight * scale + 20) + "mm";';
+    html += '  }';
+    html += '}';
+  }
+  html += 'setTimeout(function(){ window.print(); }, 400);';
+  html += '}<\/script></body></html>';
+  var blob = new Blob([html], { type: 'text/html' });
+  var url  = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(function() { URL.revokeObjectURL(url); }, 15000);
 }
 
 // ── EVENT DATA ────────────────────────────────────────────
@@ -4735,25 +4848,114 @@ function checkDayOff(ds) { return !!getSpecial().dayOffs[ds]; }
 function checkBreakRemoved(ds) { return !!getSpecial().breakRemoved[ds]; }
 
 // ── DAY OFF / BREAK ───────────────────────────────────────
+var dayOffMode = 'single';
+
+function setDayOffMode(mode) {
+  dayOffMode = mode;
+  document.getElementById('dayoff-mode-single').classList.toggle('active', mode === 'single');
+  document.getElementById('dayoff-mode-recurring').classList.toggle('active', mode === 'recurring');
+  document.getElementById('dayoff-single-fields').style.display    = mode === 'single'    ? 'block' : 'none';
+  document.getElementById('dayoff-recurring-fields').style.display = mode === 'recurring' ? 'block' : 'none';
+  if (mode === 'recurring') updateRecurringPreview();
+}
+
+function populateDayOffMonthSelect() {
+  var sel = document.getElementById('dayoff-month-select');
+  if (!sel) return;
+  sel.innerHTML = '';
+  var now = new Date();
+  for (var i = -1; i <= 3; i++) {
+    var d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    var val = d.getFullYear() + '-' + pad2(d.getMonth() + 1);
+    var label = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    var opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = label;
+    if (i === 0) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  sel.onchange = updateRecurringPreview;
+  document.getElementById('dayoff-weekday').onchange = updateRecurringPreview;
+}
+
+function getRecurringDates() {
+  var weekday  = parseInt(document.getElementById('dayoff-weekday').value);
+  var monthVal = document.getElementById('dayoff-month-select').value;
+  var parts    = monthVal.split('-');
+  var year     = parseInt(parts[0]);
+  var month    = parseInt(parts[1]) - 1;
+  var dates    = [];
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  for (var day = 1; day <= daysInMonth; day++) {
+    var d = new Date(year, month, day);
+    if (d.getDay() === weekday) dates.push(d);
+  }
+  return dates;
+}
+
+function updateRecurringPreview() {
+  var dates   = getRecurringDates();
+  var preview = document.getElementById('dayoff-recurring-preview');
+  if (!preview) return;
+  if (dates.length === 0) { preview.textContent = 'No dates found.'; return; }
+  var labels = dates.map(function(d) {
+    return d.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  });
+  preview.innerHTML = '<strong>' + dates.length + ' days will be marked:</strong> ' + labels.join(', ');
+}
+
 function openMarkDayOff(dateStr) {
+  dayOffMode = 'single';
+  document.getElementById('dayoff-mode-single').classList.add('active');
+  document.getElementById('dayoff-mode-recurring').classList.remove('active');
+  document.getElementById('dayoff-single-fields').style.display    = 'block';
+  document.getElementById('dayoff-recurring-fields').style.display = 'none';
   var el = document.getElementById('dayoff-date');
   if (el) el.value = dateStr || dateToStr(new Date());
   var note = document.getElementById('dayoff-note');
   if (note) note.value = '';
+  populateDayOffMonthSelect();
   document.getElementById('modal-day-off').classList.add('open');
 }
+
 async function saveDayOff() {
+  if (!gcalAccessToken) { showToast('Connect Google Calendar first'); return; }
+
+  if (dayOffMode === 'recurring') {
+    var dates = getRecurringDates();
+    if (dates.length === 0) { showToast('No dates found'); return; }
+    var weekdayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][parseInt(document.getElementById('dayoff-weekday').value)];
+    showToast('Marking ' + dates.length + ' days off...');
+    var failed = 0;
+    for (var i = 0; i < dates.length; i++) {
+      var ds = dateToStr(dates[i]);
+      try {
+        var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + gcalAccessToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ summary: PREFIX_DAYOFF + ' ' + weekdayName, start: { date: ds }, end: { date: ds } })
+        });
+        if (!res.ok) failed++;
+      } catch(e) { failed++; }
+    }
+    if (failed === 0) showToast('🍃 All ' + dates.length + ' ' + weekdayName + 's marked as day off');
+    else showToast('Done with ' + failed + ' error(s)');
+    closeModal('modal-day-off');
+    await fetchGCalEvents();
+    return;
+  }
+
+  // Single day
   var date = document.getElementById('dayoff-date').value;
   var note = document.getElementById('dayoff-note').value.trim();
   if (!date) { showToast('Pick a date'); return; }
-  if (!gcalAccessToken) { showToast('Connect Google Calendar first'); return; }
   try {
     var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
       method: 'POST', headers: { 'Authorization': 'Bearer ' + gcalAccessToken, 'Content-Type': 'application/json' },
       body: JSON.stringify({ summary: PREFIX_DAYOFF + (note ? ' ' + note : ''), start: { date: date }, end: { date: date } })
     });
     if (!res.ok) throw new Error('GCal ' + res.status);
-    showToast('Day off saved'); closeModal('modal-day-off'); await fetchGCalEvents();
+    showToast('🍃 Day off saved'); closeModal('modal-day-off'); await fetchGCalEvents();
   } catch(err) { showToast('Error: ' + err.message); }
 }
 function confirmRemoveBreak(dateStr) {
@@ -4955,12 +5157,32 @@ function saveAvailability() { localStorage.setItem('stevenco_avail', JSON.string
 function renderAvailText() {
   var el = document.getElementById('avail-text-output');
   if (!el) return;
+  // Build availability for the current month, skipping day-off dates
+  var special = getSpecial();
+  var year  = schedMonthCursor.getFullYear();
+  var month = schedMonthCursor.getMonth();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  // Map day name to list of dates this month (e.g. Mon → [2026-06-01, 2026-06-08...])
+  var dayNameMap = { Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6, Sun:0 };
+
   var lines = [];
-  AVAIL_DAYS.forEach(function(day) {
-    var slots = AVAIL_SLOTS.filter(function(s) { return availState[day] && availState[day][s]; });
-    if (slots.length) lines.push(day + ': ' + slots.join(', '));
+  AVAIL_DAYS.forEach(function(dayName) {
+    var slots = AVAIL_SLOTS.filter(function(s) { return availState[dayName] && availState[dayName][s]; });
+    if (!slots.length) return;
+    // Check if every occurrence of this weekday is a day off
+    var dowTarget = dayNameMap[dayName];
+    var allOff = true;
+    for (var d = 1; d <= daysInMonth; d++) {
+      var date = new Date(year, month, d);
+      if (date.getDay() === dowTarget) {
+        var ds = dateToStr(date);
+        if (!special.dayOffs[ds]) { allOff = false; break; }
+      }
+    }
+    if (allOff) return; // entire weekday is day off this month — skip
+    lines.push(dayName + ': ' + slots.join(', '));
   });
-  el.textContent = lines.length ? "I'm available:\n" + lines.join('\n') : 'No availability set - toggle slots above.';
+  el.textContent = lines.length ? "I'm available:\n" + lines.join('\n') : 'No availability set (or all days are marked off).';
 }
 function copyAvailabilityText() {
   var el = document.getElementById('avail-text-output');
