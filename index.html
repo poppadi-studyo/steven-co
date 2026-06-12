@@ -2462,6 +2462,7 @@ function renderPrivateTutoring() {
     studentsList.innerHTML = studentNames.map(name => {
       const st = studentMap[name];
       const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+      const safeName = name.replace(/'/g, "\\'");
       return `<div class="student-card">
         <div class="student-avatar">${initials}</div>
         <div class="student-info">
@@ -2471,6 +2472,7 @@ function renderPrivateTutoring() {
         <div class="student-stats">
           <div class="student-total">${fmt(st.income)}</div>
           <div class="student-hours">${st.hours}h</div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px" onclick="generateStudentInvoicePDF('${safeName}')">⬇ Invoice</button>
         </div>
       </div>`;
     }).join('');
@@ -4847,6 +4849,143 @@ function downloadCardsPDF() {
   html += (isMonth ? dayNames : '') + grid;
   html += '<script>window.onload=function(){setTimeout(function(){window.print();},300);}<\/script>';
   html += '</body></html>';
+
+  var blob = new Blob([html], { type: 'text/html' });
+  window.open(URL.createObjectURL(blob), '_blank');
+}
+
+// ── INVOICE PDF ───────────────────────────────────────────
+function generateStudentInvoicePDF(studentName) {
+  var month = selectedMonth;
+  var monthLabel = formatMonthLabel(month);
+
+  // Collect this student's completed sessions for the selected month
+  var sessions = filterByMonth(DATA.privateSessions, 'date').filter(function(s) {
+    return s.student_name === studentName &&
+           s.status !== 'Cancelled' &&
+           s.status !== 'Missed';
+  }).sort(function(a, b) { return a.date.localeCompare(b.date); });
+
+  if (sessions.length === 0) {
+    alert('No completed sessions for ' + studentName + ' in ' + monthLabel + '.');
+    return;
+  }
+
+  // Invoice number: PT-YYYYMM-NNN (sequential per student per month using localStorage counter)
+  var counterKey = 'stevenco_invoice_seq_' + month;
+  var seq = parseInt(localStorage.getItem(counterKey) || '0') + 1;
+  localStorage.setItem(counterKey, seq);
+  var invoiceNum = 'PT-' + month.replace('-', '') + '-' + (seq < 10 ? '00' + seq : seq < 100 ? '0' + seq : seq);
+
+  var totalHours   = 0;
+  var totalIncome  = 0;
+  sessions.forEach(function(s) {
+    totalHours  += Number(s.duration_hrs || 0);
+    totalIncome += Number(s.fee || 0);
+  });
+  var subject = sessions[sessions.length - 1].subject || '';
+  var avgRate = totalHours > 0 ? Math.round(totalIncome / totalHours) : DEFAULT_RATE;
+
+  var generatedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  // Build session rows
+  var sessionRows = '';
+  sessions.forEach(function(s, i) {
+    var d       = new Date(s.date + 'T00:00:00');
+    var dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    var dayStr  = d.toLocaleDateString('en-GB', { weekday: 'short' });
+    var dur     = Number(s.duration_hrs || 0);
+    var rate    = Number(s.rate || DEFAULT_RATE);
+    var fee     = Number(s.fee || (dur * rate));
+    var rowBg   = i % 2 === 0 ? '#ffffff' : '#f9f8f6';
+    sessionRows +=
+      '<tr style="background:' + rowBg + '">' +
+        '<td style="padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #eee">' + dateStr + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;color:#666;border-bottom:1px solid #eee">' + dayStr + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;color:#333;text-align:center;border-bottom:1px solid #eee">' + dur + 'h</td>' +
+        '<td style="padding:8px 12px;font-size:12px;color:#333;text-align:right;font-family:monospace;border-bottom:1px solid #eee">฿' + rate.toLocaleString() + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;font-weight:600;color:#1a1a18;text-align:right;font-family:monospace;border-bottom:1px solid #eee">฿' + fee.toLocaleString() + '</td>' +
+      '</tr>';
+  });
+
+  var html =
+    '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+    '<title>Invoice ' + invoiceNum + ' – ' + studentName + '</title>' +
+    '<style>' +
+      '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;margin:0;padding:0}' +
+      'body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a18;background:#fff;padding:14mm 14mm 10mm}' +
+      '@media print{@page{size:A4 portrait;margin:14mm 14mm 10mm}}' +
+    '</style></head><body>' +
+
+    // ── Top bar
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px">' +
+      '<div>' +
+        '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:6px">Private Tutoring Invoice</div>' +
+        '<div style="font-size:26px;font-weight:700;color:#1a1a18;letter-spacing:-0.5px">Steven Gerdphol</div>' +
+        '<div style="font-size:12px;color:#666;margin-top:4px">Prompt Language Studyo Co., Ltd.</div>' +
+      '</div>' +
+      '<div style="text-align:right">' +
+        '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#378ADD">' + invoiceNum + '</div>' +
+        '<div style="font-size:12px;color:#666;margin-top:4px">' + monthLabel + '</div>' +
+        '<div style="font-size:11px;color:#aaa;margin-top:2px">Issued: ' + generatedDate + '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // ── Divider
+    '<div style="border-top:2px solid #1a1a18;margin-bottom:24px"></div>' +
+
+    // ── Billed to
+    '<div style="margin-bottom:28px">' +
+      '<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:6px">Billed To</div>' +
+      '<div style="font-size:16px;font-weight:600;color:#1a1a18">' + studentName + '</div>' +
+      (subject ? '<div style="font-size:12px;color:#666;margin-top:2px">' + subject + '</div>' : '') +
+    '</div>' +
+
+    // ── Schedule table
+    '<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:8px">Session Summary — ' + monthLabel + '</div>' +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:24px">' +
+      '<thead>' +
+        '<tr style="background:#1a1a18">' +
+          '<th style="padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#fff;text-align:left">Date</th>' +
+          '<th style="padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#fff;text-align:left">Day</th>' +
+          '<th style="padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#fff;text-align:center">Duration</th>' +
+          '<th style="padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#fff;text-align:right">Rate / hr</th>' +
+          '<th style="padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#fff;text-align:right">Fee</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>' + sessionRows + '</tbody>' +
+    '</table>' +
+
+    // ── Fee summary box
+    '<div style="display:flex;justify-content:flex-end;margin-bottom:32px">' +
+      '<div style="background:#f7f6f3;border:1px solid #e8e7e2;border-radius:8px;padding:16px 24px;min-width:260px">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:8px">' +
+          '<span style="font-size:12px;color:#666">Total sessions</span>' +
+          '<span style="font-size:12px;font-weight:600;color:#1a1a18">' + sessions.length + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:8px">' +
+          '<span style="font-size:12px;color:#666">Total hours</span>' +
+          '<span style="font-size:12px;font-weight:600;font-family:monospace;color:#1a1a18">' + totalHours + 'h</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #e0dfd8">' +
+          '<span style="font-size:12px;color:#666">Rate / hr</span>' +
+          '<span style="font-size:12px;font-weight:600;font-family:monospace;color:#1a1a18">฿' + avgRate.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="font-size:13px;font-weight:700;color:#1a1a18">Total</span>' +
+          '<span style="font-size:20px;font-weight:700;font-family:monospace;color:#378ADD">฿' + totalIncome.toLocaleString() + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // ── Footer
+    '<div style="border-top:1px solid #e8e7e2;padding-top:14px;display:flex;justify-content:space-between;align-items:center">' +
+      '<div style="font-size:11px;color:#aaa">Thank you!</div>' +
+      '<div style="font-size:10px;color:#ccc;letter-spacing:0.5px">Generated by Steven.CO</div>' +
+    '</div>' +
+
+    '<script>window.onload=function(){setTimeout(function(){window.print();},300);}<\/script>' +
+    '</body></html>';
 
   var blob = new Blob([html], { type: 'text/html' });
   window.open(URL.createObjectURL(blob), '_blank');
