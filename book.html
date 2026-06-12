@@ -4,255 +4,896 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Book a Session — Steven Gerdphol</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: #f7f6f3; color: #1a1a18; min-height: 100vh; display: flex; flex-direction: column; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#f7f6f3;color:#1a1a18;min-height:100vh;display:flex;flex-direction:column}
+body.th{font-family:'Sarabun',sans-serif}
 
-  .header {
-    background: #fff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .header-avatar {
-    width: 44px; height: 44px;
-    background: #1a1a18; color: #fff;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 16px;
-  }
-  .header-name { font-size: 16px; font-weight: 600; }
-  .header-sub  { font-size: 12px; color: #6b6a65; margin-top: 1px; }
+/* Header */
+.hdr{background:#fff;border-bottom:1px solid rgba(0,0,0,.08);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.av{width:38px;height:38px;background:#1a1a18;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.hn{font-size:14px;font-weight:600}
+.hs{font-size:11px;color:#6b6a65;margin-top:1px}
+.lt{display:flex;gap:3px}
+.lb{padding:5px 10px;border-radius:20px;border:1px solid rgba(0,0,0,.12);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:#6b6a65;transition:all .15s;font-family:inherit}
+.lb.on{background:#1a1a18;color:#fff;border-color:#1a1a18}
 
-  .container { max-width: 560px; margin: 0 auto; padding: 32px 20px; flex: 1; }
+/* Layout */
+.wrap{max-width:540px;margin:0 auto;padding:20px 16px;flex:1}
 
-  .card {
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 16px;
-  }
-  .card-title { font-size: 13px; font-weight: 600; color: #6b6a65; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
+/* Step bar */
+.sbar{display:flex;border-radius:10px;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.08);margin-bottom:16px}
+.st{flex:1;text-align:center;padding:9px 4px;font-size:11px;font-weight:500;color:#bbb;border-bottom:2px solid transparent;transition:all .2s;line-height:1.3}
+.st.on{color:#1a1a18;border-bottom-color:#1a1a18;font-weight:700;background:#fafaf8}
+.st.done{color:#1D9E75;border-bottom-color:#1D9E75}
+.sn{display:block;font-size:10px;font-weight:700;margin-bottom:1px}
 
-  .avail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .avail-row { background: #f7f6f3; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
-  .avail-row .day { font-weight: 600; color: #1a1a18; }
-  .avail-row .slots { color: #6b6a65; font-size: 12px; margin-top: 2px; }
+/* Card */
+.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:20px;margin-bottom:12px}
+.ct{font-size:11px;font-weight:700;color:#9b9a94;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
 
-  .form-group { margin-bottom: 16px; }
-  .form-label { display: block; font-size: 12px; font-weight: 600; color: #6b6a65; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .form-input {
-    width: 100%; padding: 10px 12px;
-    border: 1px solid rgba(0,0,0,0.12);
-    border-radius: 8px;
-    font-family: inherit; font-size: 14px;
-    background: #fff; color: #1a1a18;
-    outline: none; transition: border-color 0.15s;
-  }
-  .form-input:focus { border-color: #378ADD; box-shadow: 0 0 0 3px rgba(55,138,221,0.1); }
-  textarea.form-input { resize: vertical; min-height: 80px; }
+/* Subject selector */
+.subj-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px}
+.subj-chip{padding:8px 14px;border-radius:8px;border:1.5px solid rgba(0,0,0,.1);font-size:13px;font-weight:500;cursor:pointer;transition:all .12s;background:#fff}
+.subj-chip:hover{border-color:#378ADD;background:#EBF4FF}
+.subj-chip.on{border-color:#1a1a18;background:#1a1a18;color:#fff}
+.subj-chip.ielts-main{font-weight:600}
+.ielts-skills{display:none;margin-top:10px;padding:12px;background:#f7f6f3;border-radius:9px;border:1.5px solid rgba(0,0,0,.08)}
+.ielts-skills.open{display:block}
+.skill-row{display:flex;flex-wrap:wrap;gap:6px}
+.skill-chip{padding:6px 12px;border-radius:7px;border:1.5px solid rgba(0,0,0,.1);font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;background:#fff}
+.skill-chip:hover{border-color:#378ADD;background:#EBF4FF}
+.skill-chip.on{border-color:#378ADD;background:#378ADD;color:#fff}
 
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 11px 20px; border-radius: 8px; font-family: inherit;
-    font-size: 14px; font-weight: 500; cursor: pointer; border: none;
-    transition: opacity 0.15s, background 0.15s;
-  }
-  .btn-primary { background: #1a1a18; color: #fff; width: 100%; padding: 13px; font-size: 15px; font-weight: 600; }
-  .btn-primary:hover { opacity: 0.85; }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Package chips */
+.pkg-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.pkg-chip{padding:10px 18px;border-radius:9px;border:2px solid rgba(0,0,0,.1);font-size:15px;font-weight:700;cursor:pointer;transition:all .12s;background:#fff;font-family:'DM Mono',monospace}
+.pkg-chip:hover{border-color:#378ADD;background:#EBF4FF}
+.pkg-chip.on{border-color:#1a1a18;background:#1a1a18;color:#fff}
+.custom-wrap{display:flex;align-items:center;gap:8px;margin-top:4px}
+.custom-inp{width:90px;padding:9px 12px;border:2px solid rgba(0,0,0,.1);border-radius:9px;font-size:15px;font-weight:700;font-family:'DM Mono',monospace;outline:none;text-align:center}
+.custom-inp:focus{border-color:#378ADD}
+.custom-lbl{font-size:13px;color:#6b6a65}
 
-  .success-screen { display: none; text-align: center; padding: 40px 20px; }
-  .success-icon { font-size: 48px; margin-bottom: 16px; }
-  .success-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .success-sub { font-size: 14px; color: #6b6a65; line-height: 1.6; }
+/* Session type */
+.stype-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stype-card{border:2px solid rgba(0,0,0,.08);border-radius:10px;padding:14px 8px;cursor:pointer;transition:all .12s;text-align:center}
+.stype-card:hover{border-color:#378ADD;background:#EBF4FF}
+.stype-card.on{border-color:#1a1a18;background:#f7f6f3}
+.stv{font-size:20px;font-weight:700;font-family:'DM Mono',monospace}
+.stl{font-size:11px;color:#6b6a65;margin-top:3px}
 
-  .error-msg { background: #FCEBEB; color: #E24B4A; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 12px; display: none; }
-  .required { color: #E24B4A; }
+/* Progress bar */
+.prog-wrap{background:#f0efe9;border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.prog-bar-outer{flex:1;height:6px;background:#e0dfd8;border-radius:3px;overflow:hidden}
+.prog-bar-inner{height:100%;background:#1D9E75;border-radius:3px;transition:width .3s}
+.prog-bar-inner.warn{background:#D85A30}
+.prog-txt{font-size:12px;font-weight:600;white-space:nowrap;color:#1a1a18}
+.prog-sub{font-size:11px;color:#6b6a65;margin-top:2px}
 
-  .loading-avail { color: #9b9a94; font-size: 13px; padding: 8px 0; }
+/* Calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cnb{width:30px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,.1);background:transparent;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+.cnb:hover{background:#f0efe9}
+.cnb:disabled{opacity:.25;cursor:not-allowed}
+.cm{font-size:14px;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px}
+.ch{font-size:10px;font-weight:700;color:#bbb;text-align:center;padding:3px 0;text-transform:uppercase}
 
-  footer { text-align: center; padding: 20px; font-size: 11px; color: #c0bfb8; }
+/* Day blocks */
+.day-col{border-radius:9px;overflow:hidden;border:1px solid rgba(0,0,0,.07);background:#fff}
+.day-col.empty{border:none;background:transparent}
+.day-col.no-slot{background:#faf9f7;border-color:rgba(0,0,0,.05)}
+.day-hdr{padding:5px 4px 4px;text-align:center;border-bottom:1px solid rgba(0,0,0,.06)}
+.day-num{font-size:13px;font-weight:700;color:#1a1a18}
+.day-num.today-num{color:#378ADD}
+.day-slots{padding:3px}
+.tslot{padding:4px 3px;border-radius:5px;font-size:10px;font-weight:600;font-family:'DM Mono',monospace;cursor:pointer;transition:all .1s;text-align:center;margin-bottom:2px;border:1.5px solid transparent;line-height:1.2;user-select:none}
+.tslot.free{background:#f0efe9;color:#6b6a65;border-color:transparent}
+.tslot.free:hover{background:#EBF4FF;color:#378ADD;border-color:#378ADD}
+.tslot.picked{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.tslot.picked:hover{background:#333}
+.tslot.unavail{background:#faf9f7;color:#ddd;cursor:not-allowed}
 
-  @media (max-width: 480px) {
-    .avail-grid { grid-template-columns: 1fr; }
-    .container { padding: 20px 16px; }
-    .card { padding: 18px; }
-  }
+/* Dur popover */
+.dpop-backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.35);padding:0 0 0 0}
+.dpop{background:#fff;border-radius:16px 16px 0 0;padding:22px 20px 32px;width:100%;max-width:540px;animation:slideup .2s ease}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.dpop-title{font-size:14px;font-weight:600;margin-bottom:14px;text-align:center}
+.dpop-slot{font-size:13px;color:#6b6a65;text-align:center;margin-bottom:16px}
+.dpop-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dpop-btn{padding:14px;border-radius:10px;border:2px solid rgba(0,0,0,.1);font-size:16px;font-weight:700;font-family:'DM Mono',monospace;cursor:pointer;text-align:center;transition:all .12s;background:#fff}
+.dpop-btn:hover{border-color:#1a1a18;background:#f7f6f3}
+.dpop-btn.disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.dpop-cancel{margin-top:12px;width:100%;padding:11px;background:none;border:none;color:#6b6a65;font-size:14px;cursor:pointer;font-family:inherit}
+
+/* Selected slots list */
+.slots-list{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.slot-item{display:flex;align-items:center;justify-content:space-between;background:#f7f6f3;border-radius:8px;padding:8px 12px;font-size:13px}
+.slot-item-info{display:flex;flex-direction:column;gap:1px}
+.slot-date{font-weight:600;font-size:12px}
+.slot-time{color:#6b6a65;font-size:12px;font-family:'DM Mono',monospace}
+.slot-rm{background:none;border:none;color:#aaa;cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px}
+.slot-rm:hover{color:#E24B4A;background:#FCEBEB}
+
+/* Summary (step 3) */
+.summary-slots{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;max-height:200px;overflow-y:auto}
+.ss-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#f7f6f3;border-radius:7px;font-size:12px}
+.ss-date{font-weight:600}
+.ss-time{color:#6b6a65;font-family:'DM Mono',monospace}
+.ss-dur{background:#1a1a18;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700}
+
+/* Form */
+.fg{margin-bottom:12px}
+.fl{display:block;font-size:11px;font-weight:700;color:#6b6a65;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fi{width:100%;padding:10px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-family:inherit;font-size:14px;background:#fff;color:#1a1a18;outline:none;transition:border-color .15s}
+.fi:focus{border-color:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,.1)}
+textarea.fi{resize:vertical;min-height:68px}
+.req{color:#E24B4A}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-dk{background:#1a1a18;color:#fff;width:100%;padding:13px;font-size:15px}
+.btn-dk:hover{opacity:.85}
+.btn-dk:disabled{opacity:.35;cursor:not-allowed}
+.btn-gh{background:none;color:#6b6a65;border:1.5px solid rgba(0,0,0,.1);font-size:13px;padding:9px 14px}
+.btn-gh:hover{background:#f0efe9;color:#1a1a18}
+.nr{display:flex;gap:8px;margin-top:12px}
+.nr .btn-dk{flex:1}
+
+.err{background:#FCEBEB;color:#E24B4A;border-radius:8px;padding:9px 13px;font-size:13px;margin-bottom:12px;display:none}
+.empty-msg{color:#aaa;font-size:13px;padding:8px 0}
+
+/* Success */
+.success{display:none;text-align:center;padding:52px 20px}
+.si{font-size:52px;margin-bottom:14px}
+.st2{font-size:22px;font-weight:700;margin-bottom:8px}
+.ss2{font-size:14px;color:#6b6a65;line-height:1.7}
+
+footer{text-align:center;padding:16px;font-size:11px;color:#c0bfb8}
+
+@media(max-width:400px){
+  .stype-row{grid-template-columns:repeat(3,1fr)}
+  .pkg-chip{padding:8px 14px;font-size:14px}
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-avatar">SG</div>
-  <div>
-    <div class="header-name">Steven Gerdphol</div>
-    <div class="header-sub">Private Tutoring · IELTS · SAT · GED · University Admissions</div>
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="av">SG</div>
+    <div><div class="hn">Steven Gerdphol</div><div class="hs" id="h-sub">Private Tutoring · IELTS · SAT · GED · Admissions</div></div>
+  </div>
+  <div class="lt">
+    <button class="lb on" onclick="setLang('en')">EN</button>
+    <button class="lb"    onclick="setLang('th')">ไทย</button>
   </div>
 </div>
 
-<div class="container">
+<div class="wrap">
 
-  <!-- Success screen -->
-  <div class="success-screen" id="success-screen">
-    <div class="success-icon">✓</div>
-    <div class="success-title">Request Sent!</div>
-    <div class="success-sub">Thanks! Steven will review your request and get back to you shortly.<br>Please check your inbox for a confirmation.</div>
+  <!-- Success -->
+  <div class="success" id="success">
+    <div class="si">✓</div>
+    <div class="st2" id="suc-t">Request Sent!</div>
+    <div class="ss2" id="suc-s"></div>
   </div>
 
-  <!-- Booking form -->
-  <div id="booking-form-wrap">
+  <div id="fwrap">
 
-    <div class="card">
-      <div class="card-title">Available Times</div>
-      <div id="avail-display" class="loading-avail">Loading availability...</div>
+    <!-- Step bar -->
+    <div class="sbar">
+      <div class="st on" id="tab1"><span class="sn">1</span><span id="tl1">Package</span></div>
+      <div class="st"    id="tab2"><span class="sn">2</span><span id="tl2">Slots</span></div>
+      <div class="st"    id="tab3"><span class="sn">3</span><span id="tl3">Details</span></div>
     </div>
 
-    <div class="card">
-      <div class="card-title">Request a Session</div>
+    <!-- ── STEP 1: PACKAGE ── -->
+    <div id="s1" class="card">
 
-      <div class="error-msg" id="form-error"></div>
-
-      <div class="form-group">
-        <label class="form-label">Your Name <span class="required">*</span></label>
-        <input class="form-input" type="text" id="f-name" placeholder="e.g. Araya Somporn" autocomplete="name">
+      <div class="ct" id="ct1-subj">Subject</div>
+      <div class="subj-grid" id="subj-chips"></div>
+      <div class="ielts-skills" id="ielts-skills">
+        <div style="font-size:11px;font-weight:700;color:#6b6a65;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px" id="ielts-skill-lbl">Select skills</div>
+        <div class="skill-row" id="skill-chips"></div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Email Address <span class="required">*</span></label>
-        <input class="form-input" type="email" id="f-email" placeholder="your@email.com" autocomplete="email">
+      <div class="ct" style="margin-top:18px" id="ct1">Total hours</div>
+      <div class="pkg-row" id="pkg-chips"></div>
+      <div class="custom-wrap">
+        <input class="custom-inp" type="number" id="custom-hrs" min="1" max="40" placeholder="—" oninput="pickCustom()">
+        <span class="custom-lbl" id="custom-lbl">hrs (custom, max 40)</span>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Subject / Goal <span class="required">*</span></label>
-        <input class="form-input" type="text" id="f-subject" placeholder="e.g. IELTS preparation, SAT Math, University applications">
+      <div class="ct" style="margin-top:18px" id="ct1b">Session length</div>
+      <div class="stype-row">
+        <div class="stype-card" id="sc1" onclick="pickStype('1h')">
+          <div class="stv">1h</div><div class="stl" id="stl1">1 hour</div>
+        </div>
+        <div class="stype-card" id="sc2" onclick="pickStype('2h')">
+          <div class="stv">2h</div><div class="stl" id="stl2">2 hours</div>
+        </div>
+        <div class="stype-card" id="sc3" onclick="pickStype('mix')">
+          <div class="stv">↔</div><div class="stl" id="stl3">Mixed</div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Preferred Day &amp; Time <span class="required">*</span></label>
-        <input class="form-input" type="text" id="f-slot" placeholder="e.g. Tuesday 10:00 or weekday mornings">
+      <div class="nr" style="margin-top:16px">
+        <button class="btn btn-dk" id="s1-next" onclick="goSlots()" disabled><span id="s1-next-lbl">Choose Slots →</span></button>
       </div>
-
-      <div class="form-group">
-        <label class="form-label">Message (optional)</label>
-        <textarea class="form-input" id="f-message" placeholder="Tell Steven a bit about your situation, current level, exam date, etc."></textarea>
-      </div>
-
-      <button class="btn btn-primary" id="submit-btn" onclick="submitBooking()">Send Request →</button>
     </div>
 
+    <!-- ── STEP 2: SLOTS ── -->
+    <div id="s2" style="display:none">
+
+      <!-- Progress -->
+      <div class="prog-wrap">
+        <div>
+          <div class="prog-txt" id="prog-txt">0 / 0h selected</div>
+          <div class="prog-sub" id="prog-sub"></div>
+        </div>
+        <div style="flex:1">
+          <div class="prog-bar-outer"><div class="prog-bar-inner" id="prog-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Calendar card -->
+      <div class="card" id="cal-card">
+        <div class="cal-nav">
+          <button class="cnb" id="cprev" onclick="calPrev()">‹</button>
+          <div class="cm" id="clbl"></div>
+          <button class="cnb" id="cnext" onclick="calNext()">›</button>
+        </div>
+        <div class="cal-grid" id="chdrs"></div>
+        <div class="cal-grid" id="ccells" style="gap:3px"></div>
+        <div id="cal-empty" class="empty-msg" style="display:none"></div>
+      </div>
+
+      <!-- Selected slots -->
+      <div class="card" id="picked-card" style="display:none">
+        <div class="ct" id="ct-picked">Selected slots</div>
+        <div class="slots-list" id="slots-list"></div>
+        <div class="nr">
+          <button class="btn btn-gh" onclick="goStep(1)">← <span class="bbl">Back</span></button>
+          <button class="btn btn-dk" id="s2-next" onclick="goStep(3)"><span id="s2-next-lbl">Continue →</span></button>
+        </div>
+      </div>
+      <div class="nr" id="s2-back-only" style="margin-top:4px">
+        <button class="btn btn-gh" onclick="goStep(1)">← <span class="bbl">Back</span></button>
+      </div>
+
+    </div>
+
+    <!-- ── STEP 3: DETAILS ── -->
+    <div id="s3" style="display:none">
+      <div class="card">
+        <div class="ct" id="ct3">Your booking</div>
+        <div class="summary-slots" id="sum-slots"></div>
+        <div style="font-size:12px;color:#6b6a65;margin-bottom:16px" id="sum-total"></div>
+      </div>
+      <div class="card">
+        <div class="ct" id="ct3b">Your details</div>
+        <div class="err" id="ferr"></div>
+        <div class="fg"><label class="fl" id="lbl-n">Full Name <span class="req">*</span></label><input class="fi" type="text" id="fn" autocomplete="name"></div>
+        <div class="fg"><label class="fl" id="lbl-nick">Nickname <span style="color:#bbb;font-weight:400;text-transform:none" id="nick-opt-lbl">(optional)</span></label><input class="fi" type="text" id="fnick" autocomplete="nickname"></div>
+        <div class="fg"><label class="fl" id="lbl-e">Email <span class="req">*</span></label><input class="fi" type="email" id="fe" autocomplete="email"></div>
+        <div class="fg"><label class="fl" id="lbl-m">Message <span style="color:#bbb;font-weight:400;text-transform:none" id="opt-lbl">(optional)</span></label><textarea class="fi" id="fm" rows="3"></textarea></div>
+        <div class="nr">
+          <button class="btn btn-gh" onclick="goStep(2)">← <span class="bbl">Back</span></button>
+          <button class="btn btn-dk" id="sub-btn" onclick="submitBooking()"><span id="sub-lbl">Send Request →</span></button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /fwrap -->
+</div>
+
+<!-- Duration popover (for mixed mode) -->
+<div id="dpop" style="display:none" onclick="closeDpop(event)">
+  <div class="dpop-backdrop" style="position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.4)">
+    <div class="dpop" onclick="event.stopPropagation()">
+      <div class="dpop-title" id="dp-title">How long is this session?</div>
+      <div class="dpop-slot" id="dp-slot"></div>
+      <div class="dpop-btns">
+        <div class="dpop-btn" id="dp-1h" onclick="confirmDur(1)">1h</div>
+        <div class="dpop-btn" id="dp-2h" onclick="confirmDur(2)">2h</div>
+      </div>
+      <button class="dpop-cancel" id="dp-cancel" onclick="closeDpop()">Cancel</button>
+    </div>
   </div>
 </div>
 
-<footer>Powered by Steven.CO &nbsp;·&nbsp; Prompt Language Studyo Co., Ltd.</footer>
+<footer id="footer-t">Powered by Steven.CO · Prompt Language Studyo Co., Ltd.</footer>
 
 <script>
-// ── CONFIG — update WEB_APP_URL after deploying Apps Script ──
-var WEB_APP_URL = '';  // Set this to your Apps Script Web App URL
+var WEB_APP_URL = ''; // Your Apps Script Web App URL
 
-// ── Load availability from localStorage key exposed by Steven.CO ──
-// Since book.html is on the same GitHub Pages origin as index.html,
-// it can read the same localStorage.
-function loadAvailability() {
-  var el = document.getElementById('avail-display');
-  try {
-    var raw = localStorage.getItem('stevenco_avail');
-    if (!raw) { el.textContent = 'Please contact Steven directly to arrange a time.'; return; }
-    var state = JSON.parse(raw);
-    var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    var rows = [];
-    days.forEach(function(day) {
-      var slots = Object.keys(state[day] || {}).filter(function(s) { return state[day][s]; }).sort();
-      if (slots.length) rows.push({ day: day, slots: slots });
-    });
-    if (rows.length === 0) { el.textContent = 'No availability set. Please contact Steven directly.'; return; }
-    var html = '<div class="avail-grid">';
-    rows.forEach(function(r) {
-      html += '<div class="avail-row"><div class="day">' + r.day + '</div><div class="slots">' + r.slots.join(' · ') + '</div></div>';
-    });
-    html += '</div>';
-    el.innerHTML = html;
-  } catch(e) {
-    el.textContent = 'Please contact Steven directly to arrange a time.';
+// ── STATE ─────────────────────────────────────────────────
+var lang          = 'en';
+var allSlots      = [];      // from sheet
+var slotsMap      = {};      // date → { t1:[times], t2:[times] }
+var totalHrs      = 0;
+var stype         = '';      // '1h','2h','mix'
+var selectedSubj  = '';      // subject key
+var selectedSkills= [];      // ielts skill keys (only when subj=ielts)
+var picked        = [];      // [{date,time,dur,end}]
+var calY          = 0, calM = 0;
+var dpopPending   = null;    // {date,time} waiting for dur choice
+
+// ── TRANSLATIONS ──────────────────────────────────────────
+var T = {
+  en:{
+    hsub:'Private Tutoring · IELTS · SAT · GED · Admissions',
+    tl1:'Package',tl2:'Slots',tl3:'Details',
+    ct1:'Total hours',ct1b:'Session length',
+    stl1:'1 hour',stl2:'2 hours',stl3:'Mixed',
+    s1next:'Choose Slots →',
+    customLbl:'hrs (custom, max 40)',
+    ctPicked:'Selected slots',
+    ct3:'Your booking',ct3b:'Your details',
+    progTxt:function(h,tot){return h+'h / '+tot+'h selected';},
+    progSub:function(h,tot,stype){
+      var rem=tot-h;
+      if(rem<=0) return 'Package complete \u2713';
+      return rem+'h remaining';
+    },
+    s2next:'Continue →',
+    lblN:'Your Name',lblE:'Email',lblS:'Subject / Goal',lblM:'Message',
+    optLbl:'(optional)',
+    subBtn:'Send Request →',sending:'Sending...',
+    back:'Back',
+    dpTitle:'How long is this session?',
+    dpCancel:'Cancel',
+    sumTotal:function(n,h){return n+' session'+(n===1?'':'s')+' · '+h+'h total';},
+    noSlots:'No available slots at the moment. Please check back soon.',
+    errReq:'Please fill in all required fields.',
+    errEmail:'Please enter a valid email address.',
+    errFail:'Something went wrong. Please try again.',
+    errNet:'Could not connect. Please try again.',
+    sucTitle:'Request Sent!',
+    sucSub:function(n,h){return 'Your '+n+'-session package ('+h+'h) request has been sent. Steven will review and confirm each slot shortly. Check your inbox for a confirmation.';},
+    loading:'Loading...',
+    months:['January','February','March','April','May','June','July','August','September','October','November','December'],
+    days:['Mo','Tu','We','Th','Fr','Sa','Su'],
+    footer:'Powered by Steven.CO \u00b7 Prompt Language Studyo Co., Ltd.',
+    nPh:'e.g. Araya Somporn',nickPh:'e.g. New',mPh:'Anything useful to know (current level, exam date, etc.)...',
+    ct1Subj:'Subject',ieltsSkillLbl:'Select skills',
+    lblNick:'Nickname',
+    subjects:[
+      {k:'ielts',    l:'IELTS'},
+      {k:'sat',      l:'SAT (W&R)'},
+      {k:'ged-ss',   l:'GED (Social Studies)'},
+      {k:'ged-rla',  l:'GED (RLA)'},
+      {k:'acad-w',   l:'Academic Writing'},
+      {k:'sop',      l:'SOP Writing'},
+      {k:'interview',l:'Interview Prep'},
+      {k:'gen-en',   l:'General English'},
+      {k:'biz-en',   l:'Business English'},
+      {k:'igcse-fl', l:'IGCSE (First Language)'},
+      {k:'igcse-sl', l:'IGCSE (Second Language)'},
+    ],
+    ieltsSkills:[
+      {k:'full',   l:'All Skills'},
+      {k:'listen', l:'Listening'},
+      {k:'read',   l:'Reading'},
+      {k:'write',  l:'Writing'},
+      {k:'speak',  l:'Speaking'},
+    ],
+  },
+  th:{
+    hsub:'ติวส่วนตัว · IELTS · SAT · GED · สมัครมหาวิทยาลัย',
+    tl1:'แพ็กเกจ',tl2:'ช่วงเวลา',tl3:'ข้อมูล',
+    ct1:'จำนวนชั่วโมงทั้งหมด',ct1b:'จำนวนชั่วโมงต่อคลาส',
+    stl1:'1 ชั่วโมง',stl2:'2 ชั่วโมง',stl3:'ผสม',
+    s1next:'เลือกช่วงเวลา →',
+    customLbl:'ชม. (กำหนดเอง สูงสุด 40)',
+    ctPicked:'ช่วงเวลาที่เลือก',
+    ct3:'สรุปการจอง',ct3b:'กรอกข้อมูล',
+    progTxt:function(h,tot){return h+'ชม. / '+tot+'ชม. ที่เลือก';},
+    progSub:function(h,tot){var rem=tot-h;if(rem<=0) return 'ครบแพ็กเกจแล้ว \u2713';return 'เหลืออีก '+rem+'ชม.';},
+    s2next:'ต่อไป →',
+    lblN:'ชื่อของคุณ',lblE:'อีเมล',lblS:'วิชา / เป้าหมาย',lblM:'ข้อความ',
+    optLbl:'(ไม่บังคับ)',
+    subBtn:'ส่งคำขอ →',sending:'กำลังส่ง...',
+    back:'ย้อนกลับ',
+    dpTitle:'เซสชันนี้นานแค่ไหน?',
+    dpCancel:'ยกเลิก',
+    sumTotal:function(n,h){return n+' เซสชัน · '+h+'ชม. รวม';},
+    noSlots:'ไม่มีช่วงเวลาว่างในขณะนี้ กรุณาลองใหม่ภายหลัง',
+    errReq:'กรุณากรอกข้อมูลให้ครบถ้วน',
+    errEmail:'กรุณากรอกอีเมลที่ถูกต้อง',
+    errFail:'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง',
+    errNet:'ไม่สามารถเชื่อมต่อได้ กรุณาลองอีกครั้ง',
+    sucTitle:'ส่งคำขอเรียบร้อยแล้ว!',
+    sucSub:function(n,h){return 'คำขอ '+n+' เซสชัน ('+h+'ชม.) ถูกส่งเรียบร้อยแล้ว สตีเวนจะยืนยันแต่ละช่วงเวลาในเร็วๆ นี้';},
+    loading:'กำลังโหลด...',
+    months:['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'],
+    days:['จ','อ','พ','พฤ','ศ','ส','อา'],
+    footer:'Powered by Steven.CO · Prompt Language Studyo Co., Ltd.',
+    nPh:'เช่น อาราย สมพร',nickPh:'เช่น นิว',mPh:'ข้อมูลที่เป็นประโยชน์ (ระดับปัจจุบัน วันสอบ ฯลฯ)...',
+    ct1Subj:'วิชา',ieltsSkillLbl:'เลือกทักษะ',
+    lblNick:'ชื่อเล่น',
+    subjects:[
+      {k:'ielts',    l:'IELTS'},
+      {k:'sat',      l:'SAT (W&R)'},
+      {k:'ged-ss',   l:'GED (สังคมศึกษา)'},
+      {k:'ged-rla',  l:'GED (RLA)'},
+      {k:'acad-w',   l:'Academic Writing'},
+      {k:'sop',      l:'SOP Writing'},
+      {k:'interview',l:'เตรียมสัมภาษณ์'},
+      {k:'gen-en',   l:'ภาษาอังกฤษทั่วไป'},
+      {k:'biz-en',   l:'ภาษาอังกฤษธุรกิจ'},
+      {k:'igcse-fl', l:'IGCSE (First Language)'},
+      {k:'igcse-sl', l:'IGCSE (Second Language)'},
+    ],
+    ieltsSkills:[
+      {k:'full',   l:'ทุกทักษะ'},
+      {k:'listen', l:'Listening'},
+      {k:'read',   l:'Reading'},
+      {k:'write',  l:'Writing'},
+      {k:'speak',  l:'Speaking'},
+    ],
   }
+};
+function tx(k,a,b,c,d){var v=T[lang][k]!==undefined?T[lang][k]:T.en[k];return typeof v==='function'?v(a,b,c,d):v;}
+
+// ── LANG ──────────────────────────────────────────────────
+function setLang(l){
+  lang=l;
+  document.body.classList.toggle('th',l==='th');
+  document.querySelectorAll('.lb').forEach(function(b){b.classList.toggle('on',(l==='en'&&b.textContent==='EN')||(l==='th'&&b.textContent==='ไทย'));});
+  applyT();
 }
-
-function submitBooking() {
-  var name    = document.getElementById('f-name').value.trim();
-  var email   = document.getElementById('f-email').value.trim();
-  var subject = document.getElementById('f-subject').value.trim();
-  var slot    = document.getElementById('f-slot').value.trim();
-  var message = document.getElementById('f-message').value.trim();
-  var errEl   = document.getElementById('form-error');
-
-  errEl.style.display = 'none';
-
-  if (!name || !email || !subject || !slot) {
-    errEl.textContent = 'Please fill in all required fields.';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-    errEl.textContent = 'Please enter a valid email address.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  var btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-
-  var payload = {
-    action: 'submitBookingRequest',
-    row: {
-      id:            'br_' + Date.now(),
-      student_name:  name,
-      student_email: email,
-      subject:       subject,
-      preferred_slot: slot,
-      message:       message,
-      status:        'Pending',
-      submitted_at:  new Date().toISOString()
-    }
+function applyT(){
+  var ids={
+    'h-sub':'hsub','tl1':'tl1','tl2':'tl2','tl3':'tl3',
+    'ct1':'ct1','ct1b':'ct1b','stl1':'stl1','stl2':'stl2','stl3':'stl3',
+    'ct-picked':'ctPicked','ct3':'ct3','ct3b':'ct3b',
+    'opt-lbl':'optLbl','dp-cancel':'dpCancel','footer-t':'footer',
+    'custom-lbl':'customLbl','dp-title':'dpTitle',
+    'nick-opt-lbl':'optLbl','ct1-subj':'ct1Subj','ielts-skill-lbl':'ieltsSkillLbl'
   };
+  Object.keys(ids).forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=tx(ids[id]);});
+  var _s1n=document.getElementById('s1-next-lbl'); if(_s1n) _s1n.textContent = tx('s1next');
+  var _s2n=document.getElementById('s2-next-lbl'); if(_s2n) _s2n.textContent = tx('s2next');
+  var _sb=document.getElementById('sub-lbl');      if(_sb)  _sb.textContent  = tx('subBtn');
+  var _n=document.getElementById('lbl-n');   if(_n) _n.innerHTML = tx('lblN')+' <span class="req">*</span>';
+  var _e=document.getElementById('lbl-e');   if(_e) _e.innerHTML = tx('lblE')+' <span class="req">*</span>';
+  var _m=document.getElementById('lbl-m');   if(_m) _m.innerHTML = tx('lblM')+' <span style="color:#bbb;font-weight:400;text-transform:none">'+tx('optLbl')+'</span>';
+  var _nk=document.getElementById('lbl-nick'); if(_nk) _nk.innerHTML = tx('lblNick')+' <span style="color:#bbb;font-weight:400;text-transform:none">'+tx('optLbl')+'</span>';
+  var _fn=document.getElementById('fn');     if(_fn) _fn.placeholder = tx('nPh');
+  var _fk=document.getElementById('fnick');  if(_fk) _fk.placeholder = tx('nickPh');
+  var _fm=document.getElementById('fm');     if(_fm) _fm.placeholder = tx('mPh');
 
-  if (!WEB_APP_URL) {
-    // No Web App URL configured — show success anyway (demo mode)
-    showSuccess();
+  document.getElementById('lbl-nick').innerHTML = tx('lblNick')+' <span style="color:#bbb;font-weight:400;text-transform:none">'+tx('optLbl')+'</span>';
+  document.querySelectorAll('.bbl').forEach(function(e){e.textContent=tx('back');});
+  renderSubjChips();
+  if(selectedSubj==='ielts') renderSkillChips();
+  if(calY) renderCal();
+  updateProg();
+  if(picked.length) renderPickedList();
+}
+
+// ── LOAD SLOTS ────────────────────────────────────────────
+function loadSlots(){
+  if(!WEB_APP_URL){
+    var fake=[]; var base=new Date(); base.setHours(0,0,0,0); base.setDate(base.getDate()+1);
+    for(var i=0;i<50;i++){
+      var d=new Date(base); d.setDate(base.getDate()+i);
+      if(d.getDay()===0) continue;
+      var ds=fmt(d);
+      ['09:00','10:00','11:00','13:00','14:00','15:00','16:00'].forEach(function(s){
+        fake.push({date:ds,start_time:s,end_time:addH(s,1),duration:'1',status:'Open'});
+        fake.push({date:ds,start_time:s,end_time:addH(s,2),duration:'2',status:'Open'});
+      });
+      fake.push({date:ds,start_time:'17:00',end_time:addH('17:00',1),duration:'1',status:'Open'});
+    }
+    allSlots=fake;
+    return Promise.resolve();
+  }
+  return fetch(WEB_APP_URL+'?action=getAvailableSlots')
+    .then(function(r){return r.json();})
+    .then(function(d){allSlots=d.slots||[];})
+    .catch(function(){allSlots=[];});
+}
+
+function buildMap(){
+  slotsMap={};
+  allSlots.forEach(function(s){
+    if(s.status!=='Open') return;
+    if(!slotsMap[s.date]) slotsMap[s.date]={t1:[],t2:[]};
+    if(String(s.duration)==='1') slotsMap[s.date].t1.push(s.start_time);
+    if(String(s.duration)==='2') slotsMap[s.date].t2.push(s.start_time);
+  });
+}
+
+// ── STEP 1 ────────────────────────────────────────────────
+var PKG_OPTS=[10,20,30];
+
+// ── SUBJECT ───────────────────────────────────────────────
+function renderSubjChips(){
+  var subjs = tx('subjects');
+  document.getElementById('subj-chips').innerHTML = subjs.map(function(s){
+    var on = selectedSubj===s.k;
+    var cls = 'subj-chip' + (s.k==='ielts'?' ielts-main':'') + (on?' on':'');
+    return '<div class="'+cls+'" data-k="'+s.k+'" onclick="pickSubj(this.dataset.k)">'+s.l+'</div>';
+  }).join('');
+}
+
+function renderSkillChips(){
+  var skills = tx('ieltsSkills');
+  document.getElementById('skill-chips').innerHTML = skills.map(function(s){
+    var on = selectedSkills.indexOf(s.k)>-1;
+    return '<div class="skill-chip'+(on?' on':'')+'" data-k="'+s.k+'" onclick="toggleSkill(this.dataset.k)">'+s.l+'</div>';
+  }).join('');
+}
+
+function pickSubj(k){
+  selectedSubj = k;
+  selectedSkills = [];
+  renderSubjChips();
+  var ieltsBox = document.getElementById('ielts-skills');
+  if(k==='ielts'){
+    ieltsBox.classList.add('open');
+    renderSkillChips();
+  } else {
+    ieltsBox.classList.remove('open');
+  }
+  checkS1();
+}
+
+function toggleSkill(k){
+  var idx = selectedSkills.indexOf(k);
+  if(idx>-1) selectedSkills.splice(idx,1); else selectedSkills.push(k);
+  renderSkillChips();
+  checkS1();
+}
+
+function getSubjectLabel(){
+  if(!selectedSubj) return '';
+  var subjs = tx('subjects'); // use current lang
+  var found = subjs.find(function(s){return s.k===selectedSubj;});
+  var base = found ? found.l : selectedSubj;
+  if(selectedSubj==='ielts' && selectedSkills.length>0){
+    var skills = tx('ieltsSkills');
+    var skillLabels = selectedSkills.map(function(k){
+      var sf = skills.find(function(s){return s.k===k;}); return sf?sf.l:k;
+    });
+    base += ' (' + skillLabels.join(', ') + ')';
+  }
+  return base;
+}
+
+function renderPkgChips(){
+  document.getElementById('pkg-chips').innerHTML = PKG_OPTS.map(function(h){
+    return '<div class="pkg-chip'+(totalHrs===h?' on':'')+'" onclick="pickPkg('+h+')">'+h+'h</div>';
+  }).join('');
+}
+
+function pickPkg(h){
+  totalHrs=h;
+  document.getElementById('custom-hrs').value='';
+  renderPkgChips();
+  checkS1();
+}
+
+function pickCustom(){
+  var v=parseInt(document.getElementById('custom-hrs').value)||0;
+  if(v>40){v=40;document.getElementById('custom-hrs').value=40;}
+  totalHrs=v;
+  renderPkgChips(); // deselect preset chips
+  // deselect all preset chips since custom is active
+  document.querySelectorAll('.pkg-chip').forEach(function(c){c.classList.remove('on');});
+  checkS1();
+}
+
+function pickStype(t){
+  stype=t;
+  ['1h','2h','mix'].forEach(function(v,i){
+    document.getElementById('sc'+(i+1)).classList.toggle('on',v===t);
+  });
+  checkS1();
+}
+
+function checkS1(){
+  var subjOk = selectedSubj!=='' && (selectedSubj!=='ielts' || selectedSkills.length>0);
+  var ok = subjOk && totalHrs>0 && stype!=='';
+  document.getElementById('s1-next').disabled=!ok;
+}
+
+function goSlots(){
+  if(!totalHrs||!stype) return;
+  picked=[];
+  buildMap();
+  // Set calendar to first month with slots
+  var keys=Object.keys(slotsMap).sort();
+  if(!keys.length){
+    goStep(2);
+    document.getElementById('cal-card').style.display='none';
+    document.getElementById('cal-empty').style.display='block';
+    document.getElementById('cal-empty').textContent=tx('noSlots');
+    return;
+  }
+  var fd=new Date(keys[0]+'T00:00:00');
+  calY=fd.getFullYear(); calM=fd.getMonth();
+  goStep(2);
+  renderCal();
+  updateProg();
+}
+
+// ── STEP 2: CALENDAR ──────────────────────────────────────
+function goStep(n){
+  document.getElementById('s1').style.display  = n===1?'':'none';
+  document.getElementById('s2').style.display  = n===2?'':'none';
+  document.getElementById('s3').style.display  = n===3?'':'none';
+  for(var i=1;i<=3;i++){
+    var t=document.getElementById('tab'+i);
+    t.classList.toggle('on',i===n);
+    t.classList.toggle('done',i<n);
+  }
+  if(n===3) buildSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+var DAY_H={en:['Mo','Tu','We','Th','Fr','Sa','Su'],th:['จ','อ','พ','พฤ','ศ','ส','อา']};
+
+function renderCal(){
+  var today=new Date(); today.setHours(0,0,0,0);
+  var maxD=new Date(today.getFullYear(),today.getMonth()+2,today.getDate());
+  var firstDay=new Date(calY,calM,1);
+  var lastDay =new Date(calY,calM+1,0);
+
+  document.getElementById('clbl').textContent=tx('months')[calM]+' '+calY;
+
+  var prevOk=new Date(calY,calM-1,1)>=new Date(today.getFullYear(),today.getMonth(),1);
+  var nextOk=new Date(calY,calM+1,1)<=new Date(today.getFullYear(),today.getMonth()+2,1);
+  document.getElementById('cprev').disabled=!prevOk;
+  document.getElementById('cnext').disabled=!nextOk;
+
+  document.getElementById('chdrs').innerHTML=DAY_H[lang].map(function(h){return '<div class="ch">'+h+'</div>';}).join('');
+
+  var startDow=firstDay.getDay();
+  var pad=(startDow===0)?6:startDow-1;
+  var cells='';
+  for(var p=0;p<pad;p++) cells+='<div class="day-col empty"></div>';
+
+  var pickedDates={};
+  picked.forEach(function(p){if(!pickedDates[p.date]) pickedDates[p.date]=[];pickedDates[p.date].push(p.time);});
+
+  for(var day=1;day<=lastDay.getDate();day++){
+    var d=new Date(calY,calM,day);
+    var ds=fmt(d);
+    var past=d<today, future=d>maxD;
+    var info=slotsMap[ds]||{t1:[],t2:[]};
+    var hasSome = info.t1.length>0||info.t2.length>0;
+    var isTdy=d.getTime()===today.getTime();
+
+    if(!hasSome||past||future){
+      cells+='<div class="day-col no-slot"><div class="day-hdr"><div class="day-num" style="color:#ccc">'+day+'</div></div></div>';
+      continue;
+    }
+
+    // Get available times based on stype
+    var times={};
+    if(stype==='1h'||stype==='mix') info.t1.forEach(function(t){times[t]=true;});
+    if(stype==='2h'||stype==='mix') info.t2.forEach(function(t){times[t]=true;});
+    var timeList=Object.keys(times).sort();
+
+    var slots='';
+    timeList.forEach(function(t){
+      var isPicked=(pickedDates[ds]||[]).indexOf(t)>-1;
+      var cls=isPicked?'tslot picked':'tslot free';
+      // Check if this exact dur is still valid for stype
+      var avail1=info.t1.indexOf(t)>-1;
+      var avail2=info.t2.indexOf(t)>-1;
+      // For fixed types, grey out if not matching
+      if(stype==='1h'&&!avail1) cls='tslot unavail';
+      if(stype==='2h'&&!avail2) cls='tslot unavail';
+      slots+='<div class="'+cls+'" data-ds="'+ds+'" data-t="'+t+'" onclick="tapSlot(\''+ds+'\',\''+t+'\')">'+t+'</div>';
+    });
+
+    cells+='<div class="day-col"><div class="day-hdr"><div class="day-num'+(isTdy?' today-num':'')+'">'+day+'</div></div><div class="day-slots">'+slots+'</div></div>';
+  }
+
+  document.getElementById('ccells').innerHTML=cells;
+}
+
+function calPrev(){calM--;if(calM<0){calM=11;calY--;}renderCal();}
+function calNext(){calM++;if(calM>11){calM=0;calY++;}renderCal();}
+
+function tapSlot(ds,t){
+  // Check if already picked — if so, remove it
+  var idx=picked.findIndex(function(p){return p.date===ds&&p.time===t;});
+  if(idx>-1){
+    picked.splice(idx,1);
+    afterPickChange();
     return;
   }
 
-  fetch(WEB_APP_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(payload)
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.success) { showSuccess(); }
-    else { showError('Something went wrong. Please try again.', btn); }
-  })
-  .catch(function() { showError('Could not send request. Please try again or contact Steven directly.', btn); });
+  // Check package is not already full
+  var usedH=picked.reduce(function(s,p){return s+p.dur;},0);
+  if(usedH>=totalHrs) return; // already full
+
+  if(stype==='mix'){
+    // Show dur popover
+    var info=slotsMap[ds]||{t1:[],t2:[]};
+    dpopPending={date:ds,time:t};
+    document.getElementById('dp-slot').textContent=ds+' · '+t;
+    document.getElementById('dp-1h').classList.toggle('disabled',info.t1.indexOf(t)===-1);
+    document.getElementById('dp-2h').classList.toggle('disabled',info.t2.indexOf(t)===-1);
+    document.getElementById('dpop').style.display='block';
+    return;
+  }
+
+  var dur=stype==='1h'?1:2;
+  var info=slotsMap[ds]||{t1:[],t2:[]};
+  var ok=dur===1?info.t1.indexOf(t)>-1:info.t2.indexOf(t)>-1;
+  if(!ok) return;
+
+  commitSlot(ds,t,dur);
 }
 
-function showSuccess() {
-  document.getElementById('booking-form-wrap').style.display = 'none';
-  document.getElementById('success-screen').style.display = 'block';
+function confirmDur(dur){
+  if(!dpopPending) return;
+  var info=slotsMap[dpopPending.date]||{t1:[],t2:[]};
+  var ok=dur===1?info.t1.indexOf(dpopPending.time)>-1:info.t2.indexOf(dpopPending.time)>-1;
+  if(!ok) return;
+  commitSlot(dpopPending.date,dpopPending.time,dur);
+  closeDpop();
 }
 
-function showError(msg, btn) {
-  var errEl = document.getElementById('form-error');
-  errEl.textContent = msg;
-  errEl.style.display = 'block';
-  btn.disabled = false;
-  btn.textContent = 'Send Request →';
+function closeDpop(e){
+  if(e&&e.target!==document.getElementById('dpop')) return;
+  document.getElementById('dpop').style.display='none';
+  dpopPending=null;
 }
 
-loadAvailability();
+function commitSlot(ds,t,dur){
+  picked.push({date:ds,time:t,dur:dur,end:addH(t,dur)});
+  picked.sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time);});
+  afterPickChange();
+}
+
+function afterPickChange(){
+  updateProg();
+  renderCal();
+  renderPickedList();
+  var usedH=picked.reduce(function(s,p){return s+p.dur;},0);
+  var card=document.getElementById('picked-card');
+  var backOnly=document.getElementById('s2-back-only');
+  card.style.display=picked.length?'block':'none';
+  backOnly.style.display=picked.length?'none':'block';
+  // Auto-scroll to picked card when package complete
+  if(usedH>=totalHrs){
+    setTimeout(function(){card.scrollIntoView({behavior:'smooth',block:'nearest'});},200);
+  }
+}
+
+function updateProg(){
+  var usedH=picked.reduce(function(s,p){return s+p.dur;},0);
+  var pct=totalHrs>0?Math.min(100,Math.round((usedH/totalHrs)*100)):0;
+  var bar=document.getElementById('prog-bar');
+  if(bar){
+    bar.style.width=pct+'%';
+    bar.classList.toggle('warn',pct>100);
+  }
+  var ptxt=document.getElementById('prog-txt');
+  var psub=document.getElementById('prog-sub');
+  if(ptxt) ptxt.textContent=tx('progTxt',usedH,totalHrs);
+  var subjLbl = getSubjectLabel();
+  if(psub) psub.textContent = (subjLbl ? subjLbl + '  ·  ' : '') + tx('progSub',usedH,totalHrs);
+  // Enable continue only if package filled
+  var s2n=document.getElementById('s2-next');
+  if(s2n) s2n.disabled=usedH<totalHrs;
+}
+
+function renderPickedList(){
+  var list=document.getElementById('slots-list');
+  if(!list) return;
+  list.innerHTML=picked.map(function(p,i){
+    var d=new Date(p.date+'T00:00:00');
+    var dStr=d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{weekday:'short',month:'short',day:'numeric'});
+    return '<div class="slot-item">'+
+      '<div class="slot-item-info">'+
+        '<span class="slot-date">'+dStr+'</span>'+
+        '<span class="slot-time">'+p.time+' – '+p.end+' ('+p.dur+'h)</span>'+
+      '</div>'+
+      '<button class="slot-rm" onclick="removeSlot('+i+')" title="Remove">\u00d7</button>'+
+    '</div>';
+  }).join('');
+}
+
+function removeSlot(i){
+  picked.splice(i,1);
+  afterPickChange();
+}
+
+// ── STEP 3: SUMMARY + SUBMIT ──────────────────────────────
+function buildSummary(){
+  var totalH=picked.reduce(function(s,p){return s+p.dur;},0);
+  var html=picked.map(function(p){
+    var d=new Date(p.date+'T00:00:00');
+    var dStr=d.toLocaleDateString(lang==='th'?'th-TH':'en-GB',{weekday:'long',month:'long',day:'numeric'});
+    return '<div class="ss-row"><div><div class="ss-date">'+dStr+'</div><div class="ss-time">'+p.time+' – '+p.end+'</div></div><div class="ss-dur">'+p.dur+'h</div></div>';
+  }).join('');
+  document.getElementById('sum-slots').innerHTML=html;
+  var subjLine = getSubjectLabel();
+  document.getElementById('sum-total').innerHTML =
+    (subjLine ? '<span style="font-weight:600;color:var(--text,#1a1a18)">'+subjLine+'</span> &nbsp;·&nbsp; ' : '') +
+    tx('sumTotal',picked.length,totalH);
+}
+
+function submitBooking(){
+  var name=document.getElementById('fn').value.trim();
+  var nick=document.getElementById('fnick').value.trim();
+  var email=document.getElementById('fe').value.trim();
+  var msg=document.getElementById('fm').value.trim();
+  var subjLabel = getSubjectLabel();
+  var errEl=document.getElementById('ferr');
+  errEl.style.display='none';
+
+  if(!name||!email||!subjLabel){errEl.textContent=tx('errReq');errEl.style.display='block';return;}
+  if(!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)){errEl.textContent=tx('errEmail');errEl.style.display='block';return;}
+
+  var btn=document.getElementById('sub-btn');
+  btn.disabled=true;
+  document.getElementById('sub-lbl').textContent=tx('sending');
+
+  var totalH=picked.reduce(function(s,p){return s+p.dur;},0);
+  var groupId='rg_'+Date.now();
+
+  var requests=picked.map(function(p,i){
+    return {
+      id:             'br_'+Date.now()+'_'+i,
+      student_name:   name,
+      nickname:       nick,
+      student_email:  email,
+      subject:        subjLabel,
+      preferred_slot: p.date+' '+p.time+'\u2013'+p.end+' ('+p.dur+'h)',
+      message:        msg,
+      status:         'Pending',
+      submitted_at:   new Date().toISOString(),
+      recurring_group:groupId,
+      package_info:   'Session '+(i+1)+'/'+picked.length+' · '+totalH+'h package'
+    };
+  });
+
+  if(!WEB_APP_URL){showSuccess(requests.length,totalH);return;}
+
+  var chain=Promise.resolve();
+  requests.forEach(function(row){
+    chain=chain.then(function(){
+      return fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'submitBookingRequest',row:row})}).then(function(r){return r.json();});
+    });
+  });
+  chain.then(function(){showSuccess(requests.length,totalH);})
+       .catch(function(){
+         errEl.textContent=tx('errNet');errEl.style.display='block';
+         btn.disabled=false;document.getElementById('sub-lbl').textContent=tx('subBtn');
+       });
+}
+
+function showSuccess(n,h){
+  document.getElementById('fwrap').style.display='none';
+  document.getElementById('success').style.display='block';
+  document.getElementById('suc-t').textContent=tx('sucTitle');
+  document.getElementById('suc-s').textContent=tx('sucSub',n,h);
+}
+
+// ── UTILS ─────────────────────────────────────────────────
+function fmt(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+function p2(n){return n<10?'0'+n:''+n;}
+function addH(t,h){var p=t.split(':'),hr=parseInt(p[0])+Math.floor(h),mn=parseInt(p[1]||0)+Math.round((h%1)*60);if(mn>=60){hr++;mn-=60;}return p2(hr)+':'+p2(mn);}
+
+// ── INIT ──────────────────────────────────────────────────
+loadSlots().then(function(){
+  buildMap();
+  renderPkgChips();
+  applyT();
+});
 </script>
 </body>
 </html>

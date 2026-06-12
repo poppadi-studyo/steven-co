@@ -1403,9 +1403,15 @@ tr:hover td { background: var(--surface2); }
               <div id="avail-slots-grid"></div>
             </div>
             <div class="card">
-              <div class="card-title">Availability Text <button class="btn btn-ghost btn-sm" onclick="copyAvailabilityText()">⎘ Copy</button></div>
-              <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Paste into LINE, email, or anywhere.</div>
-              <div id="avail-text-output" style="background:var(--surface2);border-radius:var(--radius);padding:12px;font-size:12px;line-height:1.8;color:var(--text2);white-space:pre-wrap;min-height:80px"></div>
+              <div class="card-title">Public Booking Page</div>
+              <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Publish your free slots so students can book online. Updates the public page instantly.</div>
+              <div id="publish-slots-status" style="background:var(--surface2);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--text3);margin-bottom:12px;min-height:40px;line-height:1.6">
+                Not published yet this session.
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-teal" onclick="publishSlots()">↑ Publish Free Slots</button>
+                <a id="book-page-btn" href="book.html" target="_blank" class="btn btn-ghost btn-sm" style="align-self:center">🔗 View Public Page</a>
+              </div>
             </div>
           </div>
         </div>
@@ -1428,7 +1434,7 @@ tr:hover td { background: var(--surface2); }
           </div>
         </div>
 
-        <!-- Pending requests -->
+        <!-- Pending groups -->
         <div class="card" id="booking-pending-card">
           <div class="card-title">
             Pending Requests
@@ -1444,37 +1450,37 @@ tr:hover td { background: var(--surface2); }
         </div>
       </div>
 
-      <!-- ── BOOKING CONFIRM MODAL ── -->
-      <div class="modal-backdrop" id="modal-booking-confirm">
-        <div class="modal" style="max-width:420px">
-          <div class="modal-title" id="modal-booking-confirm-title">Confirm Session</div>
-          <div id="modal-booking-confirm-body"></div>
+      <!-- ── EDIT SLOT MODAL ── -->
+      <div class="modal-backdrop" id="modal-edit-slot">
+        <div class="modal" style="max-width:460px">
+          <div class="modal-title">Edit Slot</div>
+          <div id="edit-slot-original" style="background:var(--surface2);border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:16px"></div>
+          <div class="form-group">
+            <label class="form-label">Override date &amp; time manually</label>
+            <div style="display:flex;gap:8px">
+              <input class="form-input" type="date" id="edit-slot-date" style="flex:1">
+              <input class="form-input" type="time" id="edit-slot-time" style="width:110px">
+            </div>
+          </div>
+          <div id="edit-slot-suggestions-wrap">
+            <div class="form-label" style="margin-bottom:8px">Or pick a suggested slot</div>
+            <div id="edit-slot-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('modal-booking-confirm')">Cancel</button>
-            <button class="btn btn-teal" id="modal-booking-confirm-btn" onclick="confirmBookingAccept()">✓ Confirm &amp; Log Session</button>
+            <button class="btn btn-secondary" onclick="closeModal('modal-edit-slot')">Cancel</button>
+            <button class="btn btn-teal" onclick="saveSlotEdit()">✓ Save Changes</button>
           </div>
         </div>
       </div>
 
-      <!-- ── RESCHEDULE MODAL ── -->
-      <div class="modal-backdrop" id="modal-reschedule">
+      <!-- ── DECLINE CONFIRM MODAL ── -->
+      <div class="modal-backdrop" id="modal-decline-group">
         <div class="modal" style="max-width:380px">
-          <div class="modal-title">Propose New Time</div>
-          <div class="form-group">
-            <label class="form-label">Suggested Date</label>
-            <input class="form-input" type="date" id="reschedule-date">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Suggested Time</label>
-            <input class="form-input" type="time" id="reschedule-time" value="09:00">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Message to student (optional)</label>
-            <textarea class="form-input" id="reschedule-note" rows="2" placeholder="e.g. How about this time instead?"></textarea>
-          </div>
+          <div class="modal-title">Decline Package</div>
+          <div id="decline-group-body" style="font-size:13px;color:var(--text2);margin-bottom:16px"></div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('modal-reschedule')">Cancel</button>
-            <button class="btn btn-primary" onclick="submitReschedule()">Send Proposal</button>
+            <button class="btn btn-secondary" onclick="closeModal('modal-decline-group')">Cancel</button>
+            <button class="btn btn-ghost" style="color:var(--coral)" onclick="confirmDeclineGroup()">✕ Decline All</button>
           </div>
         </div>
       </div>
@@ -4931,190 +4937,305 @@ function downloadCardsPDF() {
 
 // ── BOOKINGS ──────────────────────────────────────────────
 
-var _bookingAcceptPending = null; // { request, sessionDraft }
-var _bookingReschedulePending = null; // request id
+// State
+var _editSlotPending    = null; // { groupId, requestId, origDate, origTime }
+var _declineGroupPending = null; // groupId
+
+// ── Group bookings by recurring_group (or single id if no group) ──
+function groupBookingRequests(requests) {
+  var groups = {};
+  requests.forEach(function(r) {
+    var gid = (r.recurring_group && r.recurring_group !== '') ? r.recurring_group : ('solo_' + r.id);
+    if (!groups[gid]) groups[gid] = { id: gid, requests: [], student_name: r.student_name, student_email: r.student_email, subject: r.subject, submitted_at: r.submitted_at };
+    groups[gid].requests.push(r);
+  });
+  // Sort each group's requests by preferred_slot date
+  Object.values(groups).forEach(function(g) {
+    g.requests.sort(function(a,b) { return (a.preferred_slot||'').localeCompare(b.preferred_slot||''); });
+    // Group status: if any Pending → Pending; all Accepted → Accepted; any Declined → Declined
+    var statuses = g.requests.map(function(r) { return r.status; });
+    if (statuses.every(function(s){ return s === 'Accepted'; })) g.status = 'Accepted';
+    else if (statuses.some(function(s){ return s === 'Declined'; })) g.status = 'Declined';
+    else if (statuses.some(function(s){ return s === 'Pending'; })) g.status = 'Pending';
+    else g.status = statuses[0] || 'Pending';
+  });
+  return groups;
+}
 
 function renderBookings() {
   var requests = DATA.bookingRequests || [];
+  var groups   = groupBookingRequests(requests);
+  var pending  = Object.values(groups).filter(function(g) { return g.status === 'Pending'; });
 
-  // Update sidebar badge
-  var pending = requests.filter(function(r) { return r.status === 'Pending'; });
+  // Sidebar badge
   var badge = document.getElementById('booking-badge');
-  if (badge) {
-    if (pending.length > 0) {
-      badge.style.display = 'inline';
-      badge.textContent = pending.length;
-    } else {
-      badge.style.display = 'none';
-    }
-  }
+  if (badge) { badge.style.display = pending.length > 0 ? 'inline' : 'none'; if (pending.length) badge.textContent = pending.length; }
 
-  // Pending count label
+  // Pending count
   var countEl = document.getElementById('booking-pending-count');
   if (countEl) countEl.textContent = pending.length > 0 ? pending.length + ' pending' : 'All clear';
 
   // Pending list
   var pendingEl = document.getElementById('booking-pending-list');
   if (pendingEl) {
-    if (pending.length === 0) {
+    if (!pending.length) {
       pendingEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No pending requests. Share your public booking link to receive bookings.</div>';
     } else {
-      pendingEl.innerHTML = pending.map(function(r) {
-        return buildBookingCard(r, true);
-      }).join('');
+      pendingEl.innerHTML = pending.map(function(g) { return buildGroupCard(g, true); }).join('');
     }
   }
 
-  // History list
+  // History
   var histEl = document.getElementById('booking-history-list');
   if (histEl) {
-    var history = requests.filter(function(r) { return r.status !== 'Pending'; })
-      .sort(function(a, b) { return (b.submitted_at || '').localeCompare(a.submitted_at || ''); });
-    if (history.length === 0) {
-      histEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No past requests.</div>';
-    } else {
-      histEl.innerHTML = history.map(function(r) {
-        return buildBookingCard(r, false);
-      }).join('');
-    }
+    var history = Object.values(groups).filter(function(g) { return g.status !== 'Pending'; })
+      .sort(function(a,b) { return (b.submitted_at||'').localeCompare(a.submitted_at||''); });
+    histEl.innerHTML = history.length
+      ? history.map(function(g) { return buildGroupCard(g, false); }).join('')
+      : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No past requests.</div>';
   }
 }
 
-function buildBookingCard(r, showActions) {
-  var statusClass = r.status === 'Pending' ? 'pending' : r.status === 'Accepted' ? 'completed' : r.status === 'Declined' ? 'cancelled' : 'scheduled';
-  var submitted = r.submitted_at ? r.submitted_at.slice(0, 16).replace('T', ' ') : '';
+function buildGroupCard(g, showActions) {
+  var isSingle = g.requests.length === 1;
+  var statusClass = g.status === 'Pending' ? 'pending' : g.status === 'Accepted' ? 'completed' : g.status === 'Declined' ? 'cancelled' : 'scheduled';
+  var submitted = (g.submitted_at||'').slice(0,16).replace('T',' ');
+  var totalH = g.requests.reduce(function(s,r) {
+    var m = (r.preferred_slot||'').match(/\((\d+)h\)/); return s + (m ? parseInt(m[1]) : 1);
+  }, 0);
+
+  // Slot rows
+  var slotRows = g.requests.map(function(r) {
+    var slotStatus = r.status === 'Accepted' ? '<span class="status completed" style="font-size:10px">✓</span>'
+                   : r.status === 'Declined' ? '<span class="status cancelled" style="font-size:10px">✕</span>' : '';
+    var editBtn = showActions
+      ? '<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px" data-gid="' + g.id + '" data-rid="' + r.id + '" onclick="openEditSlot(this.dataset.gid,this.dataset.rid)">Edit</button>'
+      : '';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:6px;background:var(--surface2);margin-bottom:4px;gap:8px">' +
+      '<div style="font-size:12px;font-family:monospace;flex:1">' + (r.preferred_slot||'—') + '</div>' +
+      slotStatus + editBtn +
+    '</div>';
+  }).join('');
+
+  // Action bar
   var actions = '';
   if (showActions) {
-    var rid = r.id;
-    actions = '<div style="display:flex;gap:8px;margin-top:12px">' +
-      '<button class="btn btn-teal btn-sm" data-bid="' + rid + '" onclick="openBookingAccept(this.dataset.bid)">✓ Accept</button>' +
-      '<button class="btn btn-ghost btn-sm" data-bid="' + rid + '" onclick="openReschedule(this.dataset.bid)">↻ Reschedule</button>' +
-      '<button class="btn btn-ghost btn-sm" style="color:var(--coral)" data-bid="' + rid + '" onclick="declineBooking(this.dataset.bid)">✕ Decline</button>' +
+    var gid = g.id;
+    actions = '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">' +
+      '<button class="btn btn-teal btn-sm" data-gid="' + gid + '" onclick="acceptGroup(this.dataset.gid)">✓ Accept All</button>' +
+      '<button class="btn btn-ghost btn-sm" style="color:var(--coral)" data-gid="' + gid + '" onclick="openDeclineGroup(this.dataset.gid)">✕ Decline All</button>' +
     '</div>';
   }
-  return '<div style="border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;background:var(--surface)">' +
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">' +
+
+  return '<div style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;background:var(--surface)">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">' +
       '<div>' +
-        '<div style="font-size:14px;font-weight:600">' + (r.student_name || 'Unknown') + '</div>' +
-        '<div style="font-size:12px;color:var(--text2);margin-top:2px">' + (r.subject || 'No subject') + (r.preferred_slot ? ' &nbsp;·&nbsp; ' + r.preferred_slot : '') + '</div>' +
+        '<div style="font-size:14px;font-weight:600">' + (g.student_name||'Unknown') + '</div>' +
+        '<div style="font-size:12px;color:var(--text2);margin-top:2px">' + (g.subject||'No subject') +
+          (isSingle ? '' : ' &nbsp;·&nbsp; ' + g.requests.length + ' sessions · ' + totalH + 'h') + '</div>' +
+        (g.student_email ? '<div style="font-size:11px;color:var(--text3);margin-top:2px">' + g.student_email + '</div>' : '') +
       '</div>' +
       '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">' +
-        '<span class="status ' + statusClass + '">' + (r.status || 'Pending') + '</span>' +
-        '<span style="font-size:11px;color:var(--text3)">' + submitted + '</span>' +
+        '<span class="status ' + statusClass + '">' + g.status + '</span>' +
+        '<span style="font-size:10px;color:var(--text3)">' + submitted + '</span>' +
       '</div>' +
     '</div>' +
-    (r.message ? '<div style="font-size:12px;color:var(--text2);background:var(--surface2);border-radius:6px;padding:8px 10px;margin-top:6px">' + r.message + '</div>' : '') +
-    (r.student_email ? '<div style="font-size:11px;color:var(--text3);margin-top:4px">' + r.student_email + '</div>' : '') +
+    slotRows +
     actions +
   '</div>';
 }
 
-function openBookingAccept(requestId) {
-  var r = (DATA.bookingRequests || []).find(function(x) { return x.id === requestId; });
-  if (!r) return;
-  _bookingAcceptPending = { request: r };
+// ── ACCEPT ALL ────────────────────────────────────────────
+function acceptGroup(groupId) {
+  var groups  = groupBookingRequests(DATA.bookingRequests || []);
+  var g       = groups[groupId];
+  if (!g) return;
 
-  // Parse preferred slot into date + time if possible (format: "YYYY-MM-DD HH:MM" or "Monday 09:00")
-  var dateGuess = '';
-  var timeGuess = '09:00';
-  if (r.preferred_slot) {
-    var parts = r.preferred_slot.split(' ');
-    if (parts[0] && parts[0].match(/^\d{4}-\d{2}-\d{2}$/)) { dateGuess = parts[0]; if (parts[1]) timeGuess = parts[1]; }
-  }
+  var sessions = [];
+  g.requests.forEach(function(r) {
+    var parts = (r.preferred_slot||'').match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})[^\d]*(\d{2}:\d{2}).*\((\d+)h\)/);
+    var date  = parts ? parts[1] : '';
+    var time  = parts ? parts[2] : '09:00';
+    var dur   = parts ? parseInt(parts[4]) : 1;
+    if (!date) { var sp = (r.preferred_slot||'').split(' '); date = sp[0]||''; time = sp[1]||'09:00'; dur = 1; }
+    var session = {
+      id: 'pt_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      student_name: r.student_name, subject: r.subject||'',
+      date: date, start_time: time, duration_hrs: dur,
+      rate: DEFAULT_RATE, fee: dur * DEFAULT_RATE,
+      notes: 'Booked via public page. ' + (r.message||''),
+      status: 'Scheduled', created_at: new Date().toISOString()
+    };
+    sessions.push(session);
+    DATA.privateSessions.push(session);
 
-  var body = '<div style="margin-bottom:16px;padding:12px;background:var(--surface2);border-radius:var(--radius);font-size:13px">' +
-    '<strong>' + r.student_name + '</strong> · ' + (r.subject || 'No subject') +
-    (r.preferred_slot ? '<br><span style="color:var(--text2)">Requested: ' + r.preferred_slot + '</span>' : '') +
-    (r.message ? '<br><span style="color:var(--text3)">' + r.message + '</span>' : '') +
-  '</div>' +
-  '<div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="accept-date" value="' + dateGuess + '"></div>' +
-  '<div class="form-group"><label class="form-label">Start Time</label><input class="form-input" type="time" id="accept-time" value="' + timeGuess + '"></div>' +
-  '<div class="form-group"><label class="form-label">Duration (hrs)</label><input class="form-input" type="number" id="accept-duration" value="1" min="0.5" step="0.5"></div>' +
-  '<div class="form-group"><label class="form-label">Rate (฿/hr)</label><input class="form-input" type="number" id="accept-rate" value="' + DEFAULT_RATE + '"></div>';
+    var idx = DATA.bookingRequests.findIndex(function(x) { return x.id === r.id; });
+    if (idx > -1) DATA.bookingRequests[idx].status = 'Accepted';
+  });
 
-  document.getElementById('modal-booking-confirm-title').textContent = 'Confirm Session — ' + r.student_name;
-  document.getElementById('modal-booking-confirm-body').innerHTML = body;
-  document.getElementById('modal-booking-confirm').classList.add('open');
-}
-
-function confirmBookingAccept() {
-  if (!_bookingAcceptPending) return;
-  var r = _bookingAcceptPending.request;
-  var date     = document.getElementById('accept-date').value;
-  var time     = document.getElementById('accept-time').value;
-  var duration = parseFloat(document.getElementById('accept-duration').value) || 1;
-  var rate     = parseFloat(document.getElementById('accept-rate').value) || DEFAULT_RATE;
-  if (!date) { showToast('Please enter a date'); return; }
-
-  var fee = duration * rate;
-  var session = {
-    id:           'pt_' + Date.now(),
-    student_name: r.student_name,
-    subject:      r.subject || '',
-    date:         date,
-    start_time:   time,
-    duration_hrs: duration,
-    rate:         rate,
-    fee:          fee,
-    notes:        'Booked via public page. ' + (r.message || ''),
-    status:       'Scheduled',
-    created_at:   new Date().toISOString()
-  };
-
-  DATA.privateSessions.push(session);
   localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
 
-  // Update booking status
-  var idx = DATA.bookingRequests.findIndex(function(x) { return x.id === r.id; });
-  if (idx > -1) DATA.bookingRequests[idx].status = 'Accepted';
+  // Write all sessions + update all booking statuses
+  sessions.forEach(function(s) { webAppWrite('addSession', { row: s }).catch(function(){}); });
+  g.requests.forEach(function(r) {
+    webAppWrite('updateBookingRequest', {
+      id: r.id, status: 'Accepted',
+      send_summary: true,  // flag for Apps Script to send summary email
+      is_last: r.id === g.requests[g.requests.length-1].id,
+      all_slots: sessions.map(function(s){ return s.date + ' ' + s.start_time + ' (' + s.duration_hrs + 'h)'; }).join(', ')
+    }).catch(function(){});
+  });
 
-  // Write to sheet
-  webAppWrite('addSession', { row: session }).catch(function() {});
-  webAppWrite('updateBookingRequest', { id: r.id, status: 'Accepted' }).catch(function() {});
-
-  closeModal('modal-booking-confirm');
-  _bookingAcceptPending = null;
   renderPrivateTutoring();
   renderBookings();
-  showToast('\u2713 Session confirmed and logged');
+  showToast('✓ ' + g.requests.length + ' session' + (g.requests.length!==1?'s':'') + ' confirmed');
 }
 
-function openReschedule(requestId) {
-  _bookingReschedulePending = requestId;
-  document.getElementById('reschedule-date').value = '';
-  document.getElementById('reschedule-time').value = '09:00';
-  document.getElementById('reschedule-note').value = '';
-  document.getElementById('modal-reschedule').classList.add('open');
+// ── DECLINE ALL ───────────────────────────────────────────
+function openDeclineGroup(groupId) {
+  var groups = groupBookingRequests(DATA.bookingRequests || []);
+  var g = groups[groupId];
+  if (!g) return;
+  _declineGroupPending = groupId;
+  document.getElementById('decline-group-body').innerHTML =
+    'Decline all ' + g.requests.length + ' session' + (g.requests.length!==1?'s':'') +
+    ' for <strong>' + g.student_name + '</strong>? They will receive a decline email.';
+  document.getElementById('modal-decline-group').classList.add('open');
 }
 
-function submitReschedule() {
-  var id   = _bookingReschedulePending;
-  var date = document.getElementById('reschedule-date').value;
-  var time = document.getElementById('reschedule-time').value;
-  var note = document.getElementById('reschedule-note').value;
-  if (!date) { showToast('Please pick a date'); return; }
-
-  var slot = date + ' ' + time;
-  var idx  = (DATA.bookingRequests || []).findIndex(function(r) { return r.id === id; });
-  if (idx > -1) DATA.bookingRequests[idx].status = 'Rescheduled';
-  localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
-
-  webAppWrite('updateBookingRequest', { id: id, status: 'Rescheduled', reschedule_slot: slot, reschedule_note: note }).catch(function() {});
-
-  closeModal('modal-reschedule');
-  _bookingReschedulePending = null;
-  renderBookings();
-  showToast('\u2713 Reschedule proposal sent');
-}
-
-function declineBooking(requestId) {
-  if (!confirm('Decline this booking request?')) return;
-  var idx = (DATA.bookingRequests || []).findIndex(function(r) { return r.id === requestId; });
-  if (idx > -1) DATA.bookingRequests[idx].status = 'Declined';
-  localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
-  webAppWrite('updateBookingRequest', { id: requestId, status: 'Declined' }).catch(function() {});
+function confirmDeclineGroup() {
+  if (!_declineGroupPending) return;
+  var groups = groupBookingRequests(DATA.bookingRequests || []);
+  var g = groups[_declineGroupPending];
+  if (g) {
+    g.requests.forEach(function(r) {
+      var idx = DATA.bookingRequests.findIndex(function(x) { return x.id === r.id; });
+      if (idx > -1) DATA.bookingRequests[idx].status = 'Declined';
+      webAppWrite('updateBookingRequest', { id: r.id, status: 'Declined' }).catch(function(){});
+    });
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
+  }
+  closeModal('modal-decline-group');
+  _declineGroupPending = null;
   renderBookings();
   showToast('Request declined');
+}
+
+// ── EDIT SLOT ─────────────────────────────────────────────
+function openEditSlot(groupId, requestId) {
+  var r = (DATA.bookingRequests || []).find(function(x) { return x.id === requestId; });
+  if (!r) return;
+
+  // Parse original slot
+  var parts   = (r.preferred_slot||'').match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/);
+  var origDate = parts ? parts[1] : '';
+  var origTime = parts ? parts[2] : '09:00';
+  var durMatch = (r.preferred_slot||'').match(/\((\d+)h\)/);
+  var origDur  = durMatch ? parseInt(durMatch[1]) : 1;
+
+  _editSlotPending = { groupId: groupId, requestId: requestId, origDate: origDate, origTime: origTime, dur: origDur };
+
+  document.getElementById('edit-slot-original').innerHTML =
+    '<span style="color:var(--text3);font-size:11px">Current slot</span><br>' +
+    '<strong>' + (r.preferred_slot || '—') + '</strong>';
+
+  document.getElementById('edit-slot-date').value = origDate;
+  document.getElementById('edit-slot-time').value = origTime;
+
+  // Build suggestions from AvailableSlots
+  var suggestions = getSuggestedSlots(origDate, origTime, origDur);
+  var sugWrap = document.getElementById('edit-slot-suggestions-wrap');
+  var sugEl   = document.getElementById('edit-slot-suggestions');
+  if (suggestions.length === 0) {
+    sugWrap.style.display = 'none';
+  } else {
+    sugWrap.style.display = 'block';
+    sugEl.innerHTML = suggestions.map(function(s) {
+      var d = new Date(s.date + 'T00:00:00');
+      var dStr = d.toLocaleDateString('en-GB', { weekday:'short', month:'short', day:'numeric' });
+      return '<button class="btn btn-ghost btn-sm" style="font-size:11px" ' +
+        'data-date="' + s.date + '" data-time="' + s.start_time + '" ' +
+        'onclick="applySuggestedSlot(this.dataset.date,this.dataset.time)">' +
+        dStr + ' ' + s.start_time + '</button>';
+    }).join('');
+  }
+
+  document.getElementById('modal-edit-slot').classList.add('open');
+}
+
+function getSuggestedSlots(origDate, origTime, dur) {
+  if (!origDate) return [];
+  var base     = new Date(origDate + 'T00:00:00');
+  var origDow  = base.getDay();
+  var origHour = parseInt((origTime||'09:00').split(':')[0]);
+
+  // Look 2 months from original date
+  var limit = new Date(base.getFullYear(), base.getMonth() + 2, base.getDate());
+  var today = new Date(); today.setHours(0,0,0,0);
+
+  var durStr = String(dur);
+  var candidates = (DATA.availableSlots || allSlotsFromSheet()).filter(function(s) {
+    if (s.status !== 'Open') return false;
+    if (String(s.duration) !== durStr) return false;
+    var d = new Date(s.date + 'T00:00:00');
+    return d > today && d <= limit && s.date !== origDate;
+  });
+
+  // Score: same weekday = +10, same hour = +5, closer date = higher score
+  candidates.forEach(function(s) {
+    var d    = new Date(s.date + 'T00:00:00');
+    var dow  = d.getDay();
+    var hour = parseInt((s.start_time||'').split(':')[0]);
+    var daysDiff = Math.abs((d - base) / 86400000);
+    s._score = (dow === origDow ? 10 : 0) + (hour === origHour ? 5 : 0) - (daysDiff * 0.1);
+  });
+
+  candidates.sort(function(a,b) { return b._score - a._score; });
+
+  // Deduplicate by date+time, return top 8
+  var seen = {}, results = [];
+  candidates.forEach(function(s) {
+    var key = s.date + s.start_time;
+    if (!seen[key]) { seen[key] = true; results.push(s); }
+  });
+  return results.slice(0, 8);
+}
+
+function allSlotsFromSheet() {
+  // Falls back to DATA.bookingSlots if available
+  return DATA.bookingSlots || [];
+}
+
+function applySuggestedSlot(date, time) {
+  document.getElementById('edit-slot-date').value = date;
+  document.getElementById('edit-slot-time').value = time;
+  // Highlight selected suggestion
+  document.querySelectorAll('#edit-slot-suggestions .btn').forEach(function(b) {
+    b.classList.toggle('btn-teal', b.dataset.date === date && b.dataset.time === time);
+    b.classList.toggle('btn-ghost', !(b.dataset.date === date && b.dataset.time === time));
+  });
+}
+
+function saveSlotEdit() {
+  if (!_editSlotPending) return;
+  var newDate = document.getElementById('edit-slot-date').value;
+  var newTime = document.getElementById('edit-slot-time').value;
+  if (!newDate || !newTime) { showToast('⚠ Please pick a date and time'); return; }
+
+  var dur    = _editSlotPending.dur;
+  var endTime = addHours(newTime, dur);
+  var newSlot = newDate + ' ' + newTime + '–' + endTime + ' (' + dur + 'h)';
+
+  var idx = DATA.bookingRequests.findIndex(function(x) { return x.id === _editSlotPending.requestId; });
+  if (idx > -1) DATA.bookingRequests[idx].preferred_slot = newSlot;
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
+
+  webAppWrite('updateBookingSlot', { id: _editSlotPending.requestId, preferred_slot: newSlot }).catch(function(){});
+
+  closeModal('modal-edit-slot');
+  _editSlotPending = null;
+  renderBookings();
+  showToast('✓ Slot updated');
 }
 
 async function refreshBookings() {
@@ -5124,9 +5245,9 @@ async function refreshBookings() {
     DATA.bookingRequests = parseSheet(rows);
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
     renderBookings();
-    showToast('\u2713 Bookings refreshed');
+    showToast('✓ Bookings refreshed');
   } catch(e) {
-    showToast('\u26a0 Could not refresh bookings');
+    showToast('⚠ Could not refresh bookings');
   }
 }
 
@@ -5681,6 +5802,104 @@ function toggleAvailSlot(day, slot) {
   renderAvailSlots();
 }
 function saveAvailability() { localStorage.setItem('stevenco_avail', JSON.stringify(availState)); showToast('Availability saved'); }
+// ── PUBLISH SLOTS ─────────────────────────────────────────
+function publishSlots() {
+  if (!WEB_APP_URL) { showToast('⚠ Apps Script URL not set — go to Settings'); return; }
+
+  var statusEl = document.getElementById('publish-slots-status');
+  statusEl.textContent = 'Computing free slots...';
+
+  var today    = new Date();
+  today.setHours(0,0,0,0);
+  var twoMonths = new Date(today.getFullYear(), today.getMonth() + 2, today.getDate());
+
+  var dayNameMap = { Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6, Sun:0 };
+  var special = getSpecial();
+
+  // Collect all busy blocks: GCal + PrivateSessions + Poppadi sessions
+  var busyByDate = {};
+  getAllEvents().filter(function(e) { return !e.allDay; }).forEach(function(e) {
+    if (!e.date || !e.start || !e.end) return;
+    if (!busyByDate[e.date]) busyByDate[e.date] = [];
+    busyByDate[e.date].push({ start: timeToMinutes(e.start), end: timeToMinutes(e.end) });
+  });
+
+  var slots = [];
+  var d = new Date(today);
+  // Start from tomorrow
+  d.setDate(d.getDate() + 1);
+
+  while (d <= twoMonths) {
+    var ds      = dateToStr(d);
+    var dowNum  = d.getDay(); // 0=Sun
+    var dowName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dowNum];
+
+    // Skip day-offs
+    if (!checkDayOff(ds)) {
+      var availForDay = AVAIL_SLOTS.filter(function(slot) {
+        return availState[dowName] && availState[dowName][slot];
+      });
+
+      var busy = busyByDate[ds] || [];
+
+      availForDay.forEach(function(slotTime) {
+        var slotMin = timeToMinutes(slotTime);
+        // Check 1hr slot
+        var end1h = slotMin + 60;
+        var free1h = !busy.some(function(b) { return b.start < end1h && b.end > slotMin; });
+        // Check 2hr slot
+        var end2h = slotMin + 120;
+        var free2h = !busy.some(function(b) { return b.start < end2h && b.end > slotMin; });
+
+        if (free1h) {
+          slots.push({
+            date:       ds,
+            day:        dowName,
+            start_time: slotTime,
+            end_time:   addHours(slotTime, 1),
+            duration:   '1',
+            status:     'Open'
+          });
+        }
+        if (free2h) {
+          slots.push({
+            date:       ds,
+            day:        dowName,
+            start_time: slotTime,
+            end_time:   addHours(slotTime, 2),
+            duration:   '2',
+            status:     'Open'
+          });
+        }
+      });
+    }
+
+    d.setDate(d.getDate() + 1);
+  }
+
+  if (slots.length === 0) {
+    statusEl.innerHTML = '<span style="color:var(--amber)">⚠ No free slots found. Check your availability settings and GCal events.</span>';
+    return;
+  }
+
+  statusEl.textContent = 'Publishing ' + slots.length + ' slots...';
+
+  webAppWrite('publishAvailableSlots', { slots: slots })
+    .then(function() {
+      var now = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      statusEl.innerHTML =
+        '✓ <strong>' + slots.length + ' slots</strong> published &nbsp;·&nbsp; Last updated: ' + now +
+        '<br><span style="color:var(--text3);font-size:11px">Covers tomorrow through ' +
+        twoMonths.toLocaleString('en-US', { month: 'long', day: 'numeric' }) + '</span>';
+      showToast('✓ Slots published to booking page');
+    })
+    .catch(function(e) {
+      statusEl.innerHTML = '<span style="color:var(--red)">❌ Publish failed — ' + (e.message || 'check connection') + '</span>';
+      showToast('⚠ Publish failed');
+    });
+}
+
+
 function renderAvailText() {
   var el = document.getElementById('avail-text-output');
   if (!el) return;
