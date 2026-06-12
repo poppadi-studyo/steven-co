@@ -812,6 +812,8 @@ tr:hover td { background: var(--surface2); }
       <div class="nav-item" data-page="schedule" onclick="showPage('schedule',this)">
         <span class="icon">📅</span><span class="nav-label">Schedule</span></div>
       <div class="nav-section">System</div>
+      <div class="nav-item" data-page="bookings" onclick="showPage('bookings',this)">
+        <span class="icon">📩</span><span class="nav-label">Bookings <span id="booking-badge" style="display:none;background:var(--coral);color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px"></span></span></div>
       <div class="nav-item" data-page="advisor" onclick="showPage('advisor',this)">
         <span class="icon">◈</span><span class="nav-label">Advisor</span></div>
       <div class="nav-item" data-page="settings" onclick="showPage('settings',this)">
@@ -1408,6 +1410,73 @@ tr:hover td { background: var(--surface2); }
           </div>
         </div>
 
+      </div>
+
+
+      <!-- ── BOOKINGS PAGE ── -->
+      <div class="page" id="page-bookings">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1>Bookings</h1>
+              <p>Incoming requests from the public booking page</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn btn-ghost btn-sm" onclick="refreshBookings()">↻ Refresh</button>
+              <a id="book-page-link" href="book.html" target="_blank" class="btn btn-secondary btn-sm">🔗 Public Page</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending requests -->
+        <div class="card" id="booking-pending-card">
+          <div class="card-title">
+            Pending Requests
+            <span id="booking-pending-count" style="background:var(--coral-bg);color:var(--coral);border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;margin-left:6px"></span>
+          </div>
+          <div id="booking-pending-list"><div class="loading"><div class="spinner"></div> Loading...</div></div>
+        </div>
+
+        <!-- History -->
+        <div class="card">
+          <div class="card-title">History</div>
+          <div id="booking-history-list"><div style="color:var(--text3);font-size:13px;padding:8px 0">No past requests.</div></div>
+        </div>
+      </div>
+
+      <!-- ── BOOKING CONFIRM MODAL ── -->
+      <div class="modal-backdrop" id="modal-booking-confirm">
+        <div class="modal" style="max-width:420px">
+          <div class="modal-title" id="modal-booking-confirm-title">Confirm Session</div>
+          <div id="modal-booking-confirm-body"></div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('modal-booking-confirm')">Cancel</button>
+            <button class="btn btn-teal" id="modal-booking-confirm-btn" onclick="confirmBookingAccept()">✓ Confirm &amp; Log Session</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RESCHEDULE MODAL ── -->
+      <div class="modal-backdrop" id="modal-reschedule">
+        <div class="modal" style="max-width:380px">
+          <div class="modal-title">Propose New Time</div>
+          <div class="form-group">
+            <label class="form-label">Suggested Date</label>
+            <input class="form-input" type="date" id="reschedule-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Suggested Time</label>
+            <input class="form-input" type="time" id="reschedule-time" value="09:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message to student (optional)</label>
+            <textarea class="form-input" id="reschedule-note" rows="2" placeholder="e.g. How about this time instead?"></textarea>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('modal-reschedule')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitReschedule()">Send Proposal</button>
+          </div>
+        </div>
       </div>
 
       <!-- ── SETTINGS PAGE ── -->
@@ -2055,14 +2124,15 @@ let _toastTimer    = null;
 let selectedMonth  = getCurrentMonthStr();
 
 let DATA = {
-  privateSessions: [],
-  poppadiMirror:   [],
-  poppadiSessions: [],
-  profitShare:     [],
-  wwaClients:      [],
-  wwaAssignments:  [],
-  wwaExpenses:     [],
-  staffProfiles:   [],
+  privateSessions:  [],
+  poppadiMirror:    [],
+  poppadiSessions:  [],
+  profitShare:      [],
+  wwaClients:       [],
+  wwaAssignments:   [],
+  wwaExpenses:      [],
+  staffProfiles:    [],
+  bookingRequests:  [],
 };
 
 // ─── MONTH HELPERS ────────────────────────────────────────
@@ -2200,7 +2270,7 @@ async function loadAllData() {
   }
 
   try {
-    const [sessionRows, mirrorRows, sessRows, profitRows, clientRows, assignRows, expenseRows, staffRows] = await Promise.all([
+    const [sessionRows, mirrorRows, sessRows, profitRows, clientRows, assignRows, expenseRows, staffRows, bookingRows] = await Promise.all([
       fetchSheetSafe('PrivateSessions!A:K'),
       fetchSheetSafe('PoppadiMirror!A:I'),
       fetchSheetSafe('PoppadiSessions!A:H'),
@@ -2209,6 +2279,7 @@ async function loadAllData() {
       fetchSheetSafe('WWATeamAssignments!A:J'),
       fetchSheetSafe('WWAExpenses!A:G'),
       fetchSheetSafe('StaffProfiles!A:J'),
+      fetchSheetSafe('BookingRequests!A:J'),
     ]);
     DATA.privateSessions = parseSheet(sessionRows);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
@@ -2217,7 +2288,8 @@ async function loadAllData() {
     DATA.wwaClients      = parseSheet(clientRows);
     DATA.wwaAssignments  = parseSheet(assignRows);
     DATA.wwaExpenses     = parseSheet(expenseRows);
-    DATA.staffProfiles   = parseSheet(staffRows);
+    DATA.staffProfiles    = parseSheet(staffRows);
+    DATA.bookingRequests  = parseSheet(bookingRows);
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
     renderAll();
   } catch(e) {
@@ -2303,6 +2375,7 @@ function renderAll() {
   renderPoppadi();
   renderWWA();
   renderTeam();
+  renderBookings();
   // Refresh schedule if it's currently visible
   var schedPage = document.getElementById('page-schedule');
   if (schedPage && schedPage.classList.contains('active') && typeof renderScheduleView === 'function') {
@@ -3359,7 +3432,7 @@ function loadSettings() {
 const PAGE_TITLES = {
   home: 'Home', 'private-tutoring': 'Private Tutoring',
   poppadi: "Poppadi's Studyo", wwa: 'WealthWise Atelier',
-  team: 'Team', schedule: 'Schedule', advisor: 'Advisor', settings: 'Settings'
+  team: 'Team', schedule: 'Schedule', bookings: 'Bookings', advisor: 'Advisor', settings: 'Settings'
 };
 
 function showPage(id, btn) {
@@ -3385,6 +3458,7 @@ function showPage(id, btn) {
   if (id === 'team') renderTeam();
   if (id === 'advisor') initAdvisorUI();
   if (id === 'schedule') { if (typeof initSchedule === 'function') initSchedule(); }
+  if (id === 'bookings') renderBookings();
 }
 
 // ─── SIDEBAR + THEME ──────────────────────────────────────
@@ -4854,6 +4928,208 @@ function downloadCardsPDF() {
   window.open(URL.createObjectURL(blob), '_blank');
 }
 
+
+// ── BOOKINGS ──────────────────────────────────────────────
+
+var _bookingAcceptPending = null; // { request, sessionDraft }
+var _bookingReschedulePending = null; // request id
+
+function renderBookings() {
+  var requests = DATA.bookingRequests || [];
+
+  // Update sidebar badge
+  var pending = requests.filter(function(r) { return r.status === 'Pending'; });
+  var badge = document.getElementById('booking-badge');
+  if (badge) {
+    if (pending.length > 0) {
+      badge.style.display = 'inline';
+      badge.textContent = pending.length;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Pending count label
+  var countEl = document.getElementById('booking-pending-count');
+  if (countEl) countEl.textContent = pending.length > 0 ? pending.length + ' pending' : 'All clear';
+
+  // Pending list
+  var pendingEl = document.getElementById('booking-pending-list');
+  if (pendingEl) {
+    if (pending.length === 0) {
+      pendingEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No pending requests. Share your public booking link to receive bookings.</div>';
+    } else {
+      pendingEl.innerHTML = pending.map(function(r) {
+        return buildBookingCard(r, true);
+      }).join('');
+    }
+  }
+
+  // History list
+  var histEl = document.getElementById('booking-history-list');
+  if (histEl) {
+    var history = requests.filter(function(r) { return r.status !== 'Pending'; })
+      .sort(function(a, b) { return (b.submitted_at || '').localeCompare(a.submitted_at || ''); });
+    if (history.length === 0) {
+      histEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No past requests.</div>';
+    } else {
+      histEl.innerHTML = history.map(function(r) {
+        return buildBookingCard(r, false);
+      }).join('');
+    }
+  }
+}
+
+function buildBookingCard(r, showActions) {
+  var statusClass = r.status === 'Pending' ? 'pending' : r.status === 'Accepted' ? 'completed' : r.status === 'Declined' ? 'cancelled' : 'scheduled';
+  var submitted = r.submitted_at ? r.submitted_at.slice(0, 16).replace('T', ' ') : '';
+  var actions = '';
+  if (showActions) {
+    var rid = r.id;
+    actions = '<div style="display:flex;gap:8px;margin-top:12px">' +
+      '<button class="btn btn-teal btn-sm" data-bid="' + rid + '" onclick="openBookingAccept(this.dataset.bid)">✓ Accept</button>' +
+      '<button class="btn btn-ghost btn-sm" data-bid="' + rid + '" onclick="openReschedule(this.dataset.bid)">↻ Reschedule</button>' +
+      '<button class="btn btn-ghost btn-sm" style="color:var(--coral)" data-bid="' + rid + '" onclick="declineBooking(this.dataset.bid)">✕ Decline</button>' +
+    '</div>';
+  }
+  return '<div style="border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;background:var(--surface)">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">' +
+      '<div>' +
+        '<div style="font-size:14px;font-weight:600">' + (r.student_name || 'Unknown') + '</div>' +
+        '<div style="font-size:12px;color:var(--text2);margin-top:2px">' + (r.subject || 'No subject') + (r.preferred_slot ? ' &nbsp;·&nbsp; ' + r.preferred_slot : '') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">' +
+        '<span class="status ' + statusClass + '">' + (r.status || 'Pending') + '</span>' +
+        '<span style="font-size:11px;color:var(--text3)">' + submitted + '</span>' +
+      '</div>' +
+    '</div>' +
+    (r.message ? '<div style="font-size:12px;color:var(--text2);background:var(--surface2);border-radius:6px;padding:8px 10px;margin-top:6px">' + r.message + '</div>' : '') +
+    (r.student_email ? '<div style="font-size:11px;color:var(--text3);margin-top:4px">' + r.student_email + '</div>' : '') +
+    actions +
+  '</div>';
+}
+
+function openBookingAccept(requestId) {
+  var r = (DATA.bookingRequests || []).find(function(x) { return x.id === requestId; });
+  if (!r) return;
+  _bookingAcceptPending = { request: r };
+
+  // Parse preferred slot into date + time if possible (format: "YYYY-MM-DD HH:MM" or "Monday 09:00")
+  var dateGuess = '';
+  var timeGuess = '09:00';
+  if (r.preferred_slot) {
+    var parts = r.preferred_slot.split(' ');
+    if (parts[0] && parts[0].match(/^\d{4}-\d{2}-\d{2}$/)) { dateGuess = parts[0]; if (parts[1]) timeGuess = parts[1]; }
+  }
+
+  var body = '<div style="margin-bottom:16px;padding:12px;background:var(--surface2);border-radius:var(--radius);font-size:13px">' +
+    '<strong>' + r.student_name + '</strong> · ' + (r.subject || 'No subject') +
+    (r.preferred_slot ? '<br><span style="color:var(--text2)">Requested: ' + r.preferred_slot + '</span>' : '') +
+    (r.message ? '<br><span style="color:var(--text3)">' + r.message + '</span>' : '') +
+  '</div>' +
+  '<div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="accept-date" value="' + dateGuess + '"></div>' +
+  '<div class="form-group"><label class="form-label">Start Time</label><input class="form-input" type="time" id="accept-time" value="' + timeGuess + '"></div>' +
+  '<div class="form-group"><label class="form-label">Duration (hrs)</label><input class="form-input" type="number" id="accept-duration" value="1" min="0.5" step="0.5"></div>' +
+  '<div class="form-group"><label class="form-label">Rate (฿/hr)</label><input class="form-input" type="number" id="accept-rate" value="' + DEFAULT_RATE + '"></div>';
+
+  document.getElementById('modal-booking-confirm-title').textContent = 'Confirm Session — ' + r.student_name;
+  document.getElementById('modal-booking-confirm-body').innerHTML = body;
+  document.getElementById('modal-booking-confirm').classList.add('open');
+}
+
+function confirmBookingAccept() {
+  if (!_bookingAcceptPending) return;
+  var r = _bookingAcceptPending.request;
+  var date     = document.getElementById('accept-date').value;
+  var time     = document.getElementById('accept-time').value;
+  var duration = parseFloat(document.getElementById('accept-duration').value) || 1;
+  var rate     = parseFloat(document.getElementById('accept-rate').value) || DEFAULT_RATE;
+  if (!date) { showToast('Please enter a date'); return; }
+
+  var fee = duration * rate;
+  var session = {
+    id:           'pt_' + Date.now(),
+    student_name: r.student_name,
+    subject:      r.subject || '',
+    date:         date,
+    start_time:   time,
+    duration_hrs: duration,
+    rate:         rate,
+    fee:          fee,
+    notes:        'Booked via public page. ' + (r.message || ''),
+    status:       'Scheduled',
+    created_at:   new Date().toISOString()
+  };
+
+  DATA.privateSessions.push(session);
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
+
+  // Update booking status
+  var idx = DATA.bookingRequests.findIndex(function(x) { return x.id === r.id; });
+  if (idx > -1) DATA.bookingRequests[idx].status = 'Accepted';
+
+  // Write to sheet
+  webAppWrite('addSession', { row: session }).catch(function() {});
+  webAppWrite('updateBookingRequest', { id: r.id, status: 'Accepted' }).catch(function() {});
+
+  closeModal('modal-booking-confirm');
+  _bookingAcceptPending = null;
+  renderPrivateTutoring();
+  renderBookings();
+  showToast('\u2713 Session confirmed and logged');
+}
+
+function openReschedule(requestId) {
+  _bookingReschedulePending = requestId;
+  document.getElementById('reschedule-date').value = '';
+  document.getElementById('reschedule-time').value = '09:00';
+  document.getElementById('reschedule-note').value = '';
+  document.getElementById('modal-reschedule').classList.add('open');
+}
+
+function submitReschedule() {
+  var id   = _bookingReschedulePending;
+  var date = document.getElementById('reschedule-date').value;
+  var time = document.getElementById('reschedule-time').value;
+  var note = document.getElementById('reschedule-note').value;
+  if (!date) { showToast('Please pick a date'); return; }
+
+  var slot = date + ' ' + time;
+  var idx  = (DATA.bookingRequests || []).findIndex(function(r) { return r.id === id; });
+  if (idx > -1) DATA.bookingRequests[idx].status = 'Rescheduled';
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
+
+  webAppWrite('updateBookingRequest', { id: id, status: 'Rescheduled', reschedule_slot: slot, reschedule_note: note }).catch(function() {});
+
+  closeModal('modal-reschedule');
+  _bookingReschedulePending = null;
+  renderBookings();
+  showToast('\u2713 Reschedule proposal sent');
+}
+
+function declineBooking(requestId) {
+  if (!confirm('Decline this booking request?')) return;
+  var idx = (DATA.bookingRequests || []).findIndex(function(r) { return r.id === requestId; });
+  if (idx > -1) DATA.bookingRequests[idx].status = 'Declined';
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
+  webAppWrite('updateBookingRequest', { id: requestId, status: 'Declined' }).catch(function() {});
+  renderBookings();
+  showToast('Request declined');
+}
+
+async function refreshBookings() {
+  showToast('Refreshing...');
+  try {
+    var rows = await fetchSheetSafe('BookingRequests!A:J');
+    DATA.bookingRequests = parseSheet(rows);
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
+    renderBookings();
+    showToast('\u2713 Bookings refreshed');
+  } catch(e) {
+    showToast('\u26a0 Could not refresh bookings');
+  }
+}
+
 // ── INVOICE PDF ───────────────────────────────────────────
 function generateStudentInvoicePDF(studentName) {
   var month = selectedMonth;
@@ -5472,15 +5748,6 @@ function closeMobileMore() {
 }
 
 
-function toggleMobileMore() {
-  var drawer = document.getElementById('mobile-more-drawer');
-  if (drawer) drawer.classList.toggle('open');
-}
-function closeMobileMore() {
-  var drawer = document.getElementById('mobile-more-drawer');
-  if (drawer) drawer.classList.remove('open');
-}
-
 initAuth();
 </script>
 <!-- ── MOBILE BOTTOM NAV ── -->
@@ -5513,50 +5780,9 @@ initAuth();
   <div class="mobile-more-sheet">
     <div class="mobile-more-handle"></div>
     <div class="mobile-more-grid">
-      <div class="mobile-more-item" onclick="showPage('wwa',null);closeMobileMore()">
-        <span>✦</span><span>WWA</span>
+      <div class="mobile-more-item" onclick="showPage('bookings',null);closeMobileMore()">
+        <span>📩</span><span>Bookings</span>
       </div>
-      <div class="mobile-more-item" onclick="showPage('team',null);closeMobileMore()">
-        <span>👥</span><span>Team</span>
-      </div>
-      <div class="mobile-more-item" onclick="showPage('advisor',null);closeMobileMore()">
-        <span>◈</span><span>Advisor</span>
-      </div>
-      <div class="mobile-more-item" onclick="showPage('settings',null);closeMobileMore()">
-        <span>⚙</span><span>Settings</span>
-      </div>
-      <div class="mobile-more-item" onclick="logout();closeMobileMore()">
-        <span>↩</span><span>Sign out</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── MOBILE BOTTOM NAV ── -->
-<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
-  <div class="mbn-item active" data-page="home" onclick="showPage('home',this)">
-    <span class="mbn-icon">⌂</span><span class="mbn-label">Home</span>
-  </div>
-  <div class="mbn-item" data-page="poppadi" onclick="showPage('poppadi',this)">
-    <span class="mbn-icon">🏫</span><span class="mbn-label">Poppadi's</span>
-  </div>
-  <div class="mbn-item" data-page="schedule" onclick="showPage('schedule',this)">
-    <span class="mbn-icon">📅</span><span class="mbn-label">Schedule</span>
-  </div>
-  <div class="mbn-item" data-page="private-tutoring" onclick="showPage('private-tutoring',this)">
-    <span class="mbn-icon">📚</span><span class="mbn-label">Private</span>
-  </div>
-  <div class="mbn-item" data-page="more-menu" onclick="toggleMobileMore()">
-    <span class="mbn-icon" style="font-size:14px;letter-spacing:2px">•••</span><span class="mbn-label">More</span>
-  </div>
-</nav>
-
-<!-- Mobile More drawer -->
-<div class="mobile-more-drawer" id="mobile-more-drawer">
-  <div class="mobile-more-backdrop" onclick="closeMobileMore()"></div>
-  <div class="mobile-more-sheet">
-    <div class="mobile-more-handle"></div>
-    <div class="mobile-more-grid">
       <div class="mobile-more-item" onclick="showPage('wwa',null);closeMobileMore()">
         <span>✦</span><span>WWA</span>
       </div>

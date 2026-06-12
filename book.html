@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Session — Steven Gerdphol</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #f7f6f3; color: #1a1a18; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .header {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-avatar {
+    width: 44px; height: 44px;
+    background: #1a1a18; color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+  }
+  .header-name { font-size: 16px; font-weight: 600; }
+  .header-sub  { font-size: 12px; color: #6b6a65; margin-top: 1px; }
+
+  .container { max-width: 560px; margin: 0 auto; padding: 32px 20px; flex: 1; }
+
+  .card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: #6b6a65; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
+
+  .avail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .avail-row { background: #f7f6f3; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+  .avail-row .day { font-weight: 600; color: #1a1a18; }
+  .avail-row .slots { color: #6b6a65; font-size: 12px; margin-top: 2px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 12px; font-weight: 600; color: #6b6a65; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 8px;
+    font-family: inherit; font-size: 14px;
+    background: #fff; color: #1a1a18;
+    outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: #378ADD; box-shadow: 0 0 0 3px rgba(55,138,221,0.1); }
+  textarea.form-input { resize: vertical; min-height: 80px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 11px 20px; border-radius: 8px; font-family: inherit;
+    font-size: 14px; font-weight: 500; cursor: pointer; border: none;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .btn-primary { background: #1a1a18; color: #fff; width: 100%; padding: 13px; font-size: 15px; font-weight: 600; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .success-screen { display: none; text-align: center; padding: 40px 20px; }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: #6b6a65; line-height: 1.6; }
+
+  .error-msg { background: #FCEBEB; color: #E24B4A; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 12px; display: none; }
+  .required { color: #E24B4A; }
+
+  .loading-avail { color: #9b9a94; font-size: 13px; padding: 8px 0; }
+
+  footer { text-align: center; padding: 20px; font-size: 11px; color: #c0bfb8; }
+
+  @media (max-width: 480px) {
+    .avail-grid { grid-template-columns: 1fr; }
+    .container { padding: 20px 16px; }
+    .card { padding: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-avatar">SG</div>
+  <div>
+    <div class="header-name">Steven Gerdphol</div>
+    <div class="header-sub">Private Tutoring · IELTS · SAT · GED · University Admissions</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Success screen -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Request Sent!</div>
+    <div class="success-sub">Thanks! Steven will review your request and get back to you shortly.<br>Please check your inbox for a confirmation.</div>
+  </div>
+
+  <!-- Booking form -->
+  <div id="booking-form-wrap">
+
+    <div class="card">
+      <div class="card-title">Available Times</div>
+      <div id="avail-display" class="loading-avail">Loading availability...</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Request a Session</div>
+
+      <div class="error-msg" id="form-error"></div>
+
+      <div class="form-group">
+        <label class="form-label">Your Name <span class="required">*</span></label>
+        <input class="form-input" type="text" id="f-name" placeholder="e.g. Araya Somporn" autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address <span class="required">*</span></label>
+        <input class="form-input" type="email" id="f-email" placeholder="your@email.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Subject / Goal <span class="required">*</span></label>
+        <input class="form-input" type="text" id="f-subject" placeholder="e.g. IELTS preparation, SAT Math, University applications">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Preferred Day &amp; Time <span class="required">*</span></label>
+        <input class="form-input" type="text" id="f-slot" placeholder="e.g. Tuesday 10:00 or weekday mornings">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Message (optional)</label>
+        <textarea class="form-input" id="f-message" placeholder="Tell Steven a bit about your situation, current level, exam date, etc."></textarea>
+      </div>
+
+      <button class="btn btn-primary" id="submit-btn" onclick="submitBooking()">Send Request →</button>
+    </div>
+
+  </div>
+</div>
+
+<footer>Powered by Steven.CO &nbsp;·&nbsp; Prompt Language Studyo Co., Ltd.</footer>
+
+<script>
+// ── CONFIG — update WEB_APP_URL after deploying Apps Script ──
+var WEB_APP_URL = '';  // Set this to your Apps Script Web App URL
+
+// ── Load availability from localStorage key exposed by Steven.CO ──
+// Since book.html is on the same GitHub Pages origin as index.html,
+// it can read the same localStorage.
+function loadAvailability() {
+  var el = document.getElementById('avail-display');
+  try {
+    var raw = localStorage.getItem('stevenco_avail');
+    if (!raw) { el.textContent = 'Please contact Steven directly to arrange a time.'; return; }
+    var state = JSON.parse(raw);
+    var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var rows = [];
+    days.forEach(function(day) {
+      var slots = Object.keys(state[day] || {}).filter(function(s) { return state[day][s]; }).sort();
+      if (slots.length) rows.push({ day: day, slots: slots });
+    });
+    if (rows.length === 0) { el.textContent = 'No availability set. Please contact Steven directly.'; return; }
+    var html = '<div class="avail-grid">';
+    rows.forEach(function(r) {
+      html += '<div class="avail-row"><div class="day">' + r.day + '</div><div class="slots">' + r.slots.join(' · ') + '</div></div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.textContent = 'Please contact Steven directly to arrange a time.';
+  }
+}
+
+function submitBooking() {
+  var name    = document.getElementById('f-name').value.trim();
+  var email   = document.getElementById('f-email').value.trim();
+  var subject = document.getElementById('f-subject').value.trim();
+  var slot    = document.getElementById('f-slot').value.trim();
+  var message = document.getElementById('f-message').value.trim();
+  var errEl   = document.getElementById('form-error');
+
+  errEl.style.display = 'none';
+
+  if (!name || !email || !subject || !slot) {
+    errEl.textContent = 'Please fill in all required fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  var payload = {
+    action: 'submitBookingRequest',
+    row: {
+      id:            'br_' + Date.now(),
+      student_name:  name,
+      student_email: email,
+      subject:       subject,
+      preferred_slot: slot,
+      message:       message,
+      status:        'Pending',
+      submitted_at:  new Date().toISOString()
+    }
+  };
+
+  if (!WEB_APP_URL) {
+    // No Web App URL configured — show success anyway (demo mode)
+    showSuccess();
+    return;
+  }
+
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) { showSuccess(); }
+    else { showError('Something went wrong. Please try again.', btn); }
+  })
+  .catch(function() { showError('Could not send request. Please try again or contact Steven directly.', btn); });
+}
+
+function showSuccess() {
+  document.getElementById('booking-form-wrap').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+}
+
+function showError(msg, btn) {
+  var errEl = document.getElementById('form-error');
+  errEl.textContent = msg;
+  errEl.style.display = 'block';
+  btn.disabled = false;
+  btn.textContent = 'Send Request →';
+}
+
+loadAvailability();
+</script>
+</body>
+</html>
