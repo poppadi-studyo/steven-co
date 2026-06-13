@@ -343,7 +343,7 @@ footer{text-align:center;padding:16px;font-size:11px;color:#c0bfb8}
 <footer id="footer-t">Powered by Steven.CO</footer>
 
 <script>
-var WEB_APP_URL = ''; // Your Apps Script Web App URL
+var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwj4I9B_VwLiemfXo1ZHHVF-zlxqGsESavpfGJbvci9nPzV-LaKfehdXN5sCQhfFpX2/exec';
 
 // ── STATE ─────────────────────────────────────────────────
 var lang          = 'en';
@@ -866,7 +866,8 @@ function renderCal(){
     }
 
     var cls='dcell';
-    if(isPast||isFuture||tooSoon) cls+=' past';
+    if(isPast||isFuture)          cls+=' past';
+    else if(tooSoon)              cls+=' booked';
     else if(isAvail)              cls+=' avail';
     else if(isBooked)             cls+=' booked';
     else                          cls+=' full';
@@ -877,11 +878,13 @@ function renderCal(){
 
     // Bar element
     var bar='';
-    if(!isPast&&!isFuture&&!tooSoon){
-      if(isBooked){
+    if(!isPast&&!isFuture){
+      if(tooSoon){
+        bar='<div class="dbar-red"></div>';
+      } else if(isBooked){
         bar='<div class="dbar-red"></div>';
       } else if(isAvail){
-        var w=density; // already 0-100
+        var w=density;
         bar='<div class="dbar-wrap"><div class="dbar" style="width:'+w+'%"></div></div>';
       }
     }
