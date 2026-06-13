@@ -5842,35 +5842,36 @@ function publishSlots() {
 
       var busy = busyByDate[ds] || [];
 
+      // Strict 2h blocks (only these start times)
+      var STRICT_2H_PUB = ['08:00','10:00','13:00','15:00','16:00','17:00'];
+      var BREAK_HOUR_PUB = '12:00';
+
+      // Check which strict 2h blocks are free
+      var open2h = STRICT_2H_PUB.filter(function(t) {
+        var tMin = timeToMinutes(t);
+        return !busy.some(function(b) { return b.start < tMin + 120 && b.end > tMin; }) &&
+               availForDay.indexOf(t) > -1 && availForDay.indexOf(addHours(t,1)) > -1;
+      });
+
+      // Publish strict 2h blocks
+      open2h.forEach(function(t) {
+        slots.push({ date: ds, day: dowName, start_time: t, end_time: addHours(t,2), duration: '2', status: 'Open' });
+      });
+
+      // Publish 1h slots: any avail hour except break and hours overlapping open 2h blocks
       availForDay.forEach(function(slotTime) {
+        if (slotTime === BREAK_HOUR_PUB) return;
         var slotMin = timeToMinutes(slotTime);
-        // Check 1hr slot
         var end1h = slotMin + 60;
         var free1h = !busy.some(function(b) { return b.start < end1h && b.end > slotMin; });
-        // Check 2hr slot
-        var end2h = slotMin + 120;
-        var free2h = !busy.some(function(b) { return b.start < end2h && b.end > slotMin; });
-
-        if (free1h) {
-          slots.push({
-            date:       ds,
-            day:        dowName,
-            start_time: slotTime,
-            end_time:   addHours(slotTime, 1),
-            duration:   '1',
-            status:     'Open'
-          });
-        }
-        if (free2h) {
-          slots.push({
-            date:       ds,
-            day:        dowName,
-            start_time: slotTime,
-            end_time:   addHours(slotTime, 2),
-            duration:   '2',
-            status:     'Open'
-          });
-        }
+        if (!free1h) return;
+        // Skip if overlaps any open 2h block
+        var overlaps2h = open2h.some(function(b) {
+          var bMin = timeToMinutes(b);
+          return slotMin >= bMin && slotMin < bMin + 120;
+        });
+        if (overlaps2h) return;
+        slots.push({ date: ds, day: dowName, start_time: slotTime, end_time: addHours(slotTime,1), duration: '1', status: 'Open' });
       });
     }
 
