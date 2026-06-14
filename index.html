@@ -2285,7 +2285,7 @@ async function loadAllData() {
       fetchSheetSafe('WWATeamAssignments!A:J'),
       fetchSheetSafe('WWAExpenses!A:G'),
       fetchSheetSafe('StaffProfiles!A:J'),
-      fetchSheetSafe('BookingRequests!A:J'),
+      fetchSheetSafe('BookingRequests!A:L'),
     ]);
     DATA.privateSessions = parseSheet(sessionRows);
     DATA.poppadiMirror   = parseSheet(mirrorRows);
@@ -4979,10 +4979,13 @@ function groupBookingRequests(requests) {
   return groups;
 }
 
+var _expandedGroup = null; // which group is currently expanded
+
 function renderBookings() {
   var requests = DATA.bookingRequests || [];
   var groups   = groupBookingRequests(requests);
-  var pending  = Object.values(groups).filter(function(g) { return g.status === 'Pending'; });
+  var pending  = Object.values(groups).filter(function(g) { return g.status === 'Pending'; })
+    .sort(function(a,b){ return (a.submitted_at||'').localeCompare(b.submitted_at||''); });
 
   // Sidebar badge
   var badge = document.getElementById('booking-badge');
@@ -4992,80 +4995,224 @@ function renderBookings() {
   var countEl = document.getElementById('booking-pending-count');
   if (countEl) countEl.textContent = pending.length > 0 ? pending.length + ' pending' : 'All clear';
 
-  // Pending list
+  // Pending list — collapsed rows
   var pendingEl = document.getElementById('booking-pending-list');
   if (pendingEl) {
     if (!pending.length) {
-      pendingEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No pending requests. Share your public booking link to receive bookings.</div>';
+      pendingEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No pending requests.</div>';
     } else {
-      pendingEl.innerHTML = pending.map(function(g) { return buildGroupCard(g, true); }).join('');
+      pendingEl.innerHTML = pending.map(function(g) { return buildPendingRow(g); }).join('');
+      // Re-expand the previously expanded group if it still exists
+      if (_expandedGroup && groups[_expandedGroup] && groups[_expandedGroup].status === 'Pending') {
+        expandGroup(_expandedGroup);
+      }
     }
   }
 
-  // History
+  // History — compact rows only
   var histEl = document.getElementById('booking-history-list');
   if (histEl) {
     var history = Object.values(groups).filter(function(g) { return g.status !== 'Pending'; })
       .sort(function(a,b) { return (b.submitted_at||'').localeCompare(a.submitted_at||''); });
     histEl.innerHTML = history.length
-      ? history.map(function(g) { return buildGroupCard(g, false); }).join('')
+      ? history.map(function(g) { return buildHistoryRow(g); }).join('')
       : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No past requests.</div>';
   }
 }
 
-function buildGroupCard(g, showActions) {
-  var isSingle = g.requests.length === 1;
-  var statusClass = g.status === 'Pending' ? 'pending' : g.status === 'Accepted' ? 'completed' : g.status === 'Declined' ? 'cancelled' : 'scheduled';
-  var submitted = (g.submitted_at||'').slice(0,16).replace('T',' ');
+// ── Collapsed pending row ─────────────────────────────────
+function buildPendingRow(g) {
   var totalH = g.requests.reduce(function(s,r) {
     var m = (r.preferred_slot||'').match(/\((\d+)h\)/); return s + (m ? parseInt(m[1]) : 1);
   }, 0);
+  var submitted = g.submitted_at ? new Date(g.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+  var isExpanded = _expandedGroup === g.id;
 
-  // Slot rows
-  var slotRows = g.requests.map(function(r) {
-    var slotStatus = r.status === 'Accepted' ? '<span class="status completed" style="font-size:10px">✓</span>'
-                   : r.status === 'Declined' ? '<span class="status cancelled" style="font-size:10px">✕</span>' : '';
-    var editBtn = showActions
-      ? '<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px" data-gid="' + g.id + '" data-rid="' + r.id + '" onclick="openEditSlot(this.dataset.gid,this.dataset.rid)">Edit</button>'
-      : '';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:6px;background:var(--surface2);margin-bottom:4px;gap:8px">' +
-      '<div style="font-size:12px;font-family:monospace;flex:1">' + (r.preferred_slot||'—') + '</div>' +
-      slotStatus + editBtn +
-    '</div>';
-  }).join('');
-
-  // Action bar
-  var actions = '';
-  if (showActions) {
-    var gid = g.id;
-    actions = '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">' +
-      '<button class="btn btn-teal btn-sm" data-gid="' + gid + '" onclick="acceptGroup(this.dataset.gid)">✓ Accept All</button>' +
-      '<button class="btn btn-ghost btn-sm" style="color:var(--coral)" data-gid="' + gid + '" onclick="openDeclineGroup(this.dataset.gid)">✕ Decline All</button>' +
-    '</div>';
-  }
-
-  return '<div style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;background:var(--surface)">' +
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">' +
-      '<div>' +
-        '<div style="font-size:14px;font-weight:600">' + (g.student_name||'Unknown') + '</div>' +
-        '<div style="font-size:12px;color:var(--text2);margin-top:2px">' + (g.subject||'No subject') +
-          (isSingle ? '' : ' &nbsp;·&nbsp; ' + g.requests.length + ' sessions · ' + totalH + 'h') + '</div>' +
-        (g.student_email ? '<div style="font-size:11px;color:var(--text3);margin-top:2px">' + g.student_email + '</div>' : '') +
+  var row = '<div style="border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:8px;background:var(--surface)" id="bgroup-'+g.id+'">' +
+    // Clickable header row
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;gap:12px" onclick="toggleGroup(\''+g.id+'\')">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:14px;font-weight:700;color:var(--text1)">' + escAttr(g.student_name||'Unknown') + '</div>' +
+        '<div style="font-size:12px;color:var(--text2);margin-top:2px">' + escAttr(g.subject||'') + ' &nbsp;·&nbsp; ' + g.requests.length + ' session' + (g.requests.length!==1?'s':'') + ' &nbsp;·&nbsp; ' + totalH + 'h</div>' +
       '</div>' +
-      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">' +
-        '<span class="status ' + statusClass + '">' + g.status + '</span>' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
         '<span style="font-size:10px;color:var(--text3)">' + submitted + '</span>' +
+        '<span class="status pending" style="font-size:11px">Pending</span>' +
+        '<span style="font-size:14px;color:var(--text3);transition:transform .2s" id="bgroup-chevron-'+g.id+'">' + (isExpanded ? '&#8964;' : '&#8963;') + '</span>' +
       '</div>' +
     '</div>' +
-    slotRows +
-    actions +
+    // Expandable detail
+    '<div id="bgroup-detail-'+g.id+'" style="display:'+(isExpanded?'block':'none')+';border-top:1px solid var(--border)">' +
+      buildGroupDetail(g) +
+    '</div>' +
+  '</div>';
+  return row;
+}
+
+function toggleGroup(gid) {
+  if (_expandedGroup === gid) {
+    _expandedGroup = null;
+    var detail = document.getElementById('bgroup-detail-'+gid);
+    var chev   = document.getElementById('bgroup-chevron-'+gid);
+    if (detail) detail.style.display = 'none';
+    if (chev)   chev.innerHTML = '&#8963;';
+  } else {
+    // Collapse any previously open
+    if (_expandedGroup) {
+      var prev = document.getElementById('bgroup-detail-'+_expandedGroup);
+      var prevChev = document.getElementById('bgroup-chevron-'+_expandedGroup);
+      if (prev) prev.style.display = 'none';
+      if (prevChev) prevChev.innerHTML = '&#8963;';
+    }
+    _expandedGroup = gid;
+    expandGroup(gid);
+  }
+}
+
+function expandGroup(gid) {
+  var detail = document.getElementById('bgroup-detail-'+gid);
+  var chev   = document.getElementById('bgroup-chevron-'+gid);
+  if (detail) { detail.style.display = 'block'; }
+  if (chev)   { chev.innerHTML = '&#8964;'; }
+}
+
+// ── Expanded detail: monthly calendar + slot list + actions ──
+function buildGroupDetail(g) {
+  // Find the month of the first requested slot
+  var firstSlot = g.requests[0] ? (g.requests[0].preferred_slot||'') : '';
+  var firstDate = firstSlot.match(/^(\d{4}-\d{2}-\d{2})/);
+  var pivot = firstDate ? new Date(firstDate[1]+'T00:00:00') : new Date();
+  var calYear  = pivot.getFullYear();
+  var calMonth = pivot.getMonth();
+
+  // Build set of requested dates for fast lookup
+  var reqDateMap = {}; // date → [slot strings]
+  g.requests.forEach(function(r) {
+    var dp = (r.preferred_slot||'').match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}-\d{2}:\d{2})/);
+    if (dp) {
+      if (!reqDateMap[dp[1]]) reqDateMap[dp[1]] = [];
+      reqDateMap[dp[1]].push(dp[2]);
+    }
+  });
+
+  var monthLabel = pivot.toLocaleString('en-GB',{month:'long',year:'numeric'});
+  var todayStr   = dateToStr(new Date());
+
+  // Build calendar grid
+  var firstDay = new Date(calYear, calMonth, 1);
+  var lastDay  = new Date(calYear, calMonth+1, 0);
+  // Pad to Monday start
+  var startDow = firstDay.getDay(); // 0=Sun
+  var padBefore = (startDow === 0) ? 6 : startDow - 1;
+
+  var gridDays = [];
+  for (var p = padBefore; p > 0; p--) {
+    gridDays.push(new Date(firstDay.getTime() - p * 86400000));
+  }
+  for (var dd = 1; dd <= lastDay.getDate(); dd++) {
+    gridDays.push(new Date(calYear, calMonth, dd));
+  }
+  while (gridDays.length % 7 !== 0) {
+    gridDays.push(new Date(gridDays[gridDays.length-1].getTime() + 86400000));
+  }
+
+  var cal = '<div style="padding:14px 16px 0">' +
+    // Month label
+    '<div style="font-size:12px;font-weight:700;color:var(--text1);margin-bottom:10px;text-align:center">' + monthLabel + '</div>' +
+    // Day headers
+    '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">';
+  ['M','T','W','T','F','S','S'].forEach(function(d) {
+    cal += '<div style="text-align:center;font-size:10px;font-weight:700;color:var(--text3);padding:2px 0">' + d + '</div>';
+  });
+  cal += '</div>';
+  // Day cells
+  cal += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">';
+  gridDays.forEach(function(d) {
+    var ds       = dateToStr(d);
+    var isOther  = d.getMonth() !== calMonth;
+    var isToday  = ds === todayStr;
+    var isReq    = !!reqDateMap[ds];
+    var existEvts = isOther ? [] : eventsForDate(ds).filter(function(e){ return !e.allDay; });
+
+    var cellBg   = isReq ? 'rgba(55,138,221,.1)' : 'transparent';
+    var numColor = isReq ? '#378ADD' : isToday ? 'var(--blue)' : isOther ? 'var(--text3)' : 'var(--text1)';
+    var border   = isReq ? '1.5px solid #378ADD' : isToday ? '1.5px solid var(--blue)' : '1px solid transparent';
+    var opacity  = isOther ? '.35' : '1';
+
+    cal += '<div style="border-radius:6px;padding:3px 2px;background:'+cellBg+';border:'+border+';opacity:'+opacity+';min-height:44px">';
+    cal += '<div style="font-size:11px;font-weight:'+(isReq||isToday?'700':'500')+';color:'+numColor+';text-align:center;margin-bottom:2px">' + d.getDate() + '</div>';
+
+    if (!isOther) {
+      // Show requested time slots as blue chips
+      if (isReq) {
+        reqDateMap[ds].forEach(function(slot) {
+          cal += '<div style="font-size:8px;font-weight:700;color:#fff;background:#378ADD;border-radius:3px;padding:1px 3px;margin-bottom:1px;text-align:center;line-height:1.4">' + slot + '</div>';
+        });
+      }
+      // Show existing events as grey chips (max 2)
+      var shown = 0;
+      existEvts.forEach(function(e) {
+        if (shown >= 2) return;
+        if (isReq && reqDateMap[ds].some(function(rs){ return rs.split('-')[0] === (e.start||'').replace(':',''); })) return; // skip if same slot
+        var typeColors = { private:'#2563EB', poppadi:'#0E7A5A', wwa:'#7C3AED', personal:'#6B7280', meeting:'#B45309' };
+        var c = typeColors[e.type] || '#9b9a94';
+        cal += '<div style="font-size:8px;color:#fff;background:'+c+';border-radius:3px;padding:1px 3px;margin-bottom:1px;text-align:center;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%" title="'+escHtml(e.title)+'">' + (e.start||'') + '</div>';
+        shown++;
+      });
+    }
+    cal += '</div>';
+  });
+  cal += '</div></div>';
+
+  // Legend
+  cal += '<div style="display:flex;gap:12px;padding:10px 16px 14px;align-items:center">' +
+    '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;background:#378ADD;border-radius:2px"></div><span style="font-size:11px;color:var(--text3)">Requested</span></div>' +
+    '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;background:#9b9a94;border-radius:2px;opacity:.6"></div><span style="font-size:11px;color:var(--text3)">Existing</span></div>' +
+  '</div>';
+
+  // Slot list with Edit buttons
+  var slotList = '<div style="padding:12px 16px;border-top:1px solid var(--border)">' +
+    '<div style="font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Requested Slots</div>' +
+    g.requests.map(function(r) {
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--surface2);margin-bottom:4px;gap:8px">' +
+        '<div style="font-size:12px;font-family:monospace;color:var(--text1);flex:1">' + escHtml(r.preferred_slot||'—') + '</div>' +
+        '<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;flex-shrink:0" data-gid="'+g.id+'" data-rid="'+r.id+'" onclick="openEditSlot(this.dataset.gid,this.dataset.rid)">Edit</button>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+
+  // Action buttons
+  var actions = '<div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border)">' +
+    '<button class="btn btn-teal" style="flex:1" data-gid="'+g.id+'" onclick="acceptGroup(this.dataset.gid)">&#10003; Accept All</button>' +
+    '<button class="btn btn-ghost" style="color:var(--coral)" data-gid="'+g.id+'" onclick="openDeclineGroup(this.dataset.gid)">&#10005; Decline</button>' +
+  '</div>';
+
+  return cal + slotList + actions;
+}
+
+// ── History row (compact, no actions) ────────────────────
+function buildHistoryRow(g) {
+  var totalH = g.requests.reduce(function(s,r) {
+    var m = (r.preferred_slot||'').match(/\((\d+)h\)/); return s + (m ? parseInt(m[1]) : 1);
+  }, 0);
+  var statusClass = g.status === 'Accepted' ? 'completed' : g.status === 'Declined' ? 'cancelled' : 'scheduled';
+  var submitted = g.submitted_at ? new Date(g.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
+  return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:var(--radius);background:var(--surface2);margin-bottom:6px;gap:8px">' +
+    '<div>' +
+      '<div style="font-size:13px;font-weight:600;color:var(--text1)">' + escAttr(g.student_name||'Unknown') + '</div>' +
+      '<div style="font-size:11px;color:var(--text2);margin-top:1px">' + escAttr(g.subject||'') + ' · ' + g.requests.length + ' sessions · ' + totalH + 'h</div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+      '<span style="font-size:10px;color:var(--text3)">' + submitted + '</span>' +
+      '<span class="status ' + statusClass + '" style="font-size:11px">' + g.status + '</span>' +
+    '</div>' +
   '</div>';
 }
 
 // ── ACCEPT ALL ────────────────────────────────────────────
 function acceptGroup(groupId) {
-  // Disable the button immediately to prevent double-click
-  var btn = document.querySelector('[data-gid="'+groupId+'"].btn-teal');
+  // Disable the button to prevent double-click
+  var btn = document.querySelector('button.btn-teal[data-gid="'+groupId+'"]');
   if(btn){ btn.disabled=true; btn.innerHTML='<span class="spinner" style="width:12px;height:12px;border-width:2px"></span> Accepting...'; }
 
   var groups  = groupBookingRequests(DATA.bookingRequests || []);
@@ -5264,7 +5411,7 @@ function saveSlotEdit() {
 async function refreshBookings() {
   showToast('Refreshing...');
   try {
-    var rows = await fetchSheetSafe('BookingRequests!A:J');
+    var rows = await fetchSheetSafe('BookingRequests!A:L');
     DATA.bookingRequests = parseSheet(rows);
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: DATA, cachedAt: Date.now() }));
     renderBookings();
