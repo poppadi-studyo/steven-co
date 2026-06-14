@@ -5113,24 +5113,26 @@ function setGroupViewMode(gid, mode) {
 
 // ── Schedule grid view (same as Schedule page, existing = grey, requested = blue) ──
 function buildBookingScheduleGrid(g) {
-  // Collect all unique days that have requested slots
-  var reqDays = {};
-  var reqSlotMap = {}; // 'date_startMin' → {start, end, dur, name}
+  // preferred_slot format: "2026-06-16 10:00–12:00 (2h)"  (en-dash between times)
+  var REQ_RE = /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})[\u2013\-](\d{2}:\d{2})\s*\((\d+)h\)/;
+
+  var reqDays   = {};
+  var reqSlotMap = {};
   var studentName = g.student_name || 'Student';
 
   g.requests.forEach(function(r) {
-    var dp = (r.preferred_slot||'').match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})-(\d{2}:\d{2})\s*\((\d+)h\)/);
+    var dp = (r.preferred_slot||'').match(REQ_RE);
     if (dp) {
       reqDays[dp[1]] = true;
       var key = dp[1] + '_' + timeToMinutes(dp[2]);
-      reqSlotMap[key] = { start: dp[2], end: dp[3], dur: parseInt(dp[4]), name: studentName, rid: r.id };
+      reqSlotMap[key] = { start: dp[2], end: dp[3], dur: parseInt(dp[4]), name: studentName };
     }
   });
 
   var sortedDays = Object.keys(reqDays).sort().map(function(ds){ return new Date(ds+'T00:00:00'); });
   if (!sortedDays.length) return '<div style="padding:16px;color:var(--text3);font-size:13px">No slot data found.</div>';
 
-  // Smart time range across requested + existing events on those days
+  // Smart time range
   var minH = 23, maxH = 0, hasEvts = false;
   sortedDays.forEach(function(d) {
     var ds = dateToStr(d);
@@ -5140,7 +5142,7 @@ function buildBookingScheduleGrid(g) {
       minH = Math.min(minH, sh); maxH = Math.max(maxH, eh); hasEvts = true;
     });
     g.requests.forEach(function(r) {
-      var dp = (r.preferred_slot||'').match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})-(\d{2}:\d{2})/);
+      var dp = (r.preferred_slot||'').match(REQ_RE);
       if (dp && dp[1] === ds) {
         var sh = parseInt(dp[2].split(':')[0]);
         var eh = parseInt(dp[3].split(':')[0]); if(parseInt((dp[3].split(':')[1])||0)>0) eh++;
@@ -5170,8 +5172,7 @@ function buildBookingScheduleGrid(g) {
     var dlCls  = 'swt-daylabel' + (isToday ? ' swt-daylabel-today' : '');
     var dayName = d.toLocaleString('en-US',{weekday:'short'});
 
-    html += '<tr class="'+rowCls+'">';
-    html += '<td class="'+dlCls+'"><span class="swt-day-inline">'+dayName+' <strong>'+d.getDate()+'</strong></span></td>';
+    html += '<tr class="'+rowCls+'"><td class="'+dlCls+'"><span class="swt-day-inline">'+dayName+' <strong>'+d.getDate()+'</strong></span></td>';
 
     var existEvts = eventsForDate(ds).filter(function(e){ return !e.allDay; });
     var skipped = {};
@@ -5179,82 +5180,77 @@ function buildBookingScheduleGrid(g) {
     hours.forEach(function(hourInt, hj) {
       if (skipped[hj]) return;
 
-      // Check for requested slot starting in this hour
+      // Requested slot?
       var reqKey = ds + '_' + (hourInt * 60);
       if (reqSlotMap[reqKey]) {
         var rs = reqSlotMap[reqKey];
-        var span = rs.dur;
-        var remain = hours.length - hj;
-        span = Math.max(1, Math.min(span, remain));
+        var span = Math.max(1, Math.min(rs.dur, hours.length - hj));
         for (var sk = 1; sk < span; sk++) skipped[hj+sk] = true;
-        var colAttr = span > 1 ? ' colspan="'+span+'"' : '';
-        html += '<td class="swt-slot swt-slot-event"'+colAttr+'>';
-        html += '<div class="swt-block-abs" style="left:0;right:0;width:auto;background:#378ADD;color:#fff;font-weight:700">';
-        html += escHtml(rs.name) + ' &nbsp;' + rs.start + '–' + rs.end;
-        html += '</div></td>';
+        html += '<td class="swt-slot swt-slot-event"'+(span>1?' colspan="'+span+'"':'')+'>'+
+          '<div class="swt-block-abs" style="left:0;right:0;width:auto;background:#378ADD;color:#fff;font-weight:700">'+
+          escHtml(rs.name)+' &nbsp;'+rs.start+'–'+rs.end+
+          '</div></td>';
         return;
       }
 
-      // Check for existing event — render in grey regardless of type
+      // Existing event → grey
       var cellEvts = existEvts.filter(function(e) {
-        if (e.allDay) return false;
         var sm = timeToMinutes(e.start||'00:00');
-        return sm >= hourInt*60 && sm < (hourInt+1)*60;
+        return !e.allDay && sm >= hourInt*60 && sm < (hourInt+1)*60;
       });
-
-      if (!cellEvts.length) {
-        html += '<td class="swt-slot"><div class="swt-half-line"></div></td>';
-        return;
-      }
+      if (!cellEvts.length) { html += '<td class="swt-slot"><div class="swt-half-line"></div></td>'; return; }
 
       var e = cellEvts[0];
-      var startMin = timeToMinutes(e.start||'00:00');
-      var endMin   = timeToMinutes(e.end||'00:00');
-      var durMin   = Math.max(30, endMin - startMin);
+      var startMin   = timeToMinutes(e.start||'00:00');
+      var endMin     = timeToMinutes(e.end||'00:00');
+      var durMin     = Math.max(30, endMin - startMin);
       var startsMins = startMin - hourInt*60;
       var isOnHour   = startsMins < 5;
 
       if (isOnHour) {
-        var span2 = Math.round(durMin/60);
-        span2 = Math.max(1, Math.min(span2, hours.length - hj));
+        var span2 = Math.max(1, Math.min(Math.round(durMin/60), hours.length - hj));
         for (var sk2 = 1; sk2 < span2; sk2++) skipped[hj+sk2] = true;
-        var ca = span2 > 1 ? ' colspan="'+span2+'"' : '';
-        html += '<td class="swt-slot swt-slot-event"'+ca+'>';
-        // Grey regardless of type
-        html += '<div class="swt-block-abs" style="left:0;right:0;width:auto;background:var(--gray-bg);color:var(--gray)">';
-        html += escHtml(e.title);
-        html += '</div></td>';
+        html += '<td class="swt-slot swt-slot-event"'+(span2>1?' colspan="'+span2+'"':'')+'>'+
+          '<div class="swt-block-abs" style="left:0;right:0;width:auto;background:var(--gray-bg);color:var(--gray)">'+
+          escHtml(e.title)+'</div></td>';
       } else {
-        var lp = (startsMins/60)*100;
-        var wp = (durMin/60)*100;
-        html += '<td class="swt-slot" style="overflow:visible;z-index:5">';
-        html += '<div class="swt-half-line"></div>';
-        html += '<div class="swt-block-abs" style="left:'+lp.toFixed(0)+'%;width:'+wp.toFixed(0)+'%;background:var(--gray-bg);color:var(--gray)">';
-        html += escHtml(e.title);
-        html += '</div></td>';
+        var lp = (startsMins/60)*100; var wp = (durMin/60)*100;
+        html += '<td class="swt-slot" style="overflow:visible;z-index:5">'+
+          '<div class="swt-half-line"></div>'+
+          '<div class="swt-block-abs" style="left:'+lp.toFixed(0)+'%;width:'+wp.toFixed(0)+'%;background:var(--gray-bg);color:var(--gray)">'+
+          escHtml(e.title)+'</div></td>';
       }
     });
     html += '</tr>';
   });
 
   html += '</tbody></table>';
-  // Legend
-  html += '<div style="display:flex;gap:14px;padding:8px 12px 12px;align-items:center">';
-  html += '<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background:#378ADD;border-radius:3px"></div><span style="font-size:11px;color:var(--text3)">Requested</span></div>';
-  html += '<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background:var(--gray-bg);border-radius:3px"></div><span style="font-size:11px;color:var(--text3)">Existing</span></div>';
-  html += '</div></div>';
+  html += '<div style="display:flex;gap:14px;padding:8px 12px 12px;align-items:center">'+
+    '<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background:#378ADD;border-radius:3px"></div><span style="font-size:11px;color:var(--text3)">Requested</span></div>'+
+    '<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background:var(--gray-bg);border-radius:3px"></div><span style="font-size:11px;color:var(--text3)">Existing</span></div>'+
+    '</div></div>';
   return html;
 }
 
-// ── List view: slot rows + edit buttons ──────────────────
+// ── List view: slot rows with day of week + human date ───
 function buildBookingSlotList(g) {
+  var REQ_RE = /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}[\u2013\-]\d{2}:\d{2}\s*\(\d+h\))/;
   return '<div style="padding:12px 16px;border-top:1px solid var(--border)">' +
     g.requests.map(function(r) {
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:7px;background:var(--surface2);margin-bottom:5px;gap:8px">' +
-        '<div style="font-size:12.5px;font-family:monospace;color:var(--text1);flex:1">' + escHtml(r.preferred_slot||'—') + '</div>' +
-        '<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;flex-shrink:0" data-gid="'+g.id+'" data-rid="'+r.id+'" onclick="openEditSlot(this.dataset.gid,this.dataset.rid)">Edit</button>' +
+      var raw = r.preferred_slot || '—';
+      var dp = raw.match(/^(\d{4}-\d{2}-\d{2})\s+(.*)/);
+      var dateLabel = raw;
+      if (dp) {
+        var d = new Date(dp[1]+'T00:00:00');
+        var dayStr = d.toLocaleString('en-US',{weekday:'short'});
+        var dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+        dateLabel = '<span style="font-weight:700">'+dayStr+' '+dateStr+'</span> &nbsp;'+dp[2];
+      }
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:7px;background:var(--surface2);margin-bottom:5px;gap:8px">'+
+        '<div style="font-size:12.5px;color:var(--text1);flex:1;line-height:1.5">'+dateLabel+'</div>'+
+        '<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;flex-shrink:0" data-gid="'+g.id+'" data-rid="'+r.id+'" onclick="openEditSlot(this.dataset.gid,this.dataset.rid)">Edit</button>'+
       '</div>';
-    }).join('') +
+    }).join('')+
   '</div>';
 }
 
