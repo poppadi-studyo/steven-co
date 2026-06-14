@@ -1409,7 +1409,7 @@ tr:hover td { background: var(--surface2); }
                 Not published yet this session.
               </div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="btn btn-teal" onclick="publishSlots()">↑ Publish Free Slots</button>
+                <button class="btn btn-teal" id="publish-slots-btn" onclick="publishSlots()">&#8593; Publish Free Slots</button>
                 <a id="book-page-btn" href="book.html" target="_blank" class="btn btn-ghost btn-sm" style="align-self:center">🔗 View Public Page</a>
               </div>
             </div>
@@ -1480,7 +1480,7 @@ tr:hover td { background: var(--surface2); }
           <div id="decline-group-body" style="font-size:13px;color:var(--text2);margin-bottom:16px"></div>
           <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModal('modal-decline-group')">Cancel</button>
-            <button class="btn btn-ghost" style="color:var(--coral)" onclick="confirmDeclineGroup()">✕ Decline All</button>
+            <button class="btn btn-ghost" style="color:var(--coral)" id="decline-confirm-btn" onclick="confirmDeclineGroup()">✕ Decline All</button>
           </div>
         </div>
       </div>
@@ -3481,7 +3481,14 @@ function toggleTheme() {
 }
 
 // ─── UTILS ────────────────────────────────────────────────
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  // Reset decline button state
+  if(id === 'modal-decline-group'){
+    var decBtn = document.getElementById('decline-confirm-btn');
+    if(decBtn){ decBtn.disabled=false; decBtn.innerHTML='✕ Decline All'; }
+  }
+}
 
 function showToast(msg, duration) {
   const el = document.getElementById('toast');
@@ -5057,6 +5064,10 @@ function buildGroupCard(g, showActions) {
 
 // ── ACCEPT ALL ────────────────────────────────────────────
 function acceptGroup(groupId) {
+  // Disable the button immediately to prevent double-click
+  var btn = document.querySelector('[data-gid="'+groupId+'"].btn-teal');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spinner" style="width:12px;height:12px;border-width:2px"></span> Accepting...'; }
+
   var groups  = groupBookingRequests(DATA.bookingRequests || []);
   var g       = groups[groupId];
   if (!g) return;
@@ -5115,6 +5126,8 @@ function openDeclineGroup(groupId) {
 
 function confirmDeclineGroup() {
   if (!_declineGroupPending) return;
+  var decBtn = document.getElementById('decline-confirm-btn');
+  if(decBtn){ decBtn.disabled=true; decBtn.innerHTML='<span class="spinner" style="width:12px;height:12px;border-width:2px"></span> Declining...'; }
   var groups = groupBookingRequests(DATA.bookingRequests || []);
   var g = groups[_declineGroupPending];
   if (g) {
@@ -5816,6 +5829,9 @@ function saveAvailability() { localStorage.setItem('stevenco_avail', JSON.string
 function publishSlots() {
   if (!WEB_APP_URL) { showToast('⚠ Apps Script URL not set — go to Settings'); return; }
 
+  var btn = document.getElementById('publish-slots-btn');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spinner" style="width:12px;height:12px;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></span> Publishing...'; }
+
   var statusEl = document.getElementById('publish-slots-status');
   statusEl.textContent = 'Computing free slots...';
 
@@ -5890,6 +5906,7 @@ function publishSlots() {
 
   if (slots.length === 0) {
     statusEl.innerHTML = '<span style="color:var(--amber)">⚠ No free slots found. Check your availability settings and GCal events.</span>';
+    if(btn){ btn.disabled=false; btn.innerHTML='&#8593; Publish Free Slots'; }
     return;
   }
 
@@ -5903,10 +5920,12 @@ function publishSlots() {
         '<br><span style="color:var(--text3);font-size:11px">Covers tomorrow through ' +
         twoMonths.toLocaleString('en-US', { month: 'long', day: 'numeric' }) + '</span>';
       showToast('✓ Slots published to booking page');
+      if(btn){ btn.disabled=false; btn.innerHTML='&#8593; Publish Free Slots'; }
     })
     .catch(function(e) {
       statusEl.innerHTML = '<span style="color:var(--red)">❌ Publish failed — ' + (e.message || 'check connection') + '</span>';
       showToast('⚠ Publish failed');
+      if(btn){ btn.disabled=false; btn.innerHTML='&#8593; Publish Free Slots'; }
     });
 }
 
