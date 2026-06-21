@@ -939,7 +939,8 @@ tr:hover td { background: var(--surface2); }
               <div class="month-picker">
                 <select id="pt-month-select" onchange="renderPrivateTutoring()"></select>
               </div>
-              <button class="btn btn-primary" onclick="openAddSession()">+ Log Session</button>
+              <button class="btn btn-ghost btn-sm" onclick="openAddSession()">+ Single Session</button>
+              <button class="btn btn-primary" onclick="openEnrollment()">+ New Enrollment</button>
             </div>
           </div>
         </div>
@@ -1538,7 +1539,7 @@ tr:hover td { background: var(--surface2); }
 </div>
 </div>
 
-<!-- ── ADD SESSION MODAL ── -->
+<!-- ── ADD SESSION MODAL (quick single session) ── -->
 <div class="modal-backdrop" id="modal-add-session">
   <div class="modal">
     <div class="modal-title" id="modal-session-title">Log Private Tutoring Session</div>
@@ -1604,6 +1605,103 @@ tr:hover td { background: var(--surface2); }
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-add-session')">Cancel</button>
       <button class="btn btn-primary" onclick="saveSession()">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── NEW ENROLLMENT MODAL ── -->
+<div class="modal-backdrop" id="modal-enrollment">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-title">New Enrollment</div>
+
+    <!-- Type toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button id="etype-private" onclick="setEnrollmentType('private')"
+        style="flex:1;padding:10px;border-radius:var(--radius);border:2px solid var(--teal);background:var(--teal);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">
+        Private
+      </button>
+      <button id="etype-group" onclick="setEnrollmentType('group')"
+        style="flex:1;padding:10px;border-radius:var(--radius);border:2px solid var(--border-strong);background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">
+        Group
+      </button>
+    </div>
+
+    <!-- Private: single student -->
+    <div id="enroll-private-block">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Student Name *</label>
+          <input class="form-input" id="enroll-student-name" placeholder="e.g. Ploy" list="enroll-student-suggestions">
+          <datalist id="enroll-student-suggestions"></datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject *</label>
+          <input class="form-input" id="enroll-subject" placeholder="e.g. IELTS, SAT, GED">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Total Paid Hours *</label>
+          <input class="form-input" id="enroll-paid-hrs" type="number" step="0.5" min="1" placeholder="e.g. 20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fee / hr (฿) *</label>
+          <input class="form-input" id="enroll-fee-hr" type="number" placeholder="900" oninput="updateEnrollPreviewPT()">
+          <div class="form-hint">Default ฿<span id="enroll-hint-rate">900</span>/hr</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group: multi-student rows -->
+    <div id="enroll-group-block" style="display:none">
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label class="form-label">Subject *</label>
+          <input class="form-input" id="enroll-subject-group" placeholder="e.g. IELTS, SAT, GED">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Paid Hours *</label>
+          <input class="form-input" id="enroll-paid-hrs-group" type="number" step="0.5" min="1" placeholder="e.g. 20">
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Students &amp; Rates</div>
+      <div id="enroll-group-students-body" style="display:flex;flex-direction:column;gap:8px"></div>
+      <button onclick="addGroupEnrollRow()" style="margin-top:8px;background:none;border:1px dashed var(--border-strong);border-radius:var(--radius);padding:8px 14px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;width:100%">+ Add student</button>
+    </div>
+
+    <!-- Schedule -->
+    <div style="margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Session Schedule</div>
+        <button onclick="addEnrollScheduleRow()" style="background:none;border:none;font-size:12px;color:var(--teal);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600">+ Add session</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:6px 8px;text-align:left;font-size:11px;color:var(--text3);font-weight:500">Date</th>
+              <th style="padding:6px 8px;text-align:left;font-size:11px;color:var(--text3);font-weight:500">Start</th>
+              <th style="padding:6px 8px;text-align:center;font-size:11px;color:var(--text3);font-weight:500">Hrs</th>
+              <th style="padding:6px 8px"></th>
+            </tr>
+          </thead>
+          <tbody id="enroll-schedule-body"></tbody>
+        </table>
+      </div>
+      <div style="background:var(--teal-bg);border-radius:var(--radius);padding:10px 12px;margin-top:10px;font-size:13px;color:var(--teal)">
+        <span id="enroll-sched-preview">0h scheduled of 0h paid</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="enroll-notes" rows="2" placeholder="Optional..."></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-enrollment')">Cancel</button>
+      <button class="btn btn-primary" id="enroll-save-btn" onclick="saveEnrollmentPT()">Save Enrollment</button>
     </div>
   </div>
 </div>
@@ -2524,11 +2622,16 @@ function renderPrivateTutoring() {
   const studentMap = {};
   monthSessions.forEach(s => {
     const n = s.student_name || '—';
-    if (!studentMap[n]) studentMap[n] = { hours:0, income:0, sessions:0, subject: s.subject||'' };
+    if (!studentMap[n]) studentMap[n] = { hours:0, income:0, sessions:0, subject: s.subject||'', enrollType: s.enrollment_type||'private', numStudents: Number(s.num_students||1), paymentStatus: s.payment_status||'Paid', enrollmentId: s.enrollment_id||'' };
     studentMap[n].hours   += Number(s.duration_hrs||0);
     studentMap[n].income  += Number(s.fee||0);
     studentMap[n].sessions++;
     if (s.subject) studentMap[n].subject = s.subject;
+    if (s.enrollment_type) studentMap[n].enrollType = s.enrollment_type;
+    if (Number(s.num_students||1) > studentMap[n].numStudents) studentMap[n].numStudents = Number(s.num_students||1);
+    if (s.enrollment_id) studentMap[n].enrollmentId = s.enrollment_id;
+    // Payment status: Pending overrides Paid (if any session pending, show pending)
+    if ((s.payment_status||'Paid') === 'Pending') studentMap[n].paymentStatus = 'Pending';
   });
 
   const studentNames = Object.keys(studentMap);
@@ -2542,16 +2645,27 @@ function renderPrivateTutoring() {
       const st = studentMap[name];
       const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
       const safeName = name.replace(/'/g, "\\'");
+      const isPending = st.paymentStatus === 'Pending';
+      const isGroup = st.enrollType === 'group';
+      const groupBadge = isGroup ? `<span style="font-size:10px;background:var(--purple-bg);color:var(--purple);border-radius:4px;padding:2px 6px;font-weight:600;margin-left:6px">Group · ${st.numStudents} students</span>` : '';
+      const payBadge = isPending
+        ? `<span style="font-size:10px;background:var(--amber-bg);color:var(--amber);border-radius:4px;padding:2px 6px;font-weight:600">Pending</span>`
+        : `<span style="font-size:10px;background:var(--teal-bg);color:var(--teal);border-radius:4px;padding:2px 6px;font-weight:600">Paid</span>`;
+      const markPaidBtn = isPending && st.enrollmentId
+        ? `<button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:11px;color:var(--teal);border-color:var(--teal)" onclick="markEnrollmentPaid('${st.enrollmentId}', '${safeName}')">Mark Paid</button>`
+        : '';
       return `<div class="student-card">
         <div class="student-avatar">${initials}</div>
         <div class="student-info">
-          <div class="student-name">${name}</div>
+          <div class="student-name">${name}${groupBadge}</div>
           <div class="student-meta">${st.subject || 'No subject'} · ${st.sessions} session${st.sessions!==1?'s':''}</div>
+          <div style="margin-top:4px">${payBadge}</div>
         </div>
         <div class="student-stats">
           <div class="student-total">${fmt(st.income)}</div>
           <div class="student-hours">${st.hours}h</div>
-          <button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:11px" onclick="generateStudentInvoicePDF('${safeName}')">⬇ Invoice</button>
+          ${markPaidBtn}
+          <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:11px" onclick="generateStudentInvoicePDF('${safeName}')">⬇ Invoice</button>
         </div>
       </div>`;
     }).join('');
@@ -3002,6 +3116,259 @@ function updateStudentSuggestions() {
   const dl = document.getElementById('student-suggestions');
   if (dl) dl.innerHTML = names.map(n => `<option value="${n}">`).join('');
 }
+
+// ─── ENROLLMENT (Private Tutoring) ────────────────────────
+
+var _enrollType = 'private';
+
+function openEnrollment() {
+  _enrollType = 'private';
+  // Reset type buttons
+  document.getElementById('etype-private').style.background = 'var(--teal)';
+  document.getElementById('etype-private').style.color = '#fff';
+  document.getElementById('etype-private').style.borderColor = 'var(--teal)';
+  document.getElementById('etype-group').style.background = 'transparent';
+  document.getElementById('etype-group').style.color = 'var(--text2)';
+  document.getElementById('etype-group').style.borderColor = 'var(--border-strong)';
+  // Reset fields
+  document.getElementById('enroll-student-name').value = '';
+  document.getElementById('enroll-subject').value = '';
+  document.getElementById('enroll-paid-hrs').value = '';
+  document.getElementById('enroll-fee-hr').value = '';
+  document.getElementById('enroll-subject-group').value = '';
+  document.getElementById('enroll-paid-hrs-group').value = '';
+  document.getElementById('enroll-notes').value = '';
+  document.getElementById('enroll-hint-rate').textContent = DEFAULT_RATE;
+  document.getElementById('enroll-private-block').style.display = '';
+  document.getElementById('enroll-group-block').style.display = 'none';
+  // Reset schedule
+  document.getElementById('enroll-schedule-body').innerHTML = '';
+  addEnrollScheduleRow();
+  // Update student suggestions
+  var names = [...new Set(DATA.privateSessions.map(function(s) { return s.student_name; }).filter(Boolean))];
+  var dl = document.getElementById('enroll-student-suggestions');
+  if (dl) dl.innerHTML = names.map(function(n) { return '<option value="' + n + '">'; }).join('');
+  // Reset group students
+  document.getElementById('enroll-group-students-body').innerHTML = '';
+  updateEnrollPreviewPT();
+  document.getElementById('modal-enrollment').classList.add('open');
+}
+
+function setEnrollmentType(type) {
+  _enrollType = type;
+  var isGroup = type === 'group';
+  document.getElementById('enroll-private-block').style.display = isGroup ? 'none' : '';
+  document.getElementById('enroll-group-block').style.display = isGroup ? '' : 'none';
+  // Button styles
+  document.getElementById('etype-private').style.background = isGroup ? 'transparent' : 'var(--teal)';
+  document.getElementById('etype-private').style.color = isGroup ? 'var(--text2)' : '#fff';
+  document.getElementById('etype-private').style.borderColor = isGroup ? 'var(--border-strong)' : 'var(--teal)';
+  document.getElementById('etype-group').style.background = isGroup ? 'var(--teal)' : 'transparent';
+  document.getElementById('etype-group').style.color = isGroup ? '#fff' : 'var(--text2)';
+  document.getElementById('etype-group').style.borderColor = isGroup ? 'var(--teal)' : 'var(--border-strong)';
+  if (isGroup && document.getElementById('enroll-group-students-body').children.length === 0) {
+    addGroupEnrollRow();
+    addGroupEnrollRow();
+  }
+  updateEnrollPreviewPT();
+}
+
+function addEnrollScheduleRow() {
+  var tbody = document.getElementById('enroll-schedule-body');
+  var today = new Date().toISOString().slice(0,10);
+  var idx = tbody.children.length;
+  var tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td style="padding:4px 6px"><input type="date" value="' + today + '" style="font-family:DM Sans,sans-serif;font-size:13px;border:1px solid var(--border-strong);border-radius:6px;padding:5px 8px;background:var(--surface);color:var(--text)" oninput="updateEnrollPreviewPT()"></td>' +
+    '<td style="padding:4px 6px"><select style="font-family:DM Sans,sans-serif;font-size:13px;border:1px solid var(--border-strong);border-radius:6px;padding:5px 8px;background:var(--surface);color:var(--text)">' +
+      '<option value="">—</option>' +
+      ['06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30'].map(function(t){return '<option>' + t + '</option>';}).join('') +
+    '</select></td>' +
+    '<td style="padding:4px 6px;text-align:center"><input type="number" value="2" step="0.5" min="0.5" style="width:60px;font-family:DM Sans,sans-serif;font-size:13px;border:1px solid var(--border-strong);border-radius:6px;padding:5px 8px;background:var(--surface);color:var(--text);text-align:center" oninput="updateEnrollPreviewPT()"></td>' +
+    '<td style="padding:4px 6px;text-align:center"><button onclick="this.parentNode.parentNode.remove();updateEnrollPreviewPT()" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text3)">✕</button></td>';
+  tbody.appendChild(tr);
+  updateEnrollPreviewPT();
+}
+
+function addGroupEnrollRow() {
+  var body = document.getElementById('enroll-group-students-body');
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:center';
+  div.innerHTML =
+    '<input class="form-input" placeholder="Student name *" style="flex:2" oninput="updateEnrollPreviewPT()">' +
+    '<input class="form-input" type="number" placeholder="฿/hr" style="flex:1" oninput="updateEnrollPreviewPT()">' +
+    '<button onclick="this.parentElement.remove();updateEnrollPreviewPT()" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text3);flex-shrink:0">✕</button>';
+  body.appendChild(div);
+}
+
+function updateEnrollPreviewPT() {
+  var rows = document.querySelectorAll('#enroll-schedule-body tr');
+  var totalHrs = 0;
+  rows.forEach(function(r) {
+    var hrsInput = r.querySelectorAll('input[type="number"]')[0];
+    totalHrs += parseFloat(hrsInput ? hrsInput.value : 0) || 0;
+  });
+  var paidHrs = parseFloat(
+    _enrollType === 'group'
+      ? (document.getElementById('enroll-paid-hrs-group') ? document.getElementById('enroll-paid-hrs-group').value : 0)
+      : (document.getElementById('enroll-paid-hrs') ? document.getElementById('enroll-paid-hrs').value : 0)
+  ) || 0;
+  var el = document.getElementById('enroll-sched-preview');
+  if (el) {
+    var over = paidHrs > 0 && totalHrs > paidHrs;
+    el.textContent = totalHrs + 'h scheduled of ' + (paidHrs || '?') + 'h paid';
+    el.parentElement.style.background = over ? 'var(--coral-bg)' : 'var(--teal-bg)';
+    el.style.color = over ? 'var(--coral)' : 'var(--teal)';
+  }
+}
+
+async function saveEnrollmentPT() {
+  var btn = document.getElementById('enroll-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    var isGroup = _enrollType === 'group';
+    var subject = isGroup
+      ? document.getElementById('enroll-subject-group').value.trim()
+      : document.getElementById('enroll-subject').value.trim();
+    var paidHrs = parseFloat(isGroup
+      ? document.getElementById('enroll-paid-hrs-group').value
+      : document.getElementById('enroll-paid-hrs').value) || 0;
+    var notes = document.getElementById('enroll-notes').value.trim();
+
+    // Collect schedule rows
+    var schedRows = document.querySelectorAll('#enroll-schedule-body tr');
+    var sessions = [];
+    schedRows.forEach(function(row) {
+      var inputs = row.querySelectorAll('input');
+      var sel = row.querySelector('select');
+      var dateVal = inputs[0] ? inputs[0].value : '';
+      var hrsVal = parseFloat(inputs[1] ? inputs[1].value : 0) || 0;
+      var startVal = sel ? sel.value : '';
+      if (dateVal && hrsVal) sessions.push({ date: dateVal, start_time: startVal, hours: hrsVal });
+    });
+
+    if (!subject) { showToast('⚠ Please enter a subject'); btn.disabled = false; btn.textContent = 'Save Enrollment'; return; }
+    if (sessions.length === 0) { showToast('⚠ Add at least one session'); btn.disabled = false; btn.textContent = 'Save Enrollment'; return; }
+
+    var totalScheduled = sessions.reduce(function(s,r) { return s + r.hours; }, 0);
+    if (paidHrs > 0 && totalScheduled > paidHrs + 0.01) {
+      showToast('⚠ Scheduled ' + totalScheduled + 'h exceeds paid ' + paidHrs + 'h');
+      btn.disabled = false; btn.textContent = 'Save Enrollment'; return;
+    }
+
+    var enrollmentId = 'ENR-' + Date.now();
+
+    if (isGroup) {
+      // Group enrollment — collect student rows
+      var studentRows = document.querySelectorAll('#enroll-group-students-body > div');
+      var groupStudents = [];
+      var rowErr = null;
+      studentRows.forEach(function(row, i) {
+        var inputs = row.querySelectorAll('input');
+        var name = inputs[0] ? inputs[0].value.trim() : '';
+        var feeHr = parseFloat(inputs[1] ? inputs[1].value : 0) || 0;
+        if (!name) return;
+        if (!feeHr) { rowErr = 'Please enter fee/hr for ' + name; return; }
+        groupStudents.push({ name: name, feeHr: feeHr });
+      });
+      if (rowErr) { showToast('⚠ ' + rowErr); btn.disabled = false; btn.textContent = 'Save Enrollment'; return; }
+      if (groupStudents.length === 0) { showToast('⚠ Add at least one student'); btn.disabled = false; btn.textContent = 'Save Enrollment'; return; }
+
+      var numStudents = groupStudents.length;
+      for (var i = 0; i < groupStudents.length; i++) {
+        var gs = groupStudents[i];
+        for (var j = 0; j < sessions.length; j++) {
+          var sess = sessions[j];
+          var fee = gs.feeHr * sess.hours;
+          var id = 'PT-' + Date.now() + '-' + i + '-' + j;
+          var row = {
+            id: id,
+            student_name: gs.name,
+            date: sess.date,
+            start_time: sess.start_time,
+            duration_hrs: sess.hours,
+            rate: gs.feeHr,
+            fee: fee,
+            subject: subject,
+            notes: notes,
+            status: 'Scheduled',
+            enrollment_type: 'group',
+            enrollment_id: enrollmentId,
+            num_students: numStudents,
+            payment_status: 'Pending',
+            created_at: new Date().toISOString()
+          };
+          DATA.privateSessions.push(row);
+          try { await webAppWrite('addSession', { row: row }); } catch(e) {}
+        }
+      }
+    } else {
+      // Private enrollment
+      var studentName = document.getElementById('enroll-student-name').value.trim();
+      var feeHr = parseFloat(document.getElementById('enroll-fee-hr').value) || DEFAULT_RATE;
+      if (!studentName) { showToast('⚠ Please enter student name'); btn.disabled = false; btn.textContent = 'Save Enrollment'; return; }
+
+      for (var j = 0; j < sessions.length; j++) {
+        var sess = sessions[j];
+        var fee = feeHr * sess.hours;
+        var id = 'PT-' + Date.now() + '-' + j;
+        var row = {
+          id: id,
+          student_name: studentName,
+          date: sess.date,
+          start_time: sess.start_time,
+          duration_hrs: sess.hours,
+          rate: feeHr,
+          fee: fee,
+          subject: subject,
+          notes: notes,
+          status: 'Scheduled',
+          enrollment_type: 'private',
+          enrollment_id: enrollmentId,
+          num_students: 1,
+          payment_status: 'Pending',
+          created_at: new Date().toISOString()
+        };
+        DATA.privateSessions.push(row);
+        try { await webAppWrite('addSession', { row: row }); } catch(e) {}
+      }
+    }
+
+    localStorage.removeItem(CACHE_KEY);
+    renderAll();
+    closeModal('modal-enrollment');
+    showToast('✓ Enrollment saved — ' + sessions.length + ' session' + (sessions.length !== 1 ? 's' : '') + ' added');
+    try { loadAllData(); } catch(e) {}
+
+  } catch(err) {
+    showToast('⚠ Error saving enrollment');
+    console.error(err);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Save Enrollment';
+}
+
+async function markEnrollmentPaid(enrollmentId, studentName) {
+  var sessions = DATA.privateSessions.filter(function(s) {
+    return s.enrollment_id === enrollmentId && s.student_name === studentName;
+  });
+  if (sessions.length === 0) {
+    showToast('⚠ No sessions found for this enrollment');
+    return;
+  }
+  sessions.forEach(function(s) { s.payment_status = 'Paid'; });
+  renderPrivateTutoring();
+  showToast('✓ Marked as paid');
+  for (var i = 0; i < sessions.length; i++) {
+    try { await webAppWrite('updateSession', { row: sessions[i] }); } catch(e) {}
+  }
+  try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
+}
+
+
 
 // ─── WWA CLIENT MODAL ─────────────────────────────────────
 const ROLE_WEIGHTS = { strategy: 1.0, copy: 0.85, am: 0.6, ops: 0.35, none: 0 };
@@ -5546,7 +5913,7 @@ function generateStudentInvoicePDF(studentName) {
   var month = selectedMonth;
   var monthLabel = formatMonthLabel(month);
 
-  // Collect this student's completed sessions for the selected month
+  // Collect this student's sessions for the selected month (all non-cancelled)
   var sessions = filterByMonth(DATA.privateSessions, 'date').filter(function(s) {
     return s.student_name === studentName &&
            s.status !== 'Cancelled' &&
@@ -5554,7 +5921,7 @@ function generateStudentInvoicePDF(studentName) {
   }).sort(function(a, b) { return a.date.localeCompare(b.date); });
 
   if (sessions.length === 0) {
-    alert('No completed sessions for ' + studentName + ' in ' + monthLabel + '.');
+    alert('No sessions for ' + studentName + ' in ' + monthLabel + '.');
     return;
   }
 
@@ -5571,6 +5938,10 @@ function generateStudentInvoicePDF(studentName) {
     totalIncome += Number(s.fee || 0);
   });
   var subject = sessions[sessions.length - 1].subject || '';
+  var enrollType = sessions[sessions.length - 1].enrollment_type || 'private';
+  var numStudents = Number(sessions[sessions.length - 1].num_students || 1);
+  var isGroup = enrollType === 'group';
+  var payStatus = sessions.some(function(s) { return (s.payment_status||'Paid') === 'Pending'; }) ? 'Pending' : 'Paid';
   var avgRate = totalHours > 0 ? Math.round(totalIncome / totalHours) : DEFAULT_RATE;
 
   var generatedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -5624,8 +5995,12 @@ function generateStudentInvoicePDF(studentName) {
     // ── Billed to
     '<div style="margin-bottom:28px">' +
       '<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:6px">Billed To</div>' +
-      '<div style="font-size:16px;font-weight:600;color:#1a1a18">' + studentName + '</div>' +
-      (subject ? '<div style="font-size:12px;color:#666;margin-top:2px">' + subject + '</div>' : '') +
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<div style="font-size:16px;font-weight:600;color:#1a1a18">' + studentName + '</div>' +
+        (isGroup ? '<span style="font-size:10px;background:#EEEDFE;color:#7F77DD;border-radius:4px;padding:2px 8px;font-weight:700">Group · ' + numStudents + ' students</span>' : '') +
+        '<span style="font-size:10px;background:' + (payStatus === 'Pending' ? '#FAEEDA' : '#E1F5EE') + ';color:' + (payStatus === 'Pending' ? '#BA7517' : '#1D9E75') + ';border-radius:4px;padding:2px 8px;font-weight:700">' + payStatus + '</span>' +
+      '</div>' +
+      (subject ? '<div style="font-size:12px;color:#666;margin-top:4px">' + subject + '</div>' : '') +
     '</div>' +
 
     // ── Schedule table
