@@ -814,7 +814,7 @@ tr:hover td { background: var(--surface2); }
       <div class="nav-item" data-page="team" onclick="showPage('team',this)">
         <span class="icon">👥</span><span class="nav-label">Team</span></div>
       <div class="nav-item" data-page="schedule" onclick="showPage('schedule',this)">
-        <span class="icon">📅</span><span class="nav-label">Schedule</span></div>
+        <span class="icon">📅</span><span class="nav-label">My Schedule</span></div>
       <div class="nav-section">System</div>
       <div class="nav-item" data-page="bookings" onclick="showPage('bookings',this)">
         <span class="icon">📩</span><span class="nav-label">Bookings <span id="booking-badge" style="display:none;background:var(--coral);color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px"></span></span></div>
@@ -1484,7 +1484,7 @@ tr:hover td { background: var(--surface2); }
             <div style="display:flex;align-items:center;gap:10px">
               <button id="sched-back-btn" class="btn btn-ghost btn-sm" onclick="showSchedMonthView()" style="display:none">← Month</button>
               <div>
-                <h1 id="sched-main-title">Schedule</h1>
+                <h1 id="sched-main-title">My Schedule</h1>
                 <p id="sched-main-sub" style="font-size:12px;color:var(--text3);margin-top:2px">Unified calendar · All three streams</p>
               </div>
             </div>
@@ -1514,6 +1514,7 @@ tr:hover td { background: var(--surface2); }
                 <button class="sched-view-toggle"        id="sched-toggle-cards"    onclick="setSchedViewMode('cards')">⊟ Day Cards</button>
                 <button class="sched-view-toggle active" id="sched-toggle-schedule" onclick="setSchedViewMode('schedule')">⊞ Schedule</button>
                 <button class="sched-view-toggle"        id="sched-toggle-list"     onclick="setSchedViewMode('list')">☰ List</button>
+                <button class="sched-view-toggle"        id="sched-toggle-timetable" onclick="setSchedViewMode('timetable')">⊟ Timetable</button>
               </div>
               <!-- Zoom controls (Schedule view only) -->
               <div id="sched-zoom-controls" style="display:flex;gap:4px;align-items:center">
@@ -1580,6 +1581,23 @@ tr:hover td { background: var(--surface2); }
               </thead>
               <tbody id="sched-list-body"></tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- Timetable container -->
+        <div id="sched-timetable-container" style="display:none;margin-top:0">
+          <!-- paste mode banner -->
+          <div id="tt-paste-banner" style="display:none;background:var(--teal);color:#fff;padding:10px 16px;border-radius:var(--radius);margin-bottom:10px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center">
+            <span id="tt-paste-msg">Tap an empty slot to paste</span>
+            <button onclick="cancelTTPaste()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">Cancel</button>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <!-- Student legend -->
+            <div id="tt-legend" style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap"></div>
+            <!-- Grid -->
+            <div style="overflow-x:auto">
+              <div id="sched-timetable-grid"></div>
+            </div>
           </div>
         </div>
 
@@ -1797,6 +1815,40 @@ tr:hover td { background: var(--surface2); }
   </div>
 </div>
 
+
+
+<!-- ── SESSION ACTION SHEET ── -->
+<div id="session-action-sheet" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.4)" onclick="closeActionSheet()">
+  <div id="session-action-inner" onclick="event.stopPropagation()" style="position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:16px 16px 0 0;padding:20px 16px 32px;max-width:600px;margin:0 auto">
+    <div style="width:36px;height:4px;background:var(--border-strong);border-radius:2px;margin:0 auto 16px"></div>
+    <div id="sas-title" style="font-size:15px;font-weight:700;margin-bottom:4px"></div>
+    <div id="sas-meta" style="font-size:12px;color:var(--text3);margin-bottom:16px"></div>
+    <!-- Status row -->
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Status</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+      <button onclick="setSessStatus('Completed')"  class="sas-status-btn" id="sas-s-completed" style="flex:1;padding:8px;border-radius:8px;border:2px solid var(--border-strong);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Completed</button>
+      <button onclick="setSessStatus('Scheduled')"  class="sas-status-btn" id="sas-s-scheduled"  style="flex:1;padding:8px;border-radius:8px;border:2px solid var(--border-strong);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Scheduled</button>
+      <button onclick="setSessStatus('Missed')"     class="sas-status-btn" id="sas-s-missed"     style="flex:1;padding:8px;border-radius:8px;border:2px solid var(--border-strong);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Missed</button>
+      <button onclick="setSessStatus('Cancelled')"  class="sas-status-btn" id="sas-s-cancelled"  style="flex:1;padding:8px;border-radius:8px;border:2px solid var(--border-strong);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Cancelled</button>
+    </div>
+    <!-- Release/Block (only shown when cancelled) -->
+    <div id="sas-release-row" style="display:none;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Released slot</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="setSessRelease(true)"  id="sas-release-yes" style="flex:1;padding:8px;border-radius:8px;border:2px solid var(--border-strong);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--teal)">Release for booking</button>
+        <button onclick="setSessRelease(false)" id="sas-release-no"  style="flex:1;padding:8px;border-radius:8px;border:2px solid var(--border-strong);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">Block slot</button>
+      </div>
+    </div>
+    <!-- Actions row -->
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Actions</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button onclick="sasAction('copy')"  style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border-strong);font-size:13px;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">Copy</button>
+      <button onclick="sasAction('cut')"   style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border-strong);font-size:13px;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">Cut</button>
+      <button onclick="sasAction('delete')" style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--red);font-size:13px;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--red)">Delete</button>
+    </div>
+    <button onclick="closeActionSheet()" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-strong);font-size:13px;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text3)">Close</button>
+  </div>
+</div>
 
 <!-- ── ADD CLIENT MODAL ── -->
 <div class="modal-backdrop" id="modal-add-client">
@@ -3742,6 +3794,376 @@ async function runSessionImport() {
   }
 }
 
+
+// ─── TIMETABLE VIEW + SESSION ACTIONS ─────────────────────
+
+// Per-student color palette
+var PT_STUDENT_COLORS = [
+  '#378ADD','#1D9E75','#7F77DD','#D85A30','#BA7517',
+  '#D4537E','#639922','#0F6E56','#993556','#534AB7'
+];
+var _ptColorMap = {};
+
+function getPTStudentColor(name) {
+  if (!name) return '#888780';
+  if (!_ptColorMap[name]) {
+    var keys = Object.keys(_ptColorMap);
+    _ptColorMap[name] = PT_STUDENT_COLORS[keys.length % PT_STUDENT_COLORS.length];
+  }
+  return _ptColorMap[name];
+}
+
+function buildPTColorMap() {
+  _ptColorMap = {};
+  var names = Array.from(new Set(DATA.privateSessions.map(function(s) { return s.student_name; }).filter(Boolean))).sort();
+  names.forEach(function(n, i) {
+    _ptColorMap[n] = PT_STUDENT_COLORS[i % PT_STUDENT_COLORS.length];
+  });
+}
+
+// ── TIMETABLE RENDER ─────────────────────────────────────
+
+var TT_HOURS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+
+function renderTimetableView() {
+  buildPTColorMap();
+
+  var grid = document.getElementById('sched-timetable-grid');
+  var legend = document.getElementById('tt-legend');
+  if (!grid) return;
+
+  // Determine days to show
+  var days = getViewDays();
+  var todayStr = dateToStr(new Date());
+
+  // Build event lookup by date
+  var allEvts = getAllEvents();
+  var evtByDate = {};
+  allEvts.forEach(function(e) {
+    if (!evtByDate[e.date]) evtByDate[e.date] = [];
+    evtByDate[e.date].push(e);
+  });
+
+  // Build legend
+  legend.innerHTML = Object.keys(_ptColorMap).map(function(name) {
+    return '<span style="display:flex;align-items:center;gap:5px;font-size:12px">' +
+      '<span style="width:10px;height:10px;border-radius:2px;background:' + _ptColorMap[name] + ';flex-shrink:0"></span>' +
+      name + '</span>';
+  }).join('');
+
+  var cellW = 44; // px per day column
+  var rowH  = 36; // px per hour row
+
+  var html = '<table style="border-collapse:collapse;font-size:11px;min-width:' + (cellW * days.length + 60) + 'px">';
+
+  // Header row — day + date
+  html += '<thead><tr>';
+  html += '<th style="min-width:52px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);font-size:10px;color:var(--text3);text-align:left;position:sticky;left:0;z-index:3">Time</th>';
+  days.forEach(function(d) {
+    var ds = dateToStr(d);
+    var isDayOff = checkDayOff(ds);
+    var isToday  = ds === todayStr;
+    var dayName  = d.toLocaleString('en-GB', { weekday:'short' });
+    var bgStyle  = isDayOff ? 'background:var(--red-bg)' : isToday ? 'background:var(--teal-bg)' : 'background:var(--surface2)';
+    var color    = isToday ? 'color:var(--teal);font-weight:700' : isDayOff ? 'color:var(--red)' : 'color:var(--text3)';
+    html += '<th style="min-width:' + cellW + 'px;padding:4px 2px;border:1px solid var(--border);text-align:center;cursor:pointer;' + bgStyle + ';' + color + '" onclick="ttToggleDayOff(\'' + ds + '\')">';
+    html += '<div style="font-size:9px">' + dayName + '</div>';
+    html += '<div style="font-size:13px;font-weight:600">' + d.getDate() + '</div>';
+    if (isDayOff) html += '<div style="font-size:9px">off</div>';
+    html += '</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  // Hour rows
+  TT_HOURS.forEach(function(timeSlot) {
+    var isLunch = timeSlot === '12:00';
+    html += '<tr>';
+    html += '<td style="padding:4px 8px;border:1px solid var(--border);font-size:10px;color:var(--text3);white-space:nowrap;background:var(--surface2);position:sticky;left:0;z-index:2">' + timeSlot + '</td>';
+
+    days.forEach(function(d) {
+      var ds = dateToStr(d);
+      var isDayOff = checkDayOff(ds);
+
+      if (isDayOff) {
+        html += '<td style="border:1px solid var(--border);background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(226,75,74,0.06) 4px,rgba(226,75,74,0.06) 8px);height:' + rowH + 'px"></td>';
+        return;
+      }
+      if (isLunch) {
+        html += '<td style="border:1px solid var(--border);background:var(--surface2);height:' + rowH + 'px;text-align:center"><span style="font-size:9px;color:var(--text3)">lunch</span></td>';
+        return;
+      }
+
+      var dayEvts = evtByDate[ds] || [];
+      var slotEvts = dayEvts.filter(function(e) {
+        if (e.allDay) return false;
+        var sm = timeToMinutes(e.start || '00:00');
+        var tMin = timeToMinutes(timeSlot);
+        return sm >= tMin && sm < tMin + 60;
+      });
+
+      if (slotEvts.length === 0) {
+        // Empty cell — click to open add session or paste
+        html += '<td style="border:1px solid var(--border);height:' + rowH + 'px;cursor:pointer;transition:background 0.1s" ' +
+          'onclick="ttCellClick(\'' + ds + '\',\'' + timeSlot + '\')" ' +
+          '>' +
+          '</td>';
+        return;
+      }
+
+      var e = slotEvts[0];
+      var isPrivate = e.type === 'private';
+      var isCancelled = e.raw && e.raw.status === 'Cancelled';
+      var isMissed    = e.raw && e.raw.status === 'Missed';
+      var isCompleted = e.raw && e.raw.status === 'Completed';
+
+      var bgColor = isPrivate ? getPTStudentColor(e.raw ? e.raw.student_name : '') : '#6b6a65';
+      var opacity = isCancelled ? '0.4' : isMissed ? '0.6' : '1';
+      var textDeco = isCancelled ? 'text-decoration:line-through;' : '';
+      var prefix   = isCompleted ? '✓ ' : '';
+
+      var shortTitle = (e.raw && e.raw.student_name) ? e.raw.student_name.split(' ')[0] : (e.title || '').split(' ')[0];
+      if (shortTitle.length > 8) shortTitle = shortTitle.slice(0, 7) + '…';
+
+      var clickFn = isPrivate
+        ? 'openSessionActionSheet(\'' + escAttr(e.id) + '\')'
+        : 'openPoppadiDetail(' + JSON.stringify({id: e.id, title: e.title, date: e.date, start: e.start, end: e.end, type: e.type}).replace(/"/g, '&quot;') + ')';
+
+      html += '<td style="border:1px solid var(--border);padding:2px;height:' + rowH + 'px;cursor:pointer">';
+      html += '<div onclick="' + (isPrivate ? 'openSessionActionSheet(\'' + escAttr(e.id) + '\')' : '') + '" ' +
+        'style="height:100%;border-radius:4px;background:' + bgColor + ';opacity:' + opacity + ';' +
+        'display:flex;align-items:center;justify-content:center;' +
+        'font-size:10px;font-weight:600;color:#fff;' + textDeco +
+        'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 3px;' +
+        (isPrivate ? 'cursor:pointer' : 'cursor:default') + '" ' +
+        'title="' + escHtml(e.title) + ' · ' + (e.raw ? e.raw.status : '') + '">' +
+        prefix + escHtml(shortTitle) +
+        '</div>';
+      html += '</td>';
+    });
+
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  grid.innerHTML = html;
+}
+
+function ttToggleDayOff(dateStr) {
+  // Toggle day off for this date
+  var dayOffs = JSON.parse(localStorage.getItem('stevenco_dayoffs') || '{}');
+  if (dayOffs[dateStr]) {
+    delete dayOffs[dateStr];
+    showToast('Day off removed for ' + dateStr);
+  } else {
+    dayOffs[dateStr] = true;
+    showToast('Day off marked for ' + dateStr);
+  }
+  localStorage.setItem('stevenco_dayoffs', JSON.stringify(dayOffs));
+  renderScheduleView();
+}
+
+function ttCellClick(dateStr, timeSlot) {
+  if (_ttPasteMode) {
+    ttPasteSession(dateStr, timeSlot);
+    return;
+  }
+  openAddSession();
+  setTimeout(function() {
+    var dateEl = document.getElementById('session-date');
+    var timeEl = document.getElementById('session-start-time');
+    if (dateEl) dateEl.value = dateStr;
+    if (timeEl) timeEl.value = timeSlot;
+  }, 50);
+}
+
+// ── ACTION SHEET ─────────────────────────────────────────
+
+var _sasSessionId = null;
+var _sasReleased  = false;
+var _ttPasteMode  = null; // 'copy' | 'cut' | null
+var _ttPasteSession = null;
+
+function openSessionActionSheet(eventId) {
+  var allEvts = getAllEvents();
+  var e = null;
+  for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === eventId) { e = allEvts[i]; break; } }
+  if (!e || e.type !== 'private') return;
+
+  _sasSessionId = eventId;
+  _sasReleased  = false;
+
+  var sess = e.raw;
+  var name = sess ? sess.student_name : e.title;
+  var subj = sess ? (sess.subject || '') : '';
+  var date = e.date || '';
+  var time = (e.start || '') + (e.end ? '–' + e.end : '');
+
+  document.getElementById('sas-title').textContent = name + (subj ? ' · ' + subj : '');
+  document.getElementById('sas-meta').textContent  = date + (time ? ' · ' + time : '');
+
+  // Highlight current status
+  var curStatus = sess ? (sess.status || 'Scheduled') : 'Scheduled';
+  ['completed','scheduled','missed','cancelled'].forEach(function(s) {
+    var btn = document.getElementById('sas-s-' + s);
+    var isActive = curStatus.toLowerCase() === s;
+    btn.style.background   = isActive ? 'var(--teal)' : 'transparent';
+    btn.style.color        = isActive ? '#fff' : 'var(--text2)';
+    btn.style.borderColor  = isActive ? 'var(--teal)' : 'var(--border-strong)';
+  });
+
+  // Show/hide release row
+  document.getElementById('sas-release-row').style.display = curStatus === 'Cancelled' ? 'block' : 'none';
+
+  document.getElementById('session-action-sheet').style.display = 'block';
+}
+
+function closeActionSheet() {
+  document.getElementById('session-action-sheet').style.display = 'none';
+  _sasSessionId = null;
+}
+
+async function setSessStatus(status) {
+  if (!_sasSessionId) return;
+
+  var allEvts = getAllEvents();
+  var e = null;
+  for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === _sasSessionId) { e = allEvts[i]; break; } }
+  if (!e || !e.raw) return;
+
+  var sess = e.raw;
+  sess.status = status;
+
+  // Update in DATA
+  for (var j = 0; j < DATA.privateSessions.length; j++) {
+    if (DATA.privateSessions[j].id === sess.id) { DATA.privateSessions[j].status = status; break; }
+  }
+
+  // Highlight button
+  ['completed','scheduled','missed','cancelled'].forEach(function(s) {
+    var btn = document.getElementById('sas-s-' + s);
+    var isActive = status.toLowerCase() === s;
+    btn.style.background  = isActive ? 'var(--teal)' : 'transparent';
+    btn.style.color       = isActive ? '#fff' : 'var(--text2)';
+    btn.style.borderColor = isActive ? 'var(--teal)' : 'var(--border-strong)';
+  });
+
+  // Show release row if cancelled
+  document.getElementById('sas-release-row').style.display = status === 'Cancelled' ? 'block' : 'none';
+
+  renderScheduleView();
+  renderPrivateTutoring();
+  showToast('Status → ' + status);
+
+  try { await webAppWrite('updateSession', { row: sess }); } catch(err) {}
+}
+
+async function setSessRelease(doRelease) {
+  _sasReleased = doRelease;
+  document.getElementById('sas-release-yes').style.background = doRelease ? 'var(--teal)' : 'transparent';
+  document.getElementById('sas-release-yes').style.color      = doRelease ? '#fff' : 'var(--teal)';
+  document.getElementById('sas-release-no').style.background  = !doRelease ? 'var(--text2)' : 'transparent';
+  document.getElementById('sas-release-no').style.color       = !doRelease ? '#fff' : 'var(--text2)';
+
+  if (!doRelease) return;
+
+  // Auto-publish this slot to AvailableSlots
+  if (!WEB_APP_URL) { showToast('Set Apps Script URL in Settings first'); return; }
+  var allEvts = getAllEvents();
+  var e = null;
+  for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === _sasSessionId) { e = allEvts[i]; break; } }
+  if (!e || !e.raw) return;
+
+  var sess = e.raw;
+  var d = new Date(sess.date + 'T12:00:00');
+  var slot = {
+    date: sess.date,
+    day: d.toLocaleString('en-GB', { weekday: 'short' }),
+    start_time: sess.start_time || e.start || '',
+    end_time: sess.end_time || e.end || '',
+    duration: String(Number(sess.duration_hrs) || 1),
+    status: 'Open'
+  };
+
+  try {
+    await webAppWrite('publishAvailableSlots', { slots: [slot], append: true });
+    showToast('Slot released for booking');
+  } catch(err) {
+    showToast('Could not publish slot — check Apps Script URL');
+  }
+}
+
+function sasAction(action) {
+  if (!_sasSessionId) return;
+  var allEvts = getAllEvents();
+  var e = null;
+  for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === _sasSessionId) { e = allEvts[i]; break; } }
+  if (!e) return;
+
+  if (action === 'delete') {
+    if (!confirm('Delete this session permanently?')) return;
+    DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== e.raw.id; });
+    closeActionSheet();
+    renderScheduleView();
+    renderPrivateTutoring();
+    showToast('Session deleted');
+    try { webAppWrite('updateSession', { row: Object.assign({}, e.raw, { status: 'Deleted' }) }); } catch(err) {}
+    return;
+  }
+
+  // Copy or Cut — enter paste mode
+  _ttPasteMode = action;
+  _ttPasteSession = e.raw ? JSON.parse(JSON.stringify(e.raw)) : null;
+  closeActionSheet();
+
+  var banner = document.getElementById('tt-paste-banner');
+  if (banner) {
+    banner.style.display = 'flex';
+    document.getElementById('tt-paste-msg').textContent = (action === 'copy' ? 'Copy' : 'Move') + ': ' + (e.raw ? e.raw.student_name : '') + ' — tap an empty slot to place';
+  }
+
+  // Switch to timetable view for paste mode
+  setSchedViewMode('timetable');
+  showToast((action === 'copy' ? 'Copy' : 'Cut') + ' — tap an empty slot to paste');
+}
+
+async function ttPasteSession(dateStr, timeSlot) {
+  if (!_ttPasteMode || !_ttPasteSession) return;
+
+  var newSess = JSON.parse(JSON.stringify(_ttPasteSession));
+  newSess.date = dateStr;
+  newSess.start_time = timeSlot;
+
+  // Calculate end time
+  var parts = timeSlot.split(':');
+  var endH = parseInt(parts[0]) + Math.round(Number(newSess.duration_hrs) || 1);
+  newSess.end_time = String(Math.min(endH, 23)).padStart(2,'0') + ':00';
+
+  if (_ttPasteMode === 'cut') {
+    // Remove original
+    DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== _ttPasteSession.id; });
+    try { webAppWrite('updateSession', { row: Object.assign({}, _ttPasteSession, { status: 'Deleted' }) }); } catch(err) {}
+  }
+
+  // New ID for pasted session
+  newSess.id = 'PT-' + Date.now();
+  newSess.created_at = new Date().toISOString();
+  DATA.privateSessions.push(newSess);
+
+  try { await webAppWrite('addSession', { row: newSess }); } catch(err) {}
+
+  cancelTTPaste();
+  renderScheduleView();
+  renderPrivateTutoring();
+  showToast((_ttPasteMode === 'cut' ? 'Moved' : 'Copied') + ' to ' + dateStr + ' ' + timeSlot);
+}
+
+function cancelTTPaste() {
+  _ttPasteMode = null;
+  _ttPasteSession = null;
+  var banner = document.getElementById('tt-paste-banner');
+  if (banner) banner.style.display = 'none';
+}
+
 // ─── WWA CLIENT MODAL ─────────────────────────────────────
 const ROLE_WEIGHTS = { strategy: 1.0, copy: 0.85, am: 0.6, ops: 0.35, none: 0 };
 const ROLE_LABELS  = { strategy: 'Strategist', copy: 'Copywriter', am: 'Account Manager', ops: 'Content Ops', none: 'Not involved' };
@@ -5121,9 +5543,13 @@ function setSchedViewMode(mode) {
   document.getElementById('sched-toggle-cards').classList.toggle('active', mode === 'cards');
   document.getElementById('sched-toggle-schedule').classList.toggle('active', mode === 'schedule');
   document.getElementById('sched-toggle-list').classList.toggle('active', mode === 'list');
+  var ttBtn = document.getElementById('sched-toggle-timetable');
+  if (ttBtn) ttBtn.classList.toggle('active', mode === 'timetable');
   document.getElementById('sched-cards-container').style.display    = mode === 'cards'    ? 'block' : 'none';
   document.getElementById('sched-grid-container').style.display     = mode === 'schedule' ? 'block' : 'none';
   document.getElementById('sched-list-container').style.display     = mode === 'list'     ? 'block' : 'none';
+  var ttCont = document.getElementById('sched-timetable-container');
+  if (ttCont) ttCont.style.display = mode === 'timetable' ? 'block' : 'none';
   var zoomCtrl = document.getElementById('sched-zoom-controls');
   if (zoomCtrl) zoomCtrl.style.display = mode === 'schedule' ? 'flex' : 'none';
   renderScheduleView();
@@ -5194,6 +5620,7 @@ function renderScheduleView() {
   if (schedViewMode === 'cards')    renderCardsView();
   if (schedViewMode === 'schedule') renderGrid();
   if (schedViewMode === 'list')     renderListView();
+  if (schedViewMode === 'timetable') renderTimetableView();
 }
 
 // Alias for renderAll compatibility
@@ -6773,7 +7200,7 @@ function openCalEventDetail(eventId) {
   var allEvts = getAllEvents(), e = null;
   for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === eventId) { e = allEvts[i]; break; } }
   if (!e) return;
-  if (e.source === 'sheet' && e.type === 'private') { openEditSession(e.raw); return; }
+  if (e.source === 'sheet' && e.type === 'private') { openSessionActionSheet(eventId); return; }
   if (e.source === 'mirror') { openPoppadiDetail(e); return; }
   document.getElementById('modal-cal-event-title').textContent = 'Edit Event';
   document.getElementById('cal-event-gcal-id').value   = e.gcalId || '';
