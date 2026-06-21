@@ -804,6 +804,8 @@ tr:hover td { background: var(--surface2); }
         <span class="icon">📚</span><span class="nav-label">Private Tutoring</span></div>
       <div class="nav-item" data-page="enrollment" onclick="showPage('enrollment',this)">
         <span class="icon">✏️</span><span class="nav-label">New Enrollment</span></div>
+      <div class="nav-item" data-page="import" onclick="showPage('import',this)">
+        <span class="icon">⬇</span><span class="nav-label">Import Sessions</span></div>
       <div class="nav-item" data-page="poppadi" onclick="showPage('poppadi',this)">
         <span class="icon">🏫</span><span class="nav-label">Poppadi's Studyo</span></div>
       <div class="nav-item" data-page="wwa" onclick="showPage('wwa',this)">
@@ -1119,6 +1121,56 @@ tr:hover td { background: var(--surface2); }
                 <th>Student</th><th>Subject</th><th>Type</th><th>Sessions</th><th>Total hrs</th><th>Total fee</th><th></th>
               </tr></thead>
               <tbody id="pt-pending-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ── IMPORT PAGE (one-time use) ── -->
+      <div class="page" id="page-import">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1>Import Sessions</h1>
+              <p>One-time import · June 2026 · 23 sessions from AJ Steven schedule</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="background:var(--amber-bg);border:1px solid var(--amber)">
+          <div style="font-size:13px;color:var(--amber);font-weight:600">Run once only</div>
+          <div style="font-size:12px;color:var(--amber);margin-top:4px">If you need to redo this, delete the imported rows from PrivateSessions sheet first.</div>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+            <div style="flex:1;min-width:80px;background:var(--surface2);border-radius:8px;padding:12px">
+              <div style="font-size:11px;color:var(--text3)">Sessions</div>
+              <div style="font-size:22px;font-weight:700">23</div>
+            </div>
+            <div style="flex:1;min-width:80px;background:var(--surface2);border-radius:8px;padding:12px">
+              <div style="font-size:11px;color:var(--text3)">Students</div>
+              <div style="font-size:22px;font-weight:700">6</div>
+            </div>
+            <div style="flex:1;min-width:80px;background:var(--teal-bg);border-radius:8px;padding:12px">
+              <div style="font-size:11px;color:var(--teal)">Total value</div>
+              <div style="font-size:22px;font-weight:700;color:var(--teal)">฿19,100</div>
+            </div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div id="import-prog-bar" style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:8px">
+              <div id="import-prog-fill" style="height:100%;width:0%;background:var(--teal);border-radius:3px;transition:width 0.2s"></div>
+            </div>
+            <div id="import-status-msg" style="font-size:13px;color:var(--text3)">Ready to import</div>
+          </div>
+          <button class="btn btn-primary" id="import-run-btn" onclick="runSessionImport()" style="width:100%;justify-content:center">Import 23 Sessions</button>
+          <div id="import-log" style="margin-top:14px;max-height:200px;overflow-y:auto;font-size:12px;color:var(--text3);display:none"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Sessions to import</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Student</th><th>Time</th><th>Fee</th></tr></thead>
+              <tbody id="import-preview-body"></tbody>
             </table>
           </div>
         </div>
@@ -3633,6 +3685,63 @@ async function markPTEnrollmentPaid(enrollmentId) {
   try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
 }
 
+
+// ─── SESSION IMPORT ───────────────────────────────────────
+var IMPORT_SESSIONS = [{"id": "PT-IMP-1782014254890", "student_name": "Punglink", "date": "2026-06-06", "start_time": "08:00", "end_time": "09:00", "duration_hrs": 1, "rate": 700, "fee": 700, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254891", "student_name": "Anpan", "date": "2026-06-06", "start_time": "09:00", "end_time": "10:00", "duration_hrs": 1, "rate": 700, "fee": 700, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254892", "student_name": "Perm", "date": "2026-06-06", "start_time": "10:00", "end_time": "11:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254893", "student_name": "Nutcha", "date": "2026-06-06", "start_time": "13:00", "end_time": "14:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254894", "student_name": "Jaida", "date": "2026-06-07", "start_time": "10:00", "end_time": "11:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254895", "student_name": "Perm", "date": "2026-06-07", "start_time": "15:00", "end_time": "16:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254896", "student_name": "Punglink", "date": "2026-06-13", "start_time": "08:00", "end_time": "09:00", "duration_hrs": 1, "rate": 700, "fee": 700, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254897", "student_name": "Anpan", "date": "2026-06-13", "start_time": "09:00", "end_time": "10:00", "duration_hrs": 1, "rate": 700, "fee": 700, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254898", "student_name": "Perm", "date": "2026-06-13", "start_time": "10:00", "end_time": "11:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254899", "student_name": "Nutcha", "date": "2026-06-13", "start_time": "13:00", "end_time": "14:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254900", "student_name": "Perm", "date": "2026-06-14", "start_time": "08:00", "end_time": "09:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254901", "student_name": "Jaida", "date": "2026-06-14", "start_time": "10:00", "end_time": "11:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254902", "student_name": "Punglink", "date": "2026-06-20", "start_time": "08:00", "end_time": "09:00", "duration_hrs": 1, "rate": 700, "fee": 700, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254903", "student_name": "Anpan", "date": "2026-06-20", "start_time": "09:00", "end_time": "10:00", "duration_hrs": 1, "rate": 700, "fee": 700, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254904", "student_name": "Perm", "date": "2026-06-20", "start_time": "10:00", "end_time": "11:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254905", "student_name": "Jaida", "date": "2026-06-21", "start_time": "10:00", "end_time": "11:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254906", "student_name": "Perm", "date": "2026-06-21", "start_time": "15:00", "end_time": "16:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254907", "student_name": "Bentley", "date": "2026-06-22", "start_time": "18:00", "end_time": "19:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254908", "student_name": "Punglink", "date": "2026-06-27", "start_time": "08:00", "end_time": "09:00", "duration_hrs": 1, "rate": 700, "fee": 700, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254909", "student_name": "Anpan", "date": "2026-06-27", "start_time": "09:00", "end_time": "10:00", "duration_hrs": 1, "rate": 700, "fee": 700, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254910", "student_name": "Perm", "date": "2026-06-27", "start_time": "10:00", "end_time": "11:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254911", "student_name": "Jaida", "date": "2026-06-28", "start_time": "10:00", "end_time": "11:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}, {"id": "PT-IMP-1782014254912", "student_name": "Bentley", "date": "2026-06-29", "start_time": "18:00", "end_time": "19:00", "duration_hrs": 1, "rate": 900, "fee": 900, "subject": "", "notes": "Imported from AJ Steven schedule", "status": "Completed", "enrollment_type": "private", "enrollment_id": "", "num_students": 1, "payment_status": "Pending", "created_at": "2026-06-21T00:00:00.000Z"}];
+
+function initImportPage() {
+  var tbody = document.getElementById('import-preview-body');
+  if (!tbody || tbody.children.length > 0) return;
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  IMPORT_SESSIONS.forEach(function(s) {
+    var d = new Date(s.date + 'T12:00:00');
+    var label = days[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth()+1);
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + label + '</td><td><strong>' + s.student_name + '</strong></td>' +
+      '<td>' + s.start_time + '–' + s.end_time + '</td>' +
+      '<td class="mono">฿' + s.fee.toLocaleString() + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+async function runSessionImport() {
+  if (!WEB_APP_URL) { showToast('⚠ Set Apps Script URL in Settings first'); return; }
+  var btn = document.getElementById('import-run-btn');
+  btn.disabled = true; btn.textContent = 'Importing...';
+  var log = document.getElementById('import-log');
+  var fill = document.getElementById('import-prog-fill');
+  var status = document.getElementById('import-status-msg');
+  log.style.display = 'block';
+  var ok = 0; var err = 0;
+  for (var i = 0; i < IMPORT_SESSIONS.length; i++) {
+    var s = IMPORT_SESSIONS[i];
+    status.textContent = (i+1) + ' / ' + IMPORT_SESSIONS.length + ' — ' + s.student_name + ' ' + s.date;
+    fill.style.width = Math.round(((i+1)/IMPORT_SESSIONS.length)*100) + '%';
+    try {
+      await webAppWrite('addSession', { row: s });
+      ok++;
+      DATA.privateSessions.push(s);
+      log.innerHTML += '<div style="color:var(--teal)">✓ ' + s.date + ' ' + s.start_time + ' · ' + s.student_name + '</div>';
+    } catch(e) {
+      err++;
+      log.innerHTML += '<div style="color:var(--red)">✕ ' + s.date + ' · ' + s.student_name + ' — ' + (e.message||'error') + '</div>';
+    }
+    log.scrollTop = log.scrollHeight;
+    await new Promise(function(r){setTimeout(r,350)});
+  }
+  fill.style.width = '100%';
+  if (err === 0) {
+    status.textContent = '✓ All ' + ok + ' sessions imported — go to Private Tutoring to see them';
+    status.style.color = 'var(--teal)';
+    btn.textContent = 'Done';
+    try { localStorage.removeItem(CACHE_KEY); renderAll(); } catch(e) {}
+  } else {
+    status.textContent = ok + ' imported, ' + err + ' failed';
+    status.style.color = 'var(--red)';
+    btn.disabled = false; btn.textContent = 'Retry';
+  }
+}
+
 // ─── WWA CLIENT MODAL ─────────────────────────────────────
 const ROLE_WEIGHTS = { strategy: 1.0, copy: 0.85, am: 0.6, ops: 0.35, none: 0 };
 const ROLE_LABELS  = { strategy: 'Strategist', copy: 'Copywriter', am: 'Account Manager', ops: 'Content Ops', none: 'Not involved' };
@@ -4067,6 +4176,7 @@ function loadSettings() {
 // ─── NAVIGATION ───────────────────────────────────────────
 const PAGE_TITLES = {
   home: 'Home', 'enrollment': 'New Enrollment',
+    'import': 'Import Sessions',
     'private-tutoring': 'Private Tutoring',
   poppadi: "Poppadi's Studyo", wwa: 'WealthWise Atelier',
   team: 'Team', schedule: 'Schedule', bookings: 'Bookings', advisor: 'Advisor', settings: 'Settings'
@@ -4097,6 +4207,7 @@ function showPage(id, btn) {
   if (id === 'schedule') { if (typeof initSchedule === 'function') initSchedule(); }
   if (id === 'bookings') renderBookings();
   if (id === 'enrollment') initPTEnrollPage();
+  if (id === 'import') initImportPage();
 }
 
 // ─── SIDEBAR + THEME ──────────────────────────────────────
