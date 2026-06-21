@@ -1494,7 +1494,7 @@ tr:hover td { background: var(--surface2); }
               <button class="btn btn-ghost btn-sm" id="sched-nav-next" onclick="schedNav(1)">›</button>
               <button class="btn btn-secondary btn-sm" onclick="schedGoToday()">Today</button>
               <div style="width:1px;height:20px;background:var(--border);margin:0 2px"></div>
-              <button class="btn btn-ghost btn-sm" onclick="openMarkDayOff()" title="Mark Day Off">🍃 Day Off</button>
+              <button class="btn btn-ghost btn-sm" onclick="openMarkDayOff()" title="Mark Day Off">🍃 Mark Day Off</button>
               <button class="btn btn-primary btn-sm" onclick="openAddCalEvent()">+ Add Event</button>
             </div>
           </div>
@@ -1511,10 +1511,9 @@ tr:hover td { background: var(--surface2); }
             </div>
             <div style="display:flex;gap:4px;align-items:center">
               <div style="display:flex;gap:2px;background:var(--surface2);border-radius:var(--radius);padding:3px">
+                <button class="sched-view-toggle active" id="sched-toggle-timetable" onclick="setSchedViewMode('timetable')">⊞ Timetable</button>
                 <button class="sched-view-toggle"        id="sched-toggle-cards"    onclick="setSchedViewMode('cards')">⊟ Day Cards</button>
-                <button class="sched-view-toggle active" id="sched-toggle-schedule" onclick="setSchedViewMode('schedule')">⊞ Schedule</button>
                 <button class="sched-view-toggle"        id="sched-toggle-list"     onclick="setSchedViewMode('list')">☰ List</button>
-                <button class="sched-view-toggle"        id="sched-toggle-timetable" onclick="setSchedViewMode('timetable')">⊟ Timetable</button>
               </div>
               <!-- Zoom controls (Schedule view only) -->
               <div id="sched-zoom-controls" style="display:flex;gap:4px;align-items:center">
@@ -1556,7 +1555,7 @@ tr:hover td { background: var(--surface2); }
         </div>
 
         <!-- SCHEDULE VIEW (time-block grid) -->
-        <div id="sched-grid-container" class="card" style="padding:0;overflow:hidden">
+        <div id="sched-grid-container" class="card" style="padding:0;overflow:hidden;display:none">
           <div id="sched-zoom-wrapper" style="transform-origin:top left;transition:transform 0.15s">
             <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" id="sched-grid-scroll">
               <div id="sched-main-grid"></div>
@@ -1585,7 +1584,7 @@ tr:hover td { background: var(--surface2); }
         </div>
 
         <!-- Timetable container -->
-        <div id="sched-timetable-container" style="display:none;margin-top:0">
+        <div id="sched-timetable-container" style="margin-top:0">
           <!-- paste mode banner -->
           <div id="tt-paste-banner" style="display:none;background:var(--teal);color:#fff;padding:10px 16px;border-radius:var(--radius);margin-bottom:10px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center">
             <span id="tt-paste-msg">Tap an empty slot to paste</span>
@@ -1595,7 +1594,7 @@ tr:hover td { background: var(--surface2); }
             <!-- Student legend -->
             <div id="tt-legend" style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap"></div>
             <!-- Grid -->
-            <div style="overflow-x:auto">
+            <div id="tt-scroll-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y">
               <div id="sched-timetable-grid"></div>
             </div>
           </div>
@@ -1841,49 +1840,49 @@ tr:hover td { background: var(--surface2); }
     </div>
     <!-- Time edit row -->
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Edit time</div>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
       <select id="sas-start-time" class="form-select" style="flex:1;font-size:13px">
-        <option value="">Start</option>
         <option value="06:00">06:00</option>
+        <option value="06:30">06:30</option>
         <option value="07:00">07:00</option>
+        <option value="07:30">07:30</option>
         <option value="08:00">08:00</option>
+        <option value="08:30">08:30</option>
         <option value="09:00">09:00</option>
+        <option value="09:30">09:30</option>
         <option value="10:00">10:00</option>
+        <option value="10:30">10:30</option>
         <option value="11:00">11:00</option>
+        <option value="11:30">11:30</option>
         <option value="12:00">12:00</option>
+        <option value="12:30">12:30</option>
         <option value="13:00">13:00</option>
+        <option value="13:30">13:30</option>
         <option value="14:00">14:00</option>
+        <option value="14:30">14:30</option>
         <option value="15:00">15:00</option>
+        <option value="15:30">15:30</option>
         <option value="16:00">16:00</option>
+        <option value="16:30">16:30</option>
         <option value="17:00">17:00</option>
+        <option value="17:30">17:30</option>
         <option value="18:00">18:00</option>
+        <option value="18:30">18:30</option>
         <option value="19:00">19:00</option>
+        <option value="19:30">19:30</option>
         <option value="20:00">20:00</option>
+        <option value="20:30">20:30</option>
         <option value="21:00">21:00</option>
-        <option value="22:00">22:00</option>
+        <option value="21:30">21:30</option>
       </select>
-      <span style="color:var(--text3)">–</span>
-      <select id="sas-end-time" class="form-select" style="flex:1;font-size:13px">
-        <option value="">End</option>
-        <option value="07:00">07:00</option>
-        <option value="08:00">08:00</option>
-        <option value="09:00">09:00</option>
-        <option value="10:00">10:00</option>
-        <option value="11:00">11:00</option>
-        <option value="12:00">12:00</option>
-        <option value="13:00">13:00</option>
-        <option value="14:00">14:00</option>
-        <option value="15:00">15:00</option>
-        <option value="16:00">16:00</option>
-        <option value="17:00">17:00</option>
-        <option value="18:00">18:00</option>
-        <option value="19:00">19:00</option>
-        <option value="20:00">20:00</option>
-        <option value="21:00">21:00</option>
-        <option value="22:00">22:00</option>
-        <option value="23:00">23:00</option>
-      </select>
-      <button onclick="saveSessTime()" style="padding:8px 14px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;white-space:nowrap">Save</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+      <button class="sas-dur-btn" data-dur="1"   onclick="setSasDuration(1)"   style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid var(--border-strong);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">1h</button>
+      <button class="sas-dur-btn" data-dur="1.5" onclick="setSasDuration(1.5)" style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid var(--border-strong);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">1.5h</button>
+      <button class="sas-dur-btn" data-dur="2"   onclick="setSasDuration(2)"   style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid var(--border-strong);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">2h</button>
+      <button class="sas-dur-btn" data-dur="2.5" onclick="setSasDuration(2.5)" style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid var(--border-strong);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">2.5h</button>
+      <button class="sas-dur-btn" data-dur="3"   onclick="setSasDuration(3)"   style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid var(--border-strong);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">3h</button>
+      <button onclick="saveSessTime()" style="flex:1;padding:7px 8px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Save</button>
     </div>
     <!-- Actions row -->
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Actions</div>
@@ -2380,19 +2379,32 @@ tr:hover td { background: var(--surface2); }
 
 <div class="modal-backdrop" id="modal-day-off">
   <div class="modal" style="max-width:400px">
-    <div class="modal-title">🚫 Mark Day Off</div>
+    <div class="modal-title">Mark Day Off</div>
     <div class="form-group">
       <label class="form-label">Date</label>
-      <input class="form-input" id="dayoff-date" type="date">
+      <input class="form-input" id="dayoff-date" type="date" onchange="updateDayOffRepeatPreview()">
     </div>
     <div class="form-group">
       <label class="form-label">Note (optional)</label>
       <input class="form-input" id="dayoff-note" placeholder="e.g. Public holiday, travel...">
     </div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:12px">This creates an all-day event in Google Calendar and greys out the entire row in your schedule.</div>
+    <!-- Repeat weekly toggle -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:var(--radius);margin-bottom:14px">
+      <div>
+        <div style="font-size:13px;font-weight:600">Repeat weekly this month</div>
+        <div style="font-size:11px;color:var(--text3)" id="dayoff-repeat-preview">Mark every same weekday through end of month</div>
+      </div>
+      <label style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0">
+        <input type="checkbox" id="dayoff-repeat-toggle" onchange="updateDayOffRepeatPreview()" style="opacity:0;width:0;height:0">
+        <span id="dayoff-repeat-knob" style="position:absolute;cursor:pointer;inset:0;background:var(--border-strong);border-radius:22px;transition:0.2s">
+          <span style="position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.2s" id="dayoff-knob-inner"></span>
+        </span>
+      </label>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Creates all-day events in Google Calendar. The date row turns grey on your schedule.</div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-day-off')">Cancel</button>
-      <button class="btn btn-danger" onclick="saveDayOff()">Mark as Day Off</button>
+      <button class="btn btn-danger" onclick="saveDayOff()">Mark Day Off</button>
     </div>
   </div>
 </div>
@@ -3843,11 +3855,9 @@ async function runSessionImport() {
 
 // ─── TIMETABLE VIEW + SESSION ACTIONS ─────────────────────
 
-// Student color palette — vivid, distinct
 var PT_STUDENT_COLORS = [
   '#E8544A','#1D9E75','#378ADD','#BA7517','#7F77DD',
-  '#D4537E','#639922','#0F6E56','#D85A30','#534AB7',
-  '#888780','#0C447C'
+  '#D4537E','#639922','#D85A30','#0C447C','#534AB7'
 ];
 var _ptColorMap = {};
 
@@ -3856,24 +3866,26 @@ function buildPTColorMap() {
   var names = Array.from(new Set(
     DATA.privateSessions.map(function(s) { return s.student_name; }).filter(Boolean)
   )).sort();
-  names.forEach(function(n, i) {
-    _ptColorMap[n] = PT_STUDENT_COLORS[i % PT_STUDENT_COLORS.length];
-  });
+  names.forEach(function(n, i) { _ptColorMap[n] = PT_STUDENT_COLORS[i % PT_STUDENT_COLORS.length]; });
 }
 
-function getPTStudentColor(name) {
-  return _ptColorMap[name] || '#888780';
-}
+function getPTStudentColor(name) { return _ptColorMap[name] || '#888780'; }
 
 // ── TIMETABLE RENDER ─────────────────────────────────────
-// Layout: rows = dates, columns = time slots (like Google Sheets)
+// rows = dates, columns = 30-min slots 07:00–21:00
 
-var TT_HOURS = [7,8,9,10,11,12,13,14,15,16,17,18,19,20];
-var _ttZoom = 1.0; // column width multiplier
+// Generate 30-min slots from 07:00 to 20:30
+var TT_SLOTS = (function() {
+  var s = [];
+  for (var h = 7; h <= 20; h++) { s.push(h + ':00'); s.push(h + ':30'); }
+  return s; // 28 slots
+})();
+
+var _ttZoom = 1.0;
+var _ttColW = 36; // base px per 30-min slot
 
 function renderTimetableView() {
   buildPTColorMap();
-
   var grid = document.getElementById('sched-timetable-grid');
   var legend = document.getElementById('tt-legend');
   if (!grid) return;
@@ -3881,6 +3893,7 @@ function renderTimetableView() {
   var days = getViewDays();
   var todayStr = dateToStr(new Date());
   var special = getSpecial();
+  var colW = Math.round(_ttColW * _ttZoom);
 
   // Build session lookup by date
   var sessByDate = {};
@@ -3889,8 +3902,6 @@ function renderTimetableView() {
     if (!sessByDate[s.date]) sessByDate[s.date] = [];
     sessByDate[s.date].push(s);
   });
-
-  // Build poppadi session lookup by date
   var popByDate = {};
   if (DATA.poppadiSessions) {
     DATA.poppadiSessions.forEach(function(s) {
@@ -3901,130 +3912,141 @@ function renderTimetableView() {
   }
 
   // Legend
-  legend.innerHTML = Object.keys(_ptColorMap).map(function(name) {
-    return '<span style="display:flex;align-items:center;gap:5px;font-size:12px">' +
-      '<span style="width:10px;height:10px;border-radius:2px;background:' + _ptColorMap[name] + ';flex-shrink:0"></span>' +
-      name + '</span>';
-  }).join('');
+  var legendKeys = Object.keys(_ptColorMap);
+  if (legend) {
+    legend.innerHTML = legendKeys.length
+      ? '<span style="font-size:11px;color:var(--text3);margin-right:6px">Students:</span>' +
+        legendKeys.map(function(n) {
+          return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px">' +
+            '<span style="width:10px;height:10px;border-radius:2px;background:' + _ptColorMap[n] + ';display:inline-block"></span>' +
+            escHtml(n) + '</span>';
+        }).join('')
+      : '';
+  }
 
-  var colW = Math.round(72 * _ttZoom); // base 72px per hour column
-  var rowH = 34;
-
+  var rowH = 32;
   var html = '<table id="tt-table" style="border-collapse:collapse;font-size:11px;user-select:none">';
 
-  // Header row — time slots
+  // Header — time labels (show only on-the-hour)
   html += '<thead><tr>';
-  html += '<th style="min-width:60px;width:60px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);font-size:10px;color:var(--text3);text-align:left;position:sticky;left:0;z-index:4">Date</th>';
-  TT_HOURS.forEach(function(h) {
-    html += '<th style="min-width:' + colW + 'px;width:' + colW + 'px;padding:4px 4px;background:var(--surface2);border:1px solid var(--border);font-size:10px;color:var(--text3);text-align:center">' + pad2(h) + ':00</th>';
+  html += '<th style="min-width:52px;width:52px;padding:4px 6px;background:var(--surface2);border:1px solid var(--border);font-size:10px;color:var(--text3);text-align:left;position:sticky;left:0;z-index:4">Date</th>';
+  TT_SLOTS.forEach(function(slot) {
+    var isHour = slot.indexOf(':00') > -1;
+    var label = isHour ? slot : '';
+    html += '<th style="min-width:' + colW + 'px;width:' + colW + 'px;padding:2px;background:var(--surface2);border:1px solid var(--border);font-size:9px;color:var(--text3);text-align:left;' + (isHour ? 'border-left:2px solid var(--border-strong)' : '') + '">' + label + '</th>';
   });
   html += '</tr></thead><tbody>';
 
-  // One row per day
   days.forEach(function(d) {
     var ds = dateToStr(d);
     var isDayOff = !!special.dayOffs[ds];
     var isToday  = ds === todayStr;
     var isSun    = d.getDay() === 0;
-    var dayName  = d.toLocaleString('en-GB', { weekday: 'short' });
-    var dayNum   = d.getDate();
+    var dayName  = d.toLocaleString('en-GB', { weekday:'short' });
 
-    var rowBg = isDayOff ? 'background:var(--red-bg)' : isToday ? 'background:var(--teal-bg)' : isSun ? 'background:var(--surface2)' : '';
+    var rowBg = isDayOff ? 'background:var(--red-bg)' : isToday ? 'background:var(--teal-bg)' : '';
     var dayColor = isDayOff ? 'color:var(--red)' : isToday ? 'color:var(--teal);font-weight:700' : 'color:var(--text)';
 
     html += '<tr style="height:' + rowH + 'px">';
-
-    // Date label cell — tap to mark day off
-    html += '<td onclick="openMarkDayOff(\'' + ds + '\')" style="padding:4px 6px;border:1px solid var(--border);white-space:nowrap;cursor:pointer;position:sticky;left:0;z-index:2;' + rowBg + ';' + dayColor + '">';
-    html += '<div style="font-size:9px;opacity:0.7">' + dayName + '</div>';
-    html += '<div style="font-size:13px;font-weight:600;line-height:1">' + dayNum + '</div>';
+    // Date label — tap to mark day off
+    html += '<td onclick="openMarkDayOff(\'' + ds + '\')" style="padding:3px 5px;border:1px solid var(--border);white-space:nowrap;cursor:pointer;position:sticky;left:0;z-index:2;' + rowBg + '">';
+    html += '<div style="font-size:9px;' + dayColor + ';opacity:0.8">' + dayName + '</div>';
+    html += '<div style="font-size:13px;font-weight:600;line-height:1;' + dayColor + '">' + d.getDate() + '</div>';
     if (isDayOff) html += '<div style="font-size:8px;color:var(--red)">off</div>';
     html += '</td>';
 
     if (isDayOff) {
-      // Striped day-off row
-      var totalCols = TT_HOURS.length;
-      html += '<td colspan="' + totalCols + '" style="border:1px solid var(--border);background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(226,75,74,0.06) 4px,rgba(226,75,74,0.06) 8px)"></td>';
+      html += '<td colspan="' + TT_SLOTS.length + '" style="border:1px solid var(--border);background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(226,75,74,0.06) 4px,rgba(226,75,74,0.06) 8px)"></td>';
       html += '</tr>';
       return;
     }
 
-    // Build a map of which hours are occupied and by what
-    var sessions = sessByDate[ds] || [];
+    // Convert time string to slot index (30-min resolution)
+    function slotIndex(timeStr) {
+      if (!timeStr) return -1;
+      var parts = timeStr.split(':');
+      var h = parseInt(parts[0]); var m = parseInt(parts[1] || 0);
+      var half = m >= 30 ? 1 : 0;
+      return (h - 7) * 2 + half;
+    }
+    function slotsForDur(dur) { return Math.round(Number(dur) * 2); }
+
+    // Build slot occupancy map
+    var slotMap = {}; // slotIdx -> {sess, type, isStart, totalSlots}
+    var allSessions = (sessByDate[ds] || []).concat([]);
     var popSessions = popByDate[ds] || [];
 
-    // Combine all occupants per hour
-    var hourMap = {}; // hour -> {session, type, span, isStart}
-    sessions.forEach(function(s) {
-      var sh = parseInt((s.start_time || '09:00').split(':')[0]);
-      var dur = Math.max(1, Math.round(Number(s.duration_hrs) || 1));
-      for (var hh = sh; hh < sh + dur && hh <= 23; hh++) {
-        hourMap[hh] = { session: s, type: 'private', isStart: hh === sh, span: dur, startH: sh };
+    allSessions.forEach(function(s) {
+      var si = slotIndex(s.start_time || '09:00');
+      var dur = Number(s.duration_hrs) || 1;
+      var nSlots = slotsForDur(dur);
+      for (var k = 0; k < nSlots; k++) {
+        slotMap[si + k] = { sess: s, type: 'private', isStart: k === 0, totalSlots: nSlots };
       }
     });
     popSessions.forEach(function(s) {
-      var sh = parseInt((s.start_time || '09:00').split(':')[0]);
-      var dur = Math.max(1, Math.round(Number(s.hours) || 1));
-      for (var hh = sh; hh < sh + dur && hh <= 23; hh++) {
-        if (!hourMap[hh]) hourMap[hh] = { session: s, type: 'poppadi', isStart: hh === sh, span: dur, startH: sh };
+      var si = slotIndex(s.start_time || '09:00');
+      var dur = Number(s.hours) || 1;
+      var nSlots = slotsForDur(dur);
+      for (var k = 0; k < nSlots; k++) {
+        if (!slotMap[si + k]) slotMap[si + k] = { sess: s, type: 'poppadi', isStart: k === 0, totalSlots: nSlots };
       }
     });
 
     var skipped = {};
-    TT_HOURS.forEach(function(h, hi) {
-      if (skipped[h]) return;
-      var entry = hourMap[h];
+    TT_SLOTS.forEach(function(slot, si) {
+      if (skipped[si]) return;
+      var isHour = slot.indexOf(':00') > -1;
+      var isBreak = slot === '12:00' || slot === '12:30';
+      var borderLeft = isHour ? 'border-left:2px solid var(--border-strong)' : '';
 
-      if (!entry) {
-        // Empty cell
-        html += '<td onclick="ttCellClick(\'' + ds + '\',' + h + ')" style="border:1px solid var(--border);height:' + rowH + 'px;cursor:pointer"></td>';
+      // Break cells
+      if (isBreak) {
+        html += '<td style="border:1px solid var(--border);' + borderLeft + ';background:var(--surface2);height:' + rowH + 'px;text-align:center">';
+        if (slot === '12:00') html += '<span style="font-size:8px;color:var(--text3)">break</span>';
+        html += '</td>';
         return;
       }
 
-      if (!entry.isStart) return; // already handled by colspan
-
-      var s = entry.session;
-      var isPrivate = entry.type === 'private';
-      var span = entry.span;
-
-      // Clamp span to remaining columns
-      var remaining = TT_HOURS.length - hi;
-      span = Math.min(span, remaining);
-
-      // Skip subsequent cols
-      for (var ss2 = 1; ss2 < span; ss2++) {
-        skipped[TT_HOURS[hi + ss2]] = true;
+      var entry = slotMap[si];
+      if (!entry) {
+        html += '<td onclick="ttCellClick(\'' + ds + '\',\'' + slot + '\')" style="border:1px solid var(--border);' + borderLeft + ';height:' + rowH + 'px;cursor:pointer"></td>';
+        return;
       }
+      if (!entry.isStart) return;
 
-      var isCancelled = (s.status === 'Cancelled');
-      var isMissed    = (s.status === 'Missed');
-      var isCompleted = (s.status === 'Completed');
+      var s = entry.sess;
+      var isPrivate = entry.type === 'private';
+      var totalSlots = entry.totalSlots;
+
+      // Clamp to remaining slots
+      var remaining = TT_SLOTS.length - si;
+      totalSlots = Math.min(totalSlots, remaining);
+      for (var sk = 1; sk < totalSlots; sk++) skipped[si + sk] = true;
+
+      var isCancelled = s.status === 'Cancelled';
+      var isMissed    = s.status === 'Missed';
+      var isCompleted = s.status === 'Completed';
 
       var bgColor = isPrivate ? getPTStudentColor(s.student_name || '') : '#6b6a65';
-      var opacity = isCancelled ? 0.4 : isMissed ? 0.6 : 1.0;
+      var opacity = isCancelled ? 0.35 : isMissed ? 0.55 : 1.0;
       var textDeco = isCancelled ? 'text-decoration:line-through;' : '';
       var prefix   = isCompleted ? '✓ ' : isCancelled ? '✕ ' : '';
+      var label = isPrivate ? (s.student_name || '') : ((s.nickname || s.subject || 'Poppadi'));
+      if (label.length > 10) label = label.slice(0, 9) + '…';
 
-      var label = isPrivate
-        ? (s.student_name || '').split(' ')[0]
-        : ((s.nickname || s.subject || 'Poppadi').split(' ')[0]);
-      if (label.length > 9) label = label.slice(0, 8) + '…';
+      var evtId = isPrivate ? ('pt_' + s.id) : null;
+      var colspan = totalSlots > 1 ? ' colspan="' + totalSlots + '"' : '';
+      var clickAttr = isPrivate && evtId ? ' onclick="openSessionActionSheet(\'' + escAttr(evtId) + '\')"' : '';
 
-      // Generate unique id for drag handle
-      var cellId = 'ttcell-' + ds + '-' + h;
-      var evtId  = isPrivate ? ('pt_' + s.id) : null;
-
-      var colspan = span > 1 ? ' colspan="' + span + '"' : '';
-      html += '<td' + colspan + ' style="border:1px solid var(--border);padding:2px;height:' + rowH + 'px;position:relative" id="' + cellId + '">';
-      html += '<div style="height:100%;border-radius:4px;background:' + bgColor + ';opacity:' + opacity + ';' +
-        'display:flex;align-items:center;justify-content:space-between;' +
+      html += '<td' + colspan + ' style="border:1px solid var(--border);' + borderLeft + ';padding:1px;height:' + rowH + 'px;position:relative">';
+      html += '<div' + clickAttr + ' style="height:100%;border-radius:3px;background:' + bgColor + ';opacity:' + opacity + ';' +
+        'display:flex;align-items:center;padding:0 4px;box-sizing:border-box;overflow:hidden;' +
         'font-size:10px;font-weight:600;color:#fff;' + textDeco +
-        'overflow:hidden;padding:0 4px;box-sizing:border-box;' +
-        (isPrivate ? 'cursor:pointer' : 'cursor:default') + '"' +
-        (isPrivate && evtId ? ' onclick="openSessionActionSheet(\'' + escAttr(evtId) + '\')"' : '') +
+        (isPrivate ? 'cursor:pointer;' : 'cursor:default;') + '"' +
         ' title="' + escHtml((s.student_name || s.nickname || '') + (s.subject ? ' · ' + s.subject : '') + ' · ' + (s.status || '')) + '">' +
-        '<span>' + prefix + escHtml(label) + '</span>' +
-        (isPrivate ? '<span class="tt-drag-handle" data-sessid="' + escAttr(s.id) + '" data-date="' + ds + '" data-h="' + h + '" data-dur="' + (Number(s.duration_hrs)||1) + '" style="cursor:ew-resize;padding:0 2px;opacity:0.6;font-size:10px;flex-shrink:0">⋮</span>' : '') +
+        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + prefix + escHtml(label) + '</span>' +
+        (isPrivate && totalSlots >= 2 ? '<span class="tt-drag-handle" data-sessid="' + escAttr(s.id) + '" data-startslot="' + si + '" data-slots="' + totalSlots + '" style="margin-left:auto;cursor:ew-resize;flex-shrink:0;opacity:0.7;font-size:11px">▶</span>' : '') +
         '</div>';
       html += '</td>';
     });
@@ -4034,48 +4056,89 @@ function renderTimetableView() {
 
   html += '</tbody></table>';
   grid.innerHTML = html;
-  renderTTLegend();
   initTTDragHandles();
   initTTPinchZoom();
 }
 
-function renderTTLegend() {
-  var legend = document.getElementById('tt-legend');
-  if (!legend) return;
-  var keys = Object.keys(_ptColorMap);
-  if (keys.length === 0) { legend.innerHTML = ''; return; }
-  legend.innerHTML = '<span style="font-size:11px;color:var(--text3);margin-right:6px">Students:</span>' +
-    keys.map(function(name) {
-      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px">' +
-        '<span style="width:10px;height:10px;border-radius:2px;background:' + _ptColorMap[name] + ';flex-shrink:0;display:inline-block"></span>' +
-        escHtml(name) + '</span>';
-    }).join('');
+// ── PINCH-TO-ZOOM ─────────────────────────────────────────
+function initTTPinchZoom() {
+  var wrap = document.getElementById('tt-scroll-wrap');
+  if (!wrap || wrap._pinchInit) return;
+  wrap._pinchInit = true;
+
+  var _pinchStart = null;
+  var _pinchZoomBase = 1.0;
+  var _currentScale = 1.0;
+  var _isPinching = false;
+
+  function pinchDist(e) {
+    var dx = e.touches[0].clientX - e.touches[1].clientX;
+    var dy = e.touches[0].clientY - e.touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  wrap.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      _isPinching = true;
+      _pinchStart = pinchDist(e);
+      _pinchZoomBase = _ttZoom;
+      _currentScale = 1.0;
+      // Apply transform origin at midpoint of fingers
+      var table = document.getElementById('tt-table');
+      if (table) {
+        var mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        var rect = wrap.getBoundingClientRect();
+        var originX = mx - rect.left + wrap.scrollLeft;
+        table.style.transformOrigin = originX + 'px 0';
+      }
+    } else {
+      _isPinching = false;
+    }
+  }, { passive: true });
+
+  wrap.addEventListener('touchmove', function(e) {
+    if (e.touches.length !== 2 || !_isPinching || !_pinchStart) return;
+    e.preventDefault();
+    var dist = pinchDist(e);
+    _currentScale = dist / _pinchStart;
+    var newZoom = Math.max(0.3, Math.min(5.0, _pinchZoomBase * _currentScale));
+    // Apply CSS transform for smooth feel — no rerender during gesture
+    var table = document.getElementById('tt-table');
+    if (table) table.style.transform = 'scaleX(' + (_currentScale) + ')';
+    // Store for commit
+    _ttZoom = newZoom;
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', function(e) {
+    if (!_isPinching) return;
+    _isPinching = false;
+    _pinchStart = null;
+    // Remove transform and rerender at new zoom level
+    var table = document.getElementById('tt-table');
+    if (table) table.style.transform = '';
+    renderTimetableView();
+    // Restore scroll position roughly
+  }, { passive: true });
 }
 
-// ── DRAG-TO-EXTEND DURATION ───────────────────────────────
+// ── DRAG TO EXTEND DURATION ──────────────────────────────
+var _ttDrag = null;
 
 function initTTDragHandles() {
-  var handles = document.querySelectorAll('.tt-drag-handle');
-  handles.forEach(function(handle) {
-    handle.addEventListener('mousedown', startTTDrag);
-    handle.addEventListener('touchstart', startTTDrag, { passive: false });
+  document.querySelectorAll('.tt-drag-handle').forEach(function(h) {
+    h.addEventListener('mousedown', startTTDrag);
+    h.addEventListener('touchstart', startTTDrag, { passive: false });
   });
 }
 
-var _ttDrag = null;
-
 function startTTDrag(e) {
-  e.stopPropagation();
-  e.preventDefault();
-  var handle = e.currentTarget;
-  var sessId = handle.dataset.sessid;
-  var date   = handle.dataset.date;
-  var startH = parseInt(handle.dataset.h);
-  var origDur = parseFloat(handle.dataset.dur);
-  var startX = e.touches ? e.touches[0].clientX : e.clientX;
-
-  _ttDrag = { sessId: sessId, date: date, startH: startH, origDur: origDur, startX: startX };
-
+  e.stopPropagation(); e.preventDefault();
+  var h = e.currentTarget;
+  _ttDrag = {
+    sessId: h.dataset.sessid,
+    startSlots: parseInt(h.dataset.slots),
+    startX: e.touches ? e.touches[0].clientX : e.clientX
+  };
   document.addEventListener('mousemove', onTTDragMove);
   document.addEventListener('touchmove', onTTDragMove, { passive: false });
   document.addEventListener('mouseup', endTTDrag);
@@ -4085,22 +4148,10 @@ function startTTDrag(e) {
 function onTTDragMove(e) {
   if (!_ttDrag) return;
   e.preventDefault();
-  var colW = Math.round(72 * _ttZoom);
+  var colW = Math.round(_ttColW * _ttZoom);
   var x = e.touches ? e.touches[0].clientX : e.clientX;
-  var dx = x - _ttDrag.startX;
-  var addedHours = Math.round(dx / colW);
-  var newDur = Math.max(1, _ttDrag.origDur + addedHours);
-  // Show hint
-  var cellId = 'ttcell-' + _ttDrag.date + '-' + _ttDrag.startH;
-  var cell = document.getElementById(cellId);
-  if (cell) {
-    var inner = cell.querySelector('div');
-    if (inner) {
-      var parts = inner.textContent.split('→');
-      var base = parts[0].trim();
-      inner.textContent = base + (addedHours !== 0 ? ' → ' + newDur + 'h' : '');
-    }
-  }
+  var addSlots = Math.round((x - _ttDrag.startX) / colW);
+  _ttDrag.previewSlots = Math.max(2, _ttDrag.startSlots + addSlots);
 }
 
 async function endTTDrag(e) {
@@ -4109,19 +4160,20 @@ async function endTTDrag(e) {
   document.removeEventListener('touchmove', onTTDragMove);
   document.removeEventListener('mouseup', endTTDrag);
   document.removeEventListener('touchend', endTTDrag);
-
-  var colW = Math.round(72 * _ttZoom);
+  var colW = Math.round(_ttColW * _ttZoom);
   var x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-  var dx = x - _ttDrag.startX;
-  var addedHours = Math.round(dx / colW);
-  var newDur = Math.max(1, _ttDrag.origDur + addedHours);
+  var addSlots = Math.round((x - _ttDrag.startX) / colW);
+  var newSlots = Math.max(2, _ttDrag.startSlots + addSlots);
+  var newDur = newSlots / 2; // each slot = 0.5hr
 
-  if (addedHours !== 0) {
+  if (newSlots !== _ttDrag.startSlots) {
     var sess = DATA.privateSessions.find(function(s) { return s.id === _ttDrag.sessId; });
     if (sess) {
       sess.duration_hrs = newDur;
       var sh = parseInt((sess.start_time || '09:00').split(':')[0]);
-      sess.end_time = pad2(Math.min(sh + newDur, 23)) + ':00';
+      var sm = parseInt(((sess.start_time || '09:00').split(':')[1]) || '0');
+      var endTotalMins = sh * 60 + sm + Math.round(newDur * 60);
+      sess.end_time = pad2(Math.floor(endTotalMins/60)) + ':' + pad2(endTotalMins % 60);
       sess.fee = Number(sess.rate || 900) * newDur;
       renderTimetableView();
       renderPrivateTutoring();
@@ -4132,101 +4184,55 @@ async function endTTDrag(e) {
   _ttDrag = null;
 }
 
-// ── PINCH-TO-ZOOM ─────────────────────────────────────────
-
-function initTTPinchZoom() {
-  var container = document.getElementById('sched-timetable-container');
-  if (!container || container._pinchInit) return;
-  container._pinchInit = true;
-  var _pinchStart = null;
-
-  container.addEventListener('touchstart', function(e) {
-    if (e.touches.length === 2) {
-      var dx = e.touches[0].clientX - e.touches[1].clientX;
-      var dy = e.touches[0].clientY - e.touches[1].clientY;
-      _pinchStart = Math.sqrt(dx*dx + dy*dy);
-    }
-  }, { passive: true });
-
-  container.addEventListener('touchmove', function(e) {
-    if (e.touches.length === 2 && _pinchStart) {
-      e.preventDefault();
-      var dx = e.touches[0].clientX - e.touches[1].clientX;
-      var dy = e.touches[0].clientY - e.touches[1].clientY;
-      var dist = Math.sqrt(dx*dx + dy*dy);
-      var scale = dist / _pinchStart;
-      _ttZoom = Math.max(0.5, Math.min(3.0, _ttZoom * scale));
-      _pinchStart = dist;
-      renderTimetableView();
-    }
-  }, { passive: false });
-
-  container.addEventListener('touchend', function() {
-    _pinchStart = null;
-  }, { passive: true });
-}
-
-// ── CELL CLICK (empty → add session) ──────────────────────
-
-function ttCellClick(dateStr, hour) {
-  if (_ttPasteMode) { ttPasteSession(dateStr, hour); return; }
+// ── CELL CLICK ───────────────────────────────────────────
+function ttCellClick(dateStr, timeSlot) {
+  if (_ttPasteMode) { ttPasteSession(dateStr, timeSlot); return; }
   openAddSession();
   setTimeout(function() {
     var dateEl = document.getElementById('session-date');
     var timeEl = document.getElementById('session-start-time');
     if (dateEl) dateEl.value = dateStr;
-    if (timeEl) timeEl.value = pad2(hour) + ':00';
+    if (timeEl) timeEl.value = timeSlot;
   }, 50);
 }
 
 // ── ACTION SHEET ─────────────────────────────────────────
-
 var _sasSessionId = null;
 var _sasReleased  = false;
 var _ttPasteMode  = null;
 var _ttPasteSession = null;
 
 function openSessionActionSheet(eventId) {
-  var allEvts = getAllEvents();
-  // Also search including cancelled/missed
-  var e = null;
-  for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === eventId) { e = allEvts[i]; break; } }
-  // Fallback: search DATA.privateSessions directly
-  if (!e) {
-    var rawId = eventId.replace('pt_', '');
-    var rawSess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
-    if (rawSess) {
-      e = { id: eventId, type: 'private', source: 'sheet', raw: rawSess,
-            date: rawSess.date, title: rawSess.student_name,
-            start: rawSess.start_time, end: rawSess.end_time };
-    }
-  }
-  if (!e || e.type !== 'private') return;
+  var rawId = eventId.replace('pt_', '');
+  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
+  if (!sess) return;
   _sasSessionId = eventId;
   _sasReleased  = false;
 
-  var sess = e.raw;
-  var name = sess ? sess.student_name : e.title;
-  var subj = sess ? (sess.subject || '') : '';
-  document.getElementById('sas-title').textContent = name + (subj ? ' · ' + subj : '');
-  document.getElementById('sas-meta').textContent  = (e.date || '') + (e.start ? ' · ' + e.start + '–' + (e.end || '') : '');
+  document.getElementById('sas-title').textContent = (sess.student_name || '') + (sess.subject ? ' · ' + sess.subject : '');
+  document.getElementById('sas-meta').textContent  = (sess.date || '') + (sess.start_time ? ' · ' + sess.start_time : '');
 
-  // Populate time edit fields
+  // Start time select
   var stEl = document.getElementById('sas-start-time');
-  var etEl = document.getElementById('sas-end-time');
-  if (stEl) stEl.value = sess ? (sess.start_time || '') : '';
-  if (etEl) etEl.value = sess ? (sess.end_time || '') : '';
+  if (stEl) stEl.value = sess.start_time || '09:00';
 
-  var curStatus = sess ? (sess.status || 'Scheduled') : 'Scheduled';
+  // Duration buttons
+  var curDur = Number(sess.duration_hrs) || 1;
+  document.querySelectorAll('.sas-dur-btn').forEach(function(b) {
+    b.style.background  = parseFloat(b.dataset.dur) === curDur ? 'var(--teal)' : 'transparent';
+    b.style.color       = parseFloat(b.dataset.dur) === curDur ? '#fff' : 'var(--text2)';
+    b.style.borderColor = parseFloat(b.dataset.dur) === curDur ? 'var(--teal)' : 'var(--border-strong)';
+  });
+
+  // Status buttons
+  var curStatus = sess.status || 'Scheduled';
   ['completed','scheduled','missed','cancelled'].forEach(function(s) {
-    var btn = document.getElementById('sas-s-' + s);
-    if (!btn) return;
+    var btn = document.getElementById('sas-s-' + s); if (!btn) return;
     var isActive = curStatus.toLowerCase() === s;
     btn.style.background  = isActive ? 'var(--teal)' : 'transparent';
     btn.style.color       = isActive ? '#fff' : 'var(--text2)';
     btn.style.borderColor = isActive ? 'var(--teal)' : 'var(--border-strong)';
   });
-
   document.getElementById('sas-release-row').style.display = curStatus === 'Cancelled' ? 'block' : 'none';
   document.getElementById('session-action-sheet').style.display = 'block';
 }
@@ -4239,12 +4245,10 @@ function closeActionSheet() {
 async function setSessStatus(status) {
   if (!_sasSessionId) return;
   var rawId = _sasSessionId.replace('pt_', '');
-  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
-  if (!sess) return;
+  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; }); if (!sess) return;
   sess.status = status;
   ['completed','scheduled','missed','cancelled'].forEach(function(s) {
-    var btn = document.getElementById('sas-s-' + s);
-    if (!btn) return;
+    var btn = document.getElementById('sas-s-' + s); if (!btn) return;
     var isActive = status.toLowerCase() === s;
     btn.style.background  = isActive ? 'var(--teal)' : 'transparent';
     btn.style.color       = isActive ? '#fff' : 'var(--text2)';
@@ -4256,28 +4260,31 @@ async function setSessStatus(status) {
   try { await webAppWrite('updateSession', { row: sess }); } catch(err) {}
 }
 
+function setSasDuration(dur) {
+  document.querySelectorAll('.sas-dur-btn').forEach(function(b) {
+    b.style.background  = parseFloat(b.dataset.dur) === dur ? 'var(--teal)' : 'transparent';
+    b.style.color       = parseFloat(b.dataset.dur) === dur ? '#fff' : 'var(--text2)';
+    b.style.borderColor = parseFloat(b.dataset.dur) === dur ? 'var(--teal)' : 'var(--border-strong)';
+  });
+}
+
 async function saveSessTime() {
   if (!_sasSessionId) return;
   var rawId = _sasSessionId.replace('pt_', '');
-  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
-  if (!sess) return;
+  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; }); if (!sess) return;
   var stEl = document.getElementById('sas-start-time');
-  var etEl = document.getElementById('sas-end-time');
+  var activeDurBtn = document.querySelector('.sas-dur-btn[style*="var(--teal)"]');
+  var dur = activeDurBtn ? parseFloat(activeDurBtn.dataset.dur) : (Number(sess.duration_hrs) || 1);
   var newStart = stEl ? stEl.value : sess.start_time;
-  var newEnd   = etEl ? etEl.value : sess.end_time;
   if (!newStart) return;
   sess.start_time = newStart;
-  sess.end_time   = newEnd || newStart;
-  // Recalc duration
-  if (newStart && newEnd) {
-    var diffMins = timeToMinutes(newEnd) - timeToMinutes(newStart);
-    if (diffMins > 0) {
-      sess.duration_hrs = diffMins / 60;
-      sess.fee = Number(sess.rate || 900) * sess.duration_hrs;
-    }
-  }
+  sess.duration_hrs = dur;
+  var parts = newStart.split(':');
+  var totalMins = parseInt(parts[0]) * 60 + parseInt(parts[1] || 0) + Math.round(dur * 60);
+  sess.end_time = pad2(Math.floor(totalMins / 60)) + ':' + pad2(totalMins % 60);
+  sess.fee = Number(sess.rate || 900) * dur;
   renderScheduleView(); renderPrivateTutoring();
-  showToast('Time updated');
+  showToast('Updated · ' + newStart + ' · ' + dur + 'h');
   try { await webAppWrite('updateSession', { row: sess }); } catch(err) {}
 }
 
@@ -4292,17 +4299,15 @@ async function setSessRelease(doRelease) {
   var sess = rawId ? DATA.privateSessions.find(function(s) { return s.id === rawId; }) : null;
   if (!sess) return;
   var d = new Date(sess.date + 'T12:00:00');
-  var slot = { date: sess.date, day: d.toLocaleString('en-GB', {weekday:'short'}), start_time: sess.start_time||'09:00', end_time: sess.end_time||'10:00', duration: String(Number(sess.duration_hrs)||1), status: 'Open' };
-  try { await webAppWrite('publishAvailableSlots', { slots: [slot], append: true }); showToast('Slot released for booking'); }
-  catch(err) { showToast('Could not publish slot'); }
+  var slot = { date: sess.date, day: d.toLocaleString('en-GB', {weekday:'short'}), start_time: sess.start_time || '09:00', end_time: sess.end_time || '10:00', duration: String(Number(sess.duration_hrs)||1), status: 'Open' };
+  try { await webAppWrite('publishAvailableSlots', { slots: [slot], append: true }); showToast('Slot released'); }
+  catch(err) { showToast('Could not release slot'); }
 }
 
 function sasAction(action) {
   if (!_sasSessionId) return;
   var rawId = _sasSessionId.replace('pt_', '');
-  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
-  if (!sess) return;
-
+  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; }); if (!sess) return;
   if (action === 'delete') {
     if (!confirm('Delete this session permanently?')) return;
     DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== rawId; });
@@ -4312,37 +4317,33 @@ function sasAction(action) {
     try { webAppWrite('updateSession', { row: Object.assign({}, sess, { status: 'Deleted' }) }); } catch(e) {}
     return;
   }
-
   _ttPasteMode = action;
   _ttPasteSession = JSON.parse(JSON.stringify(sess));
   closeActionSheet();
   var banner = document.getElementById('tt-paste-banner');
-  if (banner) {
-    banner.style.display = 'flex';
-    document.getElementById('tt-paste-msg').textContent = (action === 'copy' ? 'Copy' : 'Move') + ': ' + sess.student_name + ' — tap an empty slot';
-  }
+  if (banner) { banner.style.display = 'flex'; document.getElementById('tt-paste-msg').textContent = (action === 'copy' ? 'Copy' : 'Move') + ': ' + sess.student_name + ' — tap empty slot'; }
   setSchedViewMode('timetable');
-  showToast((action === 'copy' ? 'Copy' : 'Cut') + ' mode — tap empty slot to place');
+  showToast((action === 'copy' ? 'Copy' : 'Cut') + ' — tap an empty slot');
 }
 
-async function ttPasteSession(dateStr, hour) {
+async function ttPasteSession(dateStr, timeSlot) {
   if (!_ttPasteMode || !_ttPasteSession) return;
   var newSess = JSON.parse(JSON.stringify(_ttPasteSession));
-  newSess.date = dateStr;
-  newSess.start_time = pad2(hour) + ':00';
+  newSess.date = dateStr; newSess.start_time = timeSlot;
   var dur = Number(newSess.duration_hrs) || 1;
-  newSess.end_time = pad2(Math.min(hour + dur, 23)) + ':00';
+  var parts = timeSlot.split(':');
+  var totalMins = parseInt(parts[0]) * 60 + parseInt(parts[1] || 0) + Math.round(dur * 60);
+  newSess.end_time = pad2(Math.floor(totalMins/60)) + ':' + pad2(totalMins % 60);
   if (_ttPasteMode === 'cut') {
     DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== _ttPasteSession.id; });
     try { webAppWrite('updateSession', { row: Object.assign({}, _ttPasteSession, { status: 'Deleted' }) }); } catch(e) {}
   }
-  newSess.id = 'PT-' + Date.now();
-  newSess.created_at = new Date().toISOString();
+  newSess.id = 'PT-' + Date.now(); newSess.created_at = new Date().toISOString();
   DATA.privateSessions.push(newSess);
   try { await webAppWrite('addSession', { row: newSess }); } catch(e) {}
   cancelTTPaste();
   renderScheduleView(); renderPrivateTutoring();
-  showToast((_ttPasteMode === 'cut' ? 'Moved' : 'Copied') + ' to ' + dateStr + ' ' + pad2(hour) + ':00');
+  showToast((_ttPasteMode === 'cut' ? 'Moved' : 'Copied') + ' to ' + dateStr + ' ' + timeSlot);
 }
 
 function cancelTTPaste() {
@@ -5600,7 +5601,7 @@ var gcalAccessToken = null;
 var gcalEvents      = [];
 
 var schedMode        = 'month';
-var schedViewMode    = 'schedule'; // 'cards' | 'schedule' | 'list'
+var schedViewMode    = 'timetable'; // 'timetable' | 'cards' | 'list'
 var schedFilter      = 'all';
 var schedMonthCursor = new Date();
 var schedWeekCursor  = new Date();
@@ -5640,6 +5641,16 @@ function initGCalTokenClient() {
 }
 
 function initSchedule() {
+  // Ensure timetable is visible and other containers hidden on every page show
+  var ttCont = document.getElementById('sched-timetable-container');
+  var gridCont = document.getElementById('sched-grid-container');
+  var cardsCont = document.getElementById('sched-cards-container');
+  var listCont = document.getElementById('sched-list-container');
+  if (ttCont) ttCont.style.display = 'block';
+  if (gridCont) gridCont.style.display = 'none';
+  if (cardsCont) cardsCont.style.display = 'none';
+  if (listCont) listCont.style.display = 'none';
+  schedViewMode = 'timetable';
   renderScheduleView();
   renderAvailSlots();
   if (!schedInitialised) {
@@ -5727,18 +5738,20 @@ function applySchedZoom() {
 // ── VIEW MODE ─────────────────────────────────────────────
 function setSchedViewMode(mode) {
   schedViewMode = mode;
-  document.getElementById('sched-toggle-cards').classList.toggle('active', mode === 'cards');
-  document.getElementById('sched-toggle-schedule').classList.toggle('active', mode === 'schedule');
-  document.getElementById('sched-toggle-list').classList.toggle('active', mode === 'list');
   var ttBtn = document.getElementById('sched-toggle-timetable');
   if (ttBtn) ttBtn.classList.toggle('active', mode === 'timetable');
-  document.getElementById('sched-cards-container').style.display    = mode === 'cards'    ? 'block' : 'none';
-  document.getElementById('sched-grid-container').style.display     = mode === 'schedule' ? 'block' : 'none';
-  document.getElementById('sched-list-container').style.display     = mode === 'list'     ? 'block' : 'none';
+  document.getElementById('sched-toggle-cards').classList.toggle('active', mode === 'cards');
+  document.getElementById('sched-toggle-list').classList.toggle('active', mode === 'list');
+  // Hide all containers
+  ['sched-cards-container','sched-grid-container','sched-list-container'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
   var ttCont = document.getElementById('sched-timetable-container');
   if (ttCont) ttCont.style.display = mode === 'timetable' ? 'block' : 'none';
+  document.getElementById('sched-cards-container').style.display = mode === 'cards' ? 'block' : 'none';
+  document.getElementById('sched-list-container').style.display  = mode === 'list'  ? 'block' : 'none';
   var zoomCtrl = document.getElementById('sched-zoom-controls');
-  if (zoomCtrl) zoomCtrl.style.display = mode === 'schedule' ? 'flex' : 'none';
+  if (zoomCtrl) zoomCtrl.style.display = 'none';
   renderScheduleView();
 }
 
@@ -5805,7 +5818,6 @@ function renderScheduleView() {
   }
 
   if (schedViewMode === 'cards')    renderCardsView();
-  if (schedViewMode === 'schedule') renderGrid();
   if (schedViewMode === 'list')     renderListView();
   if (schedViewMode === 'timetable') renderTimetableView();
 }
@@ -7283,27 +7295,66 @@ function updateRecurringPreview() {
 }
 
 function openMarkDayOff(dateStr) {
-  dayOffMode = 'single';
-  document.getElementById('dayoff-mode-single').classList.add('active');
-  document.getElementById('dayoff-mode-recurring').classList.remove('active');
-  document.getElementById('dayoff-single-fields').style.display    = 'block';
-  document.getElementById('dayoff-recurring-fields').style.display = 'none';
   var el = document.getElementById('dayoff-date');
   if (el) el.value = dateStr || dateToStr(new Date());
   var note = document.getElementById('dayoff-note');
   if (note) note.value = '';
-  populateDayOffMonthSelect();
+  var toggle = document.getElementById('dayoff-repeat-toggle');
+  if (toggle) toggle.checked = false;
+  updateDayOffRepeatPreview();
   document.getElementById('modal-day-off').classList.add('open');
+}
+
+function updateDayOffRepeatPreview() {
+  var toggle = document.getElementById('dayoff-repeat-toggle');
+  var knob = document.getElementById('dayoff-repeat-knob');
+  var inner = document.getElementById('dayoff-knob-inner');
+  var preview = document.getElementById('dayoff-repeat-preview');
+  var dateEl = document.getElementById('dayoff-date');
+
+  var on = toggle && toggle.checked;
+  if (knob) knob.style.background = on ? 'var(--teal)' : 'var(--border-strong)';
+  if (inner) inner.style.transform = on ? 'translateX(18px)' : 'translateX(0)';
+
+  if (!preview) return;
+  if (!on) { preview.textContent = 'Mark every same weekday through end of month'; return; }
+
+  var dateStr = dateEl ? dateEl.value : '';
+  if (!dateStr) { preview.textContent = 'Pick a date first'; return; }
+  var d = new Date(dateStr + 'T12:00:00');
+  var dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+  // Count occurrences remaining in the month
+  var year = d.getFullYear(); var month = d.getMonth();
+  var lastDay = new Date(year, month + 1, 0).getDate();
+  var count = 0; var cur = new Date(d);
+  while (cur.getMonth() === month) { count++; cur.setDate(cur.getDate() + 7); }
+  preview.textContent = 'Will mark all ' + dayName + 's this month (' + count + ' days)';
 }
 
 async function saveDayOff() {
   if (!gcalAccessToken) { showToast('Connect Google Calendar first'); return; }
 
-  if (dayOffMode === 'recurring') {
-    var dates = getRecurringDates();
-    if (dates.length === 0) { showToast('No dates found'); return; }
-    var weekdayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][parseInt(document.getElementById('dayoff-weekday').value)];
-    showToast('Marking ' + dates.length + ' days off...');
+  var date = document.getElementById('dayoff-date').value;
+  var note = document.getElementById('dayoff-note').value.trim();
+  var repeatToggle = document.getElementById('dayoff-repeat-toggle');
+  var doRepeat = repeatToggle && repeatToggle.checked;
+
+  if (!date) { showToast('Pick a date'); return; }
+
+  if (doRepeat) {
+    // Mark every same weekday in the same month
+    var base = new Date(date + 'T12:00:00');
+    var dow  = base.getDay();
+    var year = base.getFullYear(); var month = base.getMonth();
+    var dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][dow];
+    // Collect all matching weekdays in the month
+    var dates = [];
+    var d = new Date(year, month, 1);
+    while (d.getMonth() === month) {
+      if (d.getDay() === dow) dates.push(new Date(d));
+      d.setDate(d.getDate() + 1);
+    }
+    showToast('Marking ' + dates.length + ' ' + dayName + 's...');
     var failed = 0;
     for (var i = 0; i < dates.length; i++) {
       var ds = dateToStr(dates[i]);
@@ -7311,12 +7362,12 @@ async function saveDayOff() {
         var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + gcalAccessToken, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ summary: PREFIX_DAYOFF + ' ' + weekdayName, start: { date: ds }, end: { date: ds } })
+          body: JSON.stringify({ summary: PREFIX_DAYOFF + ' ' + dayName + (note ? ' ' + note : ''), start: { date: ds }, end: { date: ds } })
         });
         if (!res.ok) failed++;
       } catch(e) { failed++; }
     }
-    if (failed === 0) showToast('🍃 All ' + dates.length + ' ' + weekdayName + 's marked as day off');
+    if (failed === 0) showToast('All ' + dates.length + ' ' + dayName + 's marked as day off');
     else showToast('Done with ' + failed + ' error(s)');
     closeModal('modal-day-off');
     await fetchGCalEvents();
@@ -7324,16 +7375,13 @@ async function saveDayOff() {
   }
 
   // Single day
-  var date = document.getElementById('dayoff-date').value;
-  var note = document.getElementById('dayoff-note').value.trim();
-  if (!date) { showToast('Pick a date'); return; }
   try {
     var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
       method: 'POST', headers: { 'Authorization': 'Bearer ' + gcalAccessToken, 'Content-Type': 'application/json' },
       body: JSON.stringify({ summary: PREFIX_DAYOFF + (note ? ' ' + note : ''), start: { date: date }, end: { date: date } })
     });
     if (!res.ok) throw new Error('GCal ' + res.status);
-    showToast('🍃 Day off saved'); closeModal('modal-day-off'); await fetchGCalEvents();
+    showToast('Day off saved'); closeModal('modal-day-off'); await fetchGCalEvents();
   } catch(err) { showToast('Error: ' + err.message); }
 }
 function confirmRemoveBreak(dateStr) {
