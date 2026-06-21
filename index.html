@@ -1839,6 +1839,52 @@ tr:hover td { background: var(--surface2); }
         <button onclick="setSessRelease(false)" id="sas-release-no"  style="flex:1;padding:8px;border-radius:8px;border:2px solid var(--border-strong);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;background:transparent;color:var(--text2)">Block slot</button>
       </div>
     </div>
+    <!-- Time edit row -->
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Edit time</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+      <select id="sas-start-time" class="form-select" style="flex:1;font-size:13px">
+        <option value="">Start</option>
+        <option value="06:00">06:00</option>
+        <option value="07:00">07:00</option>
+        <option value="08:00">08:00</option>
+        <option value="09:00">09:00</option>
+        <option value="10:00">10:00</option>
+        <option value="11:00">11:00</option>
+        <option value="12:00">12:00</option>
+        <option value="13:00">13:00</option>
+        <option value="14:00">14:00</option>
+        <option value="15:00">15:00</option>
+        <option value="16:00">16:00</option>
+        <option value="17:00">17:00</option>
+        <option value="18:00">18:00</option>
+        <option value="19:00">19:00</option>
+        <option value="20:00">20:00</option>
+        <option value="21:00">21:00</option>
+        <option value="22:00">22:00</option>
+      </select>
+      <span style="color:var(--text3)">–</span>
+      <select id="sas-end-time" class="form-select" style="flex:1;font-size:13px">
+        <option value="">End</option>
+        <option value="07:00">07:00</option>
+        <option value="08:00">08:00</option>
+        <option value="09:00">09:00</option>
+        <option value="10:00">10:00</option>
+        <option value="11:00">11:00</option>
+        <option value="12:00">12:00</option>
+        <option value="13:00">13:00</option>
+        <option value="14:00">14:00</option>
+        <option value="15:00">15:00</option>
+        <option value="16:00">16:00</option>
+        <option value="17:00">17:00</option>
+        <option value="18:00">18:00</option>
+        <option value="19:00">19:00</option>
+        <option value="20:00">20:00</option>
+        <option value="21:00">21:00</option>
+        <option value="22:00">22:00</option>
+        <option value="23:00">23:00</option>
+      </select>
+      <button onclick="saveSessTime()" style="padding:8px 14px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;white-space:nowrap">Save</button>
+    </div>
     <!-- Actions row -->
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Actions</div>
     <div style="display:flex;gap:8px;margin-bottom:16px">
@@ -3797,33 +3843,33 @@ async function runSessionImport() {
 
 // ─── TIMETABLE VIEW + SESSION ACTIONS ─────────────────────
 
-// Per-student color palette
+// Student color palette — vivid, distinct
 var PT_STUDENT_COLORS = [
-  '#378ADD','#1D9E75','#7F77DD','#D85A30','#BA7517',
-  '#D4537E','#639922','#0F6E56','#993556','#534AB7'
+  '#E8544A','#1D9E75','#378ADD','#BA7517','#7F77DD',
+  '#D4537E','#639922','#0F6E56','#D85A30','#534AB7',
+  '#888780','#0C447C'
 ];
 var _ptColorMap = {};
 
-function getPTStudentColor(name) {
-  if (!name) return '#888780';
-  if (!_ptColorMap[name]) {
-    var keys = Object.keys(_ptColorMap);
-    _ptColorMap[name] = PT_STUDENT_COLORS[keys.length % PT_STUDENT_COLORS.length];
-  }
-  return _ptColorMap[name];
-}
-
 function buildPTColorMap() {
   _ptColorMap = {};
-  var names = Array.from(new Set(DATA.privateSessions.map(function(s) { return s.student_name; }).filter(Boolean))).sort();
+  var names = Array.from(new Set(
+    DATA.privateSessions.map(function(s) { return s.student_name; }).filter(Boolean)
+  )).sort();
   names.forEach(function(n, i) {
     _ptColorMap[n] = PT_STUDENT_COLORS[i % PT_STUDENT_COLORS.length];
   });
 }
 
-// ── TIMETABLE RENDER ─────────────────────────────────────
+function getPTStudentColor(name) {
+  return _ptColorMap[name] || '#888780';
+}
 
-var TT_HOURS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+// ── TIMETABLE RENDER ─────────────────────────────────────
+// Layout: rows = dates, columns = time slots (like Google Sheets)
+
+var TT_HOURS = [7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+var _ttZoom = 1.0; // column width multiplier
 
 function renderTimetableView() {
   buildPTColorMap();
@@ -3832,111 +3878,153 @@ function renderTimetableView() {
   var legend = document.getElementById('tt-legend');
   if (!grid) return;
 
-  // Determine days to show
   var days = getViewDays();
   var todayStr = dateToStr(new Date());
+  var special = getSpecial();
 
-  // Build event lookup by date
-  var allEvts = getAllEvents();
-  var evtByDate = {};
-  allEvts.forEach(function(e) {
-    if (!evtByDate[e.date]) evtByDate[e.date] = [];
-    evtByDate[e.date].push(e);
+  // Build session lookup by date
+  var sessByDate = {};
+  DATA.privateSessions.forEach(function(s) {
+    if (!s.date) return;
+    if (!sessByDate[s.date]) sessByDate[s.date] = [];
+    sessByDate[s.date].push(s);
   });
 
-  // Build legend
+  // Build poppadi session lookup by date
+  var popByDate = {};
+  if (DATA.poppadiSessions) {
+    DATA.poppadiSessions.forEach(function(s) {
+      if (!s.date || s.status === 'Cancelled') return;
+      if (!popByDate[s.date]) popByDate[s.date] = [];
+      popByDate[s.date].push(s);
+    });
+  }
+
+  // Legend
   legend.innerHTML = Object.keys(_ptColorMap).map(function(name) {
     return '<span style="display:flex;align-items:center;gap:5px;font-size:12px">' +
       '<span style="width:10px;height:10px;border-radius:2px;background:' + _ptColorMap[name] + ';flex-shrink:0"></span>' +
       name + '</span>';
   }).join('');
 
-  var cellW = 44; // px per day column
-  var rowH  = 36; // px per hour row
+  var colW = Math.round(72 * _ttZoom); // base 72px per hour column
+  var rowH = 34;
 
-  var html = '<table style="border-collapse:collapse;font-size:11px;min-width:' + (cellW * days.length + 60) + 'px">';
+  var html = '<table id="tt-table" style="border-collapse:collapse;font-size:11px;user-select:none">';
 
-  // Header row — day + date
+  // Header row — time slots
   html += '<thead><tr>';
-  html += '<th style="min-width:52px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);font-size:10px;color:var(--text3);text-align:left;position:sticky;left:0;z-index:3">Time</th>';
-  days.forEach(function(d) {
-    var ds = dateToStr(d);
-    var isDayOff = checkDayOff(ds);
-    var isToday  = ds === todayStr;
-    var dayName  = d.toLocaleString('en-GB', { weekday:'short' });
-    var bgStyle  = isDayOff ? 'background:var(--red-bg)' : isToday ? 'background:var(--teal-bg)' : 'background:var(--surface2)';
-    var color    = isToday ? 'color:var(--teal);font-weight:700' : isDayOff ? 'color:var(--red)' : 'color:var(--text3)';
-    html += '<th style="min-width:' + cellW + 'px;padding:4px 2px;border:1px solid var(--border);text-align:center;cursor:pointer;' + bgStyle + ';' + color + '" onclick="ttToggleDayOff(\'' + ds + '\')">';
-    html += '<div style="font-size:9px">' + dayName + '</div>';
-    html += '<div style="font-size:13px;font-weight:600">' + d.getDate() + '</div>';
-    if (isDayOff) html += '<div style="font-size:9px">off</div>';
-    html += '</th>';
+  html += '<th style="min-width:60px;width:60px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);font-size:10px;color:var(--text3);text-align:left;position:sticky;left:0;z-index:4">Date</th>';
+  TT_HOURS.forEach(function(h) {
+    html += '<th style="min-width:' + colW + 'px;width:' + colW + 'px;padding:4px 4px;background:var(--surface2);border:1px solid var(--border);font-size:10px;color:var(--text3);text-align:center">' + pad2(h) + ':00</th>';
   });
   html += '</tr></thead><tbody>';
 
-  // Hour rows
-  TT_HOURS.forEach(function(timeSlot) {
-    var isLunch = timeSlot === '12:00';
-    html += '<tr>';
-    html += '<td style="padding:4px 8px;border:1px solid var(--border);font-size:10px;color:var(--text3);white-space:nowrap;background:var(--surface2);position:sticky;left:0;z-index:2">' + timeSlot + '</td>';
+  // One row per day
+  days.forEach(function(d) {
+    var ds = dateToStr(d);
+    var isDayOff = !!special.dayOffs[ds];
+    var isToday  = ds === todayStr;
+    var isSun    = d.getDay() === 0;
+    var dayName  = d.toLocaleString('en-GB', { weekday: 'short' });
+    var dayNum   = d.getDate();
 
-    days.forEach(function(d) {
-      var ds = dateToStr(d);
-      var isDayOff = checkDayOff(ds);
+    var rowBg = isDayOff ? 'background:var(--red-bg)' : isToday ? 'background:var(--teal-bg)' : isSun ? 'background:var(--surface2)' : '';
+    var dayColor = isDayOff ? 'color:var(--red)' : isToday ? 'color:var(--teal);font-weight:700' : 'color:var(--text)';
 
-      if (isDayOff) {
-        html += '<td style="border:1px solid var(--border);background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(226,75,74,0.06) 4px,rgba(226,75,74,0.06) 8px);height:' + rowH + 'px"></td>';
+    html += '<tr style="height:' + rowH + 'px">';
+
+    // Date label cell — tap to mark day off
+    html += '<td onclick="openMarkDayOff(\'' + ds + '\')" style="padding:4px 6px;border:1px solid var(--border);white-space:nowrap;cursor:pointer;position:sticky;left:0;z-index:2;' + rowBg + ';' + dayColor + '">';
+    html += '<div style="font-size:9px;opacity:0.7">' + dayName + '</div>';
+    html += '<div style="font-size:13px;font-weight:600;line-height:1">' + dayNum + '</div>';
+    if (isDayOff) html += '<div style="font-size:8px;color:var(--red)">off</div>';
+    html += '</td>';
+
+    if (isDayOff) {
+      // Striped day-off row
+      var totalCols = TT_HOURS.length;
+      html += '<td colspan="' + totalCols + '" style="border:1px solid var(--border);background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(226,75,74,0.06) 4px,rgba(226,75,74,0.06) 8px)"></td>';
+      html += '</tr>';
+      return;
+    }
+
+    // Build a map of which hours are occupied and by what
+    var sessions = sessByDate[ds] || [];
+    var popSessions = popByDate[ds] || [];
+
+    // Combine all occupants per hour
+    var hourMap = {}; // hour -> {session, type, span, isStart}
+    sessions.forEach(function(s) {
+      var sh = parseInt((s.start_time || '09:00').split(':')[0]);
+      var dur = Math.max(1, Math.round(Number(s.duration_hrs) || 1));
+      for (var hh = sh; hh < sh + dur && hh <= 23; hh++) {
+        hourMap[hh] = { session: s, type: 'private', isStart: hh === sh, span: dur, startH: sh };
+      }
+    });
+    popSessions.forEach(function(s) {
+      var sh = parseInt((s.start_time || '09:00').split(':')[0]);
+      var dur = Math.max(1, Math.round(Number(s.hours) || 1));
+      for (var hh = sh; hh < sh + dur && hh <= 23; hh++) {
+        if (!hourMap[hh]) hourMap[hh] = { session: s, type: 'poppadi', isStart: hh === sh, span: dur, startH: sh };
+      }
+    });
+
+    var skipped = {};
+    TT_HOURS.forEach(function(h, hi) {
+      if (skipped[h]) return;
+      var entry = hourMap[h];
+
+      if (!entry) {
+        // Empty cell
+        html += '<td onclick="ttCellClick(\'' + ds + '\',' + h + ')" style="border:1px solid var(--border);height:' + rowH + 'px;cursor:pointer"></td>';
         return;
       }
-      if (isLunch) {
-        html += '<td style="border:1px solid var(--border);background:var(--surface2);height:' + rowH + 'px;text-align:center"><span style="font-size:9px;color:var(--text3)">lunch</span></td>';
-        return;
+
+      if (!entry.isStart) return; // already handled by colspan
+
+      var s = entry.session;
+      var isPrivate = entry.type === 'private';
+      var span = entry.span;
+
+      // Clamp span to remaining columns
+      var remaining = TT_HOURS.length - hi;
+      span = Math.min(span, remaining);
+
+      // Skip subsequent cols
+      for (var ss2 = 1; ss2 < span; ss2++) {
+        skipped[TT_HOURS[hi + ss2]] = true;
       }
 
-      var dayEvts = evtByDate[ds] || [];
-      var slotEvts = dayEvts.filter(function(e) {
-        if (e.allDay) return false;
-        var sm = timeToMinutes(e.start || '00:00');
-        var tMin = timeToMinutes(timeSlot);
-        return sm >= tMin && sm < tMin + 60;
-      });
+      var isCancelled = (s.status === 'Cancelled');
+      var isMissed    = (s.status === 'Missed');
+      var isCompleted = (s.status === 'Completed');
 
-      if (slotEvts.length === 0) {
-        // Empty cell — click to open add session or paste
-        html += '<td style="border:1px solid var(--border);height:' + rowH + 'px;cursor:pointer;transition:background 0.1s" ' +
-          'onclick="ttCellClick(\'' + ds + '\',\'' + timeSlot + '\')" ' +
-          '>' +
-          '</td>';
-        return;
-      }
-
-      var e = slotEvts[0];
-      var isPrivate = e.type === 'private';
-      var isCancelled = e.raw && e.raw.status === 'Cancelled';
-      var isMissed    = e.raw && e.raw.status === 'Missed';
-      var isCompleted = e.raw && e.raw.status === 'Completed';
-
-      var bgColor = isPrivate ? getPTStudentColor(e.raw ? e.raw.student_name : '') : '#6b6a65';
-      var opacity = isCancelled ? '0.4' : isMissed ? '0.6' : '1';
+      var bgColor = isPrivate ? getPTStudentColor(s.student_name || '') : '#6b6a65';
+      var opacity = isCancelled ? 0.4 : isMissed ? 0.6 : 1.0;
       var textDeco = isCancelled ? 'text-decoration:line-through;' : '';
-      var prefix   = isCompleted ? '✓ ' : '';
+      var prefix   = isCompleted ? '✓ ' : isCancelled ? '✕ ' : '';
 
-      var shortTitle = (e.raw && e.raw.student_name) ? e.raw.student_name.split(' ')[0] : (e.title || '').split(' ')[0];
-      if (shortTitle.length > 8) shortTitle = shortTitle.slice(0, 7) + '…';
+      var label = isPrivate
+        ? (s.student_name || '').split(' ')[0]
+        : ((s.nickname || s.subject || 'Poppadi').split(' ')[0]);
+      if (label.length > 9) label = label.slice(0, 8) + '…';
 
-      var clickFn = isPrivate
-        ? 'openSessionActionSheet(\'' + escAttr(e.id) + '\')'
-        : 'openPoppadiDetail(' + JSON.stringify({id: e.id, title: e.title, date: e.date, start: e.start, end: e.end, type: e.type}).replace(/"/g, '&quot;') + ')';
+      // Generate unique id for drag handle
+      var cellId = 'ttcell-' + ds + '-' + h;
+      var evtId  = isPrivate ? ('pt_' + s.id) : null;
 
-      html += '<td style="border:1px solid var(--border);padding:2px;height:' + rowH + 'px;cursor:pointer">';
-      html += '<div onclick="' + (isPrivate ? 'openSessionActionSheet(\'' + escAttr(e.id) + '\')' : '') + '" ' +
-        'style="height:100%;border-radius:4px;background:' + bgColor + ';opacity:' + opacity + ';' +
-        'display:flex;align-items:center;justify-content:center;' +
+      var colspan = span > 1 ? ' colspan="' + span + '"' : '';
+      html += '<td' + colspan + ' style="border:1px solid var(--border);padding:2px;height:' + rowH + 'px;position:relative" id="' + cellId + '">';
+      html += '<div style="height:100%;border-radius:4px;background:' + bgColor + ';opacity:' + opacity + ';' +
+        'display:flex;align-items:center;justify-content:space-between;' +
         'font-size:10px;font-weight:600;color:#fff;' + textDeco +
-        'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 3px;' +
-        (isPrivate ? 'cursor:pointer' : 'cursor:default') + '" ' +
-        'title="' + escHtml(e.title) + ' · ' + (e.raw ? e.raw.status : '') + '">' +
-        prefix + escHtml(shortTitle) +
+        'overflow:hidden;padding:0 4px;box-sizing:border-box;' +
+        (isPrivate ? 'cursor:pointer' : 'cursor:default') + '"' +
+        (isPrivate && evtId ? ' onclick="openSessionActionSheet(\'' + escAttr(evtId) + '\')"' : '') +
+        ' title="' + escHtml((s.student_name || s.nickname || '') + (s.subject ? ' · ' + s.subject : '') + ' · ' + (s.status || '')) + '">' +
+        '<span>' + prefix + escHtml(label) + '</span>' +
+        (isPrivate ? '<span class="tt-drag-handle" data-sessid="' + escAttr(s.id) + '" data-date="' + ds + '" data-h="' + h + '" data-dur="' + (Number(s.duration_hrs)||1) + '" style="cursor:ew-resize;padding:0 2px;opacity:0.6;font-size:10px;flex-shrink:0">⋮</span>' : '') +
         '</div>';
       html += '</td>';
     });
@@ -3946,33 +4034,148 @@ function renderTimetableView() {
 
   html += '</tbody></table>';
   grid.innerHTML = html;
+  renderTTLegend();
+  initTTDragHandles();
+  initTTPinchZoom();
 }
 
-function ttToggleDayOff(dateStr) {
-  // Toggle day off for this date
-  var dayOffs = JSON.parse(localStorage.getItem('stevenco_dayoffs') || '{}');
-  if (dayOffs[dateStr]) {
-    delete dayOffs[dateStr];
-    showToast('Day off removed for ' + dateStr);
-  } else {
-    dayOffs[dateStr] = true;
-    showToast('Day off marked for ' + dateStr);
-  }
-  localStorage.setItem('stevenco_dayoffs', JSON.stringify(dayOffs));
-  renderScheduleView();
+function renderTTLegend() {
+  var legend = document.getElementById('tt-legend');
+  if (!legend) return;
+  var keys = Object.keys(_ptColorMap);
+  if (keys.length === 0) { legend.innerHTML = ''; return; }
+  legend.innerHTML = '<span style="font-size:11px;color:var(--text3);margin-right:6px">Students:</span>' +
+    keys.map(function(name) {
+      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px">' +
+        '<span style="width:10px;height:10px;border-radius:2px;background:' + _ptColorMap[name] + ';flex-shrink:0;display:inline-block"></span>' +
+        escHtml(name) + '</span>';
+    }).join('');
 }
 
-function ttCellClick(dateStr, timeSlot) {
-  if (_ttPasteMode) {
-    ttPasteSession(dateStr, timeSlot);
-    return;
+// ── DRAG-TO-EXTEND DURATION ───────────────────────────────
+
+function initTTDragHandles() {
+  var handles = document.querySelectorAll('.tt-drag-handle');
+  handles.forEach(function(handle) {
+    handle.addEventListener('mousedown', startTTDrag);
+    handle.addEventListener('touchstart', startTTDrag, { passive: false });
+  });
+}
+
+var _ttDrag = null;
+
+function startTTDrag(e) {
+  e.stopPropagation();
+  e.preventDefault();
+  var handle = e.currentTarget;
+  var sessId = handle.dataset.sessid;
+  var date   = handle.dataset.date;
+  var startH = parseInt(handle.dataset.h);
+  var origDur = parseFloat(handle.dataset.dur);
+  var startX = e.touches ? e.touches[0].clientX : e.clientX;
+
+  _ttDrag = { sessId: sessId, date: date, startH: startH, origDur: origDur, startX: startX };
+
+  document.addEventListener('mousemove', onTTDragMove);
+  document.addEventListener('touchmove', onTTDragMove, { passive: false });
+  document.addEventListener('mouseup', endTTDrag);
+  document.addEventListener('touchend', endTTDrag);
+}
+
+function onTTDragMove(e) {
+  if (!_ttDrag) return;
+  e.preventDefault();
+  var colW = Math.round(72 * _ttZoom);
+  var x = e.touches ? e.touches[0].clientX : e.clientX;
+  var dx = x - _ttDrag.startX;
+  var addedHours = Math.round(dx / colW);
+  var newDur = Math.max(1, _ttDrag.origDur + addedHours);
+  // Show hint
+  var cellId = 'ttcell-' + _ttDrag.date + '-' + _ttDrag.startH;
+  var cell = document.getElementById(cellId);
+  if (cell) {
+    var inner = cell.querySelector('div');
+    if (inner) {
+      var parts = inner.textContent.split('→');
+      var base = parts[0].trim();
+      inner.textContent = base + (addedHours !== 0 ? ' → ' + newDur + 'h' : '');
+    }
   }
+}
+
+async function endTTDrag(e) {
+  if (!_ttDrag) return;
+  document.removeEventListener('mousemove', onTTDragMove);
+  document.removeEventListener('touchmove', onTTDragMove);
+  document.removeEventListener('mouseup', endTTDrag);
+  document.removeEventListener('touchend', endTTDrag);
+
+  var colW = Math.round(72 * _ttZoom);
+  var x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+  var dx = x - _ttDrag.startX;
+  var addedHours = Math.round(dx / colW);
+  var newDur = Math.max(1, _ttDrag.origDur + addedHours);
+
+  if (addedHours !== 0) {
+    var sess = DATA.privateSessions.find(function(s) { return s.id === _ttDrag.sessId; });
+    if (sess) {
+      sess.duration_hrs = newDur;
+      var sh = parseInt((sess.start_time || '09:00').split(':')[0]);
+      sess.end_time = pad2(Math.min(sh + newDur, 23)) + ':00';
+      sess.fee = Number(sess.rate || 900) * newDur;
+      renderTimetableView();
+      renderPrivateTutoring();
+      showToast('Duration → ' + newDur + 'h');
+      try { await webAppWrite('updateSession', { row: sess }); } catch(err) {}
+    }
+  }
+  _ttDrag = null;
+}
+
+// ── PINCH-TO-ZOOM ─────────────────────────────────────────
+
+function initTTPinchZoom() {
+  var container = document.getElementById('sched-timetable-container');
+  if (!container || container._pinchInit) return;
+  container._pinchInit = true;
+  var _pinchStart = null;
+
+  container.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      var dx = e.touches[0].clientX - e.touches[1].clientX;
+      var dy = e.touches[0].clientY - e.touches[1].clientY;
+      _pinchStart = Math.sqrt(dx*dx + dy*dy);
+    }
+  }, { passive: true });
+
+  container.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2 && _pinchStart) {
+      e.preventDefault();
+      var dx = e.touches[0].clientX - e.touches[1].clientX;
+      var dy = e.touches[0].clientY - e.touches[1].clientY;
+      var dist = Math.sqrt(dx*dx + dy*dy);
+      var scale = dist / _pinchStart;
+      _ttZoom = Math.max(0.5, Math.min(3.0, _ttZoom * scale));
+      _pinchStart = dist;
+      renderTimetableView();
+    }
+  }, { passive: false });
+
+  container.addEventListener('touchend', function() {
+    _pinchStart = null;
+  }, { passive: true });
+}
+
+// ── CELL CLICK (empty → add session) ──────────────────────
+
+function ttCellClick(dateStr, hour) {
+  if (_ttPasteMode) { ttPasteSession(dateStr, hour); return; }
   openAddSession();
   setTimeout(function() {
     var dateEl = document.getElementById('session-date');
     var timeEl = document.getElementById('session-start-time');
     if (dateEl) dateEl.value = dateStr;
-    if (timeEl) timeEl.value = timeSlot;
+    if (timeEl) timeEl.value = pad2(hour) + ':00';
   }, 50);
 }
 
@@ -3980,40 +4183,51 @@ function ttCellClick(dateStr, timeSlot) {
 
 var _sasSessionId = null;
 var _sasReleased  = false;
-var _ttPasteMode  = null; // 'copy' | 'cut' | null
+var _ttPasteMode  = null;
 var _ttPasteSession = null;
 
 function openSessionActionSheet(eventId) {
   var allEvts = getAllEvents();
+  // Also search including cancelled/missed
   var e = null;
   for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === eventId) { e = allEvts[i]; break; } }
+  // Fallback: search DATA.privateSessions directly
+  if (!e) {
+    var rawId = eventId.replace('pt_', '');
+    var rawSess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
+    if (rawSess) {
+      e = { id: eventId, type: 'private', source: 'sheet', raw: rawSess,
+            date: rawSess.date, title: rawSess.student_name,
+            start: rawSess.start_time, end: rawSess.end_time };
+    }
+  }
   if (!e || e.type !== 'private') return;
-
   _sasSessionId = eventId;
   _sasReleased  = false;
 
   var sess = e.raw;
   var name = sess ? sess.student_name : e.title;
   var subj = sess ? (sess.subject || '') : '';
-  var date = e.date || '';
-  var time = (e.start || '') + (e.end ? '–' + e.end : '');
-
   document.getElementById('sas-title').textContent = name + (subj ? ' · ' + subj : '');
-  document.getElementById('sas-meta').textContent  = date + (time ? ' · ' + time : '');
+  document.getElementById('sas-meta').textContent  = (e.date || '') + (e.start ? ' · ' + e.start + '–' + (e.end || '') : '');
 
-  // Highlight current status
+  // Populate time edit fields
+  var stEl = document.getElementById('sas-start-time');
+  var etEl = document.getElementById('sas-end-time');
+  if (stEl) stEl.value = sess ? (sess.start_time || '') : '';
+  if (etEl) etEl.value = sess ? (sess.end_time || '') : '';
+
   var curStatus = sess ? (sess.status || 'Scheduled') : 'Scheduled';
   ['completed','scheduled','missed','cancelled'].forEach(function(s) {
     var btn = document.getElementById('sas-s-' + s);
+    if (!btn) return;
     var isActive = curStatus.toLowerCase() === s;
-    btn.style.background   = isActive ? 'var(--teal)' : 'transparent';
-    btn.style.color        = isActive ? '#fff' : 'var(--text2)';
-    btn.style.borderColor  = isActive ? 'var(--teal)' : 'var(--border-strong)';
+    btn.style.background  = isActive ? 'var(--teal)' : 'transparent';
+    btn.style.color       = isActive ? '#fff' : 'var(--text2)';
+    btn.style.borderColor = isActive ? 'var(--teal)' : 'var(--border-strong)';
   });
 
-  // Show/hide release row
   document.getElementById('sas-release-row').style.display = curStatus === 'Cancelled' ? 'block' : 'none';
-
   document.getElementById('session-action-sheet').style.display = 'block';
 }
 
@@ -4024,142 +4238,115 @@ function closeActionSheet() {
 
 async function setSessStatus(status) {
   if (!_sasSessionId) return;
-
-  var allEvts = getAllEvents();
-  var e = null;
-  for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === _sasSessionId) { e = allEvts[i]; break; } }
-  if (!e || !e.raw) return;
-
-  var sess = e.raw;
+  var rawId = _sasSessionId.replace('pt_', '');
+  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
+  if (!sess) return;
   sess.status = status;
-
-  // Update in DATA
-  for (var j = 0; j < DATA.privateSessions.length; j++) {
-    if (DATA.privateSessions[j].id === sess.id) { DATA.privateSessions[j].status = status; break; }
-  }
-
-  // Highlight button
   ['completed','scheduled','missed','cancelled'].forEach(function(s) {
     var btn = document.getElementById('sas-s-' + s);
+    if (!btn) return;
     var isActive = status.toLowerCase() === s;
     btn.style.background  = isActive ? 'var(--teal)' : 'transparent';
     btn.style.color       = isActive ? '#fff' : 'var(--text2)';
     btn.style.borderColor = isActive ? 'var(--teal)' : 'var(--border-strong)';
   });
-
-  // Show release row if cancelled
   document.getElementById('sas-release-row').style.display = status === 'Cancelled' ? 'block' : 'none';
-
-  renderScheduleView();
-  renderPrivateTutoring();
+  renderScheduleView(); renderPrivateTutoring();
   showToast('Status → ' + status);
+  try { await webAppWrite('updateSession', { row: sess }); } catch(err) {}
+}
 
+async function saveSessTime() {
+  if (!_sasSessionId) return;
+  var rawId = _sasSessionId.replace('pt_', '');
+  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
+  if (!sess) return;
+  var stEl = document.getElementById('sas-start-time');
+  var etEl = document.getElementById('sas-end-time');
+  var newStart = stEl ? stEl.value : sess.start_time;
+  var newEnd   = etEl ? etEl.value : sess.end_time;
+  if (!newStart) return;
+  sess.start_time = newStart;
+  sess.end_time   = newEnd || newStart;
+  // Recalc duration
+  if (newStart && newEnd) {
+    var diffMins = timeToMinutes(newEnd) - timeToMinutes(newStart);
+    if (diffMins > 0) {
+      sess.duration_hrs = diffMins / 60;
+      sess.fee = Number(sess.rate || 900) * sess.duration_hrs;
+    }
+  }
+  renderScheduleView(); renderPrivateTutoring();
+  showToast('Time updated');
   try { await webAppWrite('updateSession', { row: sess }); } catch(err) {}
 }
 
 async function setSessRelease(doRelease) {
   _sasReleased = doRelease;
-  document.getElementById('sas-release-yes').style.background = doRelease ? 'var(--teal)' : 'transparent';
-  document.getElementById('sas-release-yes').style.color      = doRelease ? '#fff' : 'var(--teal)';
-  document.getElementById('sas-release-no').style.background  = !doRelease ? 'var(--text2)' : 'transparent';
-  document.getElementById('sas-release-no').style.color       = !doRelease ? '#fff' : 'var(--text2)';
-
-  if (!doRelease) return;
-
-  // Auto-publish this slot to AvailableSlots
-  if (!WEB_APP_URL) { showToast('Set Apps Script URL in Settings first'); return; }
-  var allEvts = getAllEvents();
-  var e = null;
-  for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === _sasSessionId) { e = allEvts[i]; break; } }
-  if (!e || !e.raw) return;
-
-  var sess = e.raw;
+  var yesBtn = document.getElementById('sas-release-yes');
+  var noBtn  = document.getElementById('sas-release-no');
+  if (yesBtn) { yesBtn.style.background = doRelease ? 'var(--teal)' : 'transparent'; yesBtn.style.color = doRelease ? '#fff' : 'var(--teal)'; }
+  if (noBtn)  { noBtn.style.background  = !doRelease ? 'var(--text2)' : 'transparent'; noBtn.style.color = !doRelease ? '#fff' : 'var(--text2)'; }
+  if (!doRelease || !WEB_APP_URL) return;
+  var rawId = _sasSessionId ? _sasSessionId.replace('pt_', '') : null;
+  var sess = rawId ? DATA.privateSessions.find(function(s) { return s.id === rawId; }) : null;
+  if (!sess) return;
   var d = new Date(sess.date + 'T12:00:00');
-  var slot = {
-    date: sess.date,
-    day: d.toLocaleString('en-GB', { weekday: 'short' }),
-    start_time: sess.start_time || e.start || '',
-    end_time: sess.end_time || e.end || '',
-    duration: String(Number(sess.duration_hrs) || 1),
-    status: 'Open'
-  };
-
-  try {
-    await webAppWrite('publishAvailableSlots', { slots: [slot], append: true });
-    showToast('Slot released for booking');
-  } catch(err) {
-    showToast('Could not publish slot — check Apps Script URL');
-  }
+  var slot = { date: sess.date, day: d.toLocaleString('en-GB', {weekday:'short'}), start_time: sess.start_time||'09:00', end_time: sess.end_time||'10:00', duration: String(Number(sess.duration_hrs)||1), status: 'Open' };
+  try { await webAppWrite('publishAvailableSlots', { slots: [slot], append: true }); showToast('Slot released for booking'); }
+  catch(err) { showToast('Could not publish slot'); }
 }
 
 function sasAction(action) {
   if (!_sasSessionId) return;
-  var allEvts = getAllEvents();
-  var e = null;
-  for (var i = 0; i < allEvts.length; i++) { if (allEvts[i].id === _sasSessionId) { e = allEvts[i]; break; } }
-  if (!e) return;
+  var rawId = _sasSessionId.replace('pt_', '');
+  var sess = DATA.privateSessions.find(function(s) { return s.id === rawId; });
+  if (!sess) return;
 
   if (action === 'delete') {
     if (!confirm('Delete this session permanently?')) return;
-    DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== e.raw.id; });
+    DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== rawId; });
     closeActionSheet();
-    renderScheduleView();
-    renderPrivateTutoring();
+    renderScheduleView(); renderPrivateTutoring();
     showToast('Session deleted');
-    try { webAppWrite('updateSession', { row: Object.assign({}, e.raw, { status: 'Deleted' }) }); } catch(err) {}
+    try { webAppWrite('updateSession', { row: Object.assign({}, sess, { status: 'Deleted' }) }); } catch(e) {}
     return;
   }
 
-  // Copy or Cut — enter paste mode
   _ttPasteMode = action;
-  _ttPasteSession = e.raw ? JSON.parse(JSON.stringify(e.raw)) : null;
+  _ttPasteSession = JSON.parse(JSON.stringify(sess));
   closeActionSheet();
-
   var banner = document.getElementById('tt-paste-banner');
   if (banner) {
     banner.style.display = 'flex';
-    document.getElementById('tt-paste-msg').textContent = (action === 'copy' ? 'Copy' : 'Move') + ': ' + (e.raw ? e.raw.student_name : '') + ' — tap an empty slot to place';
+    document.getElementById('tt-paste-msg').textContent = (action === 'copy' ? 'Copy' : 'Move') + ': ' + sess.student_name + ' — tap an empty slot';
   }
-
-  // Switch to timetable view for paste mode
   setSchedViewMode('timetable');
-  showToast((action === 'copy' ? 'Copy' : 'Cut') + ' — tap an empty slot to paste');
+  showToast((action === 'copy' ? 'Copy' : 'Cut') + ' mode — tap empty slot to place');
 }
 
-async function ttPasteSession(dateStr, timeSlot) {
+async function ttPasteSession(dateStr, hour) {
   if (!_ttPasteMode || !_ttPasteSession) return;
-
   var newSess = JSON.parse(JSON.stringify(_ttPasteSession));
   newSess.date = dateStr;
-  newSess.start_time = timeSlot;
-
-  // Calculate end time
-  var parts = timeSlot.split(':');
-  var endH = parseInt(parts[0]) + Math.round(Number(newSess.duration_hrs) || 1);
-  newSess.end_time = String(Math.min(endH, 23)).padStart(2,'0') + ':00';
-
+  newSess.start_time = pad2(hour) + ':00';
+  var dur = Number(newSess.duration_hrs) || 1;
+  newSess.end_time = pad2(Math.min(hour + dur, 23)) + ':00';
   if (_ttPasteMode === 'cut') {
-    // Remove original
     DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== _ttPasteSession.id; });
-    try { webAppWrite('updateSession', { row: Object.assign({}, _ttPasteSession, { status: 'Deleted' }) }); } catch(err) {}
+    try { webAppWrite('updateSession', { row: Object.assign({}, _ttPasteSession, { status: 'Deleted' }) }); } catch(e) {}
   }
-
-  // New ID for pasted session
   newSess.id = 'PT-' + Date.now();
   newSess.created_at = new Date().toISOString();
   DATA.privateSessions.push(newSess);
-
-  try { await webAppWrite('addSession', { row: newSess }); } catch(err) {}
-
+  try { await webAppWrite('addSession', { row: newSess }); } catch(e) {}
   cancelTTPaste();
-  renderScheduleView();
-  renderPrivateTutoring();
-  showToast((_ttPasteMode === 'cut' ? 'Moved' : 'Copied') + ' to ' + dateStr + ' ' + timeSlot);
+  renderScheduleView(); renderPrivateTutoring();
+  showToast((_ttPasteMode === 'cut' ? 'Moved' : 'Copied') + ' to ' + dateStr + ' ' + pad2(hour) + ':00');
 }
 
 function cancelTTPaste() {
-  _ttPasteMode = null;
-  _ttPasteSession = null;
+  _ttPasteMode = null; _ttPasteSession = null;
   var banner = document.getElementById('tt-paste-banner');
   if (banner) banner.style.display = 'none';
 }
@@ -6773,21 +6960,20 @@ function generateStudentInvoicePDF(studentName, mode) {
   if (mode === 'unpaid') {
     sessions = DATA.privateSessions.filter(function(s) {
       return s.student_name === studentName &&
-             s.status !== 'Cancelled' && s.status !== 'Missed' &&
+             s.status !== 'Deleted' &&
              (s.payment_status || 'Paid') === 'Pending';
     }).sort(function(a, b) { return a.date.localeCompare(b.date); });
     invoiceTitle = 'Unpaid Sessions Invoice';
   } else if (mode === 'all') {
     sessions = DATA.privateSessions.filter(function(s) {
       return s.student_name === studentName &&
-             s.status !== 'Cancelled' && s.status !== 'Missed';
+             s.status !== 'Deleted';
     }).sort(function(a, b) { return a.date.localeCompare(b.date); });
     invoiceTitle = 'Full History Invoice';
   } else {
     // month
     sessions = filterByMonth(DATA.privateSessions, 'date').filter(function(s) {
-      return s.student_name === studentName &&
-             s.status !== 'Cancelled' && s.status !== 'Missed';
+      return s.student_name === studentName && s.status !== 'Deleted';
     }).sort(function(a, b) { return a.date.localeCompare(b.date); });
     invoiceTitle = monthLabel;
   }
@@ -6806,8 +6992,11 @@ function generateStudentInvoicePDF(studentName, mode) {
   var totalHours   = 0;
   var totalIncome  = 0;
   sessions.forEach(function(s) {
-    totalHours  += Number(s.duration_hrs || 0);
-    totalIncome += Number(s.fee || 0);
+    var isCancelled = s.status === 'Cancelled' || s.status === 'Missed';
+    if (!isCancelled) {
+      totalHours  += Number(s.duration_hrs || 0);
+      totalIncome += Number(s.fee || 0);
+    }
   });
   var subject = sessions[sessions.length - 1].subject || '';
   var enrollType = sessions[sessions.length - 1].enrollment_type || 'private';
@@ -6828,13 +7017,17 @@ function generateStudentInvoicePDF(studentName, mode) {
     var rate    = Number(s.rate || DEFAULT_RATE);
     var fee     = Number(s.fee || (dur * rate));
     var rowBg   = i % 2 === 0 ? '#ffffff' : '#f9f8f6';
+    var isCancelled = s.status === 'Cancelled' || s.status === 'Missed';
+    var textStyle = isCancelled ? 'text-decoration:line-through;color:#aaa' : 'color:#333';
+    var feeStyle  = isCancelled ? 'text-decoration:line-through;color:#aaa' : 'color:#1a1a18;font-weight:600';
+    var statusLabel = isCancelled ? ' <span style="font-size:10px;background:#fee;color:#c00;border-radius:3px;padding:1px 5px">' + s.status + '</span>' : '';
     sessionRows +=
       '<tr style="background:' + rowBg + '">' +
-        '<td style="padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #eee">' + dateStr + '</td>' +
-        '<td style="padding:8px 12px;font-size:12px;color:#666;border-bottom:1px solid #eee">' + dayStr + '</td>' +
-        '<td style="padding:8px 12px;font-size:12px;color:#333;text-align:center;border-bottom:1px solid #eee">' + dur + 'h</td>' +
-        '<td style="padding:8px 12px;font-size:12px;color:#333;text-align:right;font-family:monospace;border-bottom:1px solid #eee">฿' + rate.toLocaleString() + '</td>' +
-        '<td style="padding:8px 12px;font-size:12px;font-weight:600;color:#1a1a18;text-align:right;font-family:monospace;border-bottom:1px solid #eee">฿' + fee.toLocaleString() + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;border-bottom:1px solid #eee;' + textStyle + '">' + dateStr + statusLabel + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;border-bottom:1px solid #eee;color:#666">' + dayStr + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;text-align:center;border-bottom:1px solid #eee;' + textStyle + '">' + dur + 'h</td>' +
+        '<td style="padding:8px 12px;font-size:12px;text-align:right;font-family:monospace;border-bottom:1px solid #eee;' + textStyle + '">฿' + rate.toLocaleString() + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;text-align:right;font-family:monospace;border-bottom:1px solid #eee;' + feeStyle + '">' + (isCancelled ? '฿0' : '฿' + fee.toLocaleString()) + '</td>' +
       '</tr>';
   });
 
@@ -6929,7 +7122,7 @@ function generateStudentInvoicePDF(studentName, mode) {
 function getAllEvents() {
   var events = [];
   DATA.privateSessions.forEach(function(s) {
-    if (!s.date || s.status === 'Cancelled' || s.status === 'Missed') return;
+    if (!s.date || s.status === 'Deleted') return;
     events.push({
       id: 'pt_' + s.id, date: s.date,
       title: s.student_name + (s.subject ? ' - ' + s.subject : ''),
