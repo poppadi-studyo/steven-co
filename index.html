@@ -6811,14 +6811,16 @@ function publishSlots() {
   var statusEl = document.getElementById('publish-slots-status');
   statusEl.textContent = 'Computing free slots...';
 
-  var today    = new Date();
+  var today = new Date();
   today.setHours(0,0,0,0);
-  var twoMonths = new Date(today.getFullYear(), today.getMonth() + 2, today.getDate());
+  var threeMonths = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
 
-  var dayNameMap = { Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6, Sun:0 };
-  var special = getSpecial();
+  // Working hours: 08:00–19:00 every hour, skip 12:00–13:00 (lunch)
+  var WORK_HOURS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+  // Strict 2h blocks that can be offered (must start at these times)
+  var STRICT_2H  = ['08:00','10:00','13:00','15:00','16:00','17:00'];
 
-  // Collect all busy blocks: GCal + PrivateSessions + Poppadi sessions
+  // Collect all busy blocks from GCal + PrivateSessions + Poppadi sessions
   var busyByDate = {};
   getAllEvents().filter(function(e) { return !e.allDay; }).forEach(function(e) {
     if (!e.date || !e.start || !e.end) return;
@@ -6828,52 +6830,41 @@ function publishSlots() {
 
   var slots = [];
   var d = new Date(today);
-  // Start from tomorrow
-  d.setDate(d.getDate() + 1);
+  d.setDate(d.getDate() + 1); // start from tomorrow
 
-  while (d <= twoMonths) {
-    var ds      = dateToStr(d);
-    var dowNum  = d.getDay(); // 0=Sun
+  while (d <= threeMonths) {
+    var ds     = dateToStr(d);
+    var dowNum = d.getDay();
     var dowName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dowNum];
 
-    // Skip day-offs
-    if (!checkDayOff(ds)) {
-      var availForDay = AVAIL_SLOTS.filter(function(slot) {
-        return availState[dowName] && availState[dowName][slot];
-      });
-
+    // Skip Sundays and marked day-offs
+    if (dowNum !== 0 && !checkDayOff(ds)) {
       var busy = busyByDate[ds] || [];
 
-      // Strict 2h blocks (only these start times)
-      var STRICT_2H_PUB = ['08:00','10:00','13:00','15:00','16:00','17:00'];
-      var BREAK_HOUR_PUB = '12:00';
-
-      // Check which strict 2h blocks are free
-      var open2h = STRICT_2H_PUB.filter(function(t) {
+      // Find open 2h blocks
+      var open2h = STRICT_2H.filter(function(t) {
         var tMin = timeToMinutes(t);
-        return !busy.some(function(b) { return b.start < tMin + 120 && b.end > tMin; }) &&
-               availForDay.indexOf(t) > -1 && availForDay.indexOf(addHours(t,1)) > -1;
+        return !busy.some(function(b) { return b.start < tMin + 120 && b.end > tMin; });
       });
 
-      // Publish strict 2h blocks
+      // Publish 2h blocks
       open2h.forEach(function(t) {
         slots.push({ date: ds, day: dowName, start_time: t, end_time: addHours(t,2), duration: '2', status: 'Open' });
       });
 
-      // Publish 1h slots: any avail hour except break and hours overlapping open 2h blocks
-      availForDay.forEach(function(slotTime) {
-        if (slotTime === BREAK_HOUR_PUB) return;
-        var slotMin = timeToMinutes(slotTime);
-        var end1h = slotMin + 60;
-        var free1h = !busy.some(function(b) { return b.start < end1h && b.end > slotMin; });
-        if (!free1h) return;
-        // Skip if overlaps any open 2h block
-        var overlaps2h = open2h.some(function(b) {
+      // Publish 1h slots for free hours not already covered by a 2h block
+      WORK_HOURS.forEach(function(t) {
+        var tMin  = timeToMinutes(t);
+        var end1h = tMin + 60;
+        // Skip if busy
+        if (busy.some(function(b) { return b.start < end1h && b.end > tMin; })) return;
+        // Skip if this hour falls inside an open 2h block
+        var in2h = open2h.some(function(b) {
           var bMin = timeToMinutes(b);
-          return slotMin >= bMin && slotMin < bMin + 120;
+          return tMin >= bMin && tMin < bMin + 120;
         });
-        if (overlaps2h) return;
-        slots.push({ date: ds, day: dowName, start_time: slotTime, end_time: addHours(slotTime,1), duration: '1', status: 'Open' });
+        if (in2h) return;
+        slots.push({ date: ds, day: dowName, start_time: t, end_time: addHours(t,1), duration: '1', status: 'Open' });
       });
     }
 
@@ -6881,7 +6872,7 @@ function publishSlots() {
   }
 
   if (slots.length === 0) {
-    statusEl.innerHTML = '<span style="color:var(--amber)">⚠ No free slots found. Check your availability settings and GCal events.</span>';
+    statusEl.innerHTML = '<span style="color:var(--amber)">⚠ No free slots found — your calendar may be fully booked for the next 3 months.</span>';
     if(btn){ btn.disabled=false; btn.innerHTML='&#8593; Publish Free Slots'; }
     return;
   }
@@ -6893,9 +6884,8 @@ function publishSlots() {
       var now = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
       statusEl.innerHTML =
         '✓ <strong>' + slots.length + ' slots</strong> published &nbsp;·&nbsp; Last updated: ' + now +
-        '<br><span style="color:var(--text3);font-size:11px">Covers tomorrow through ' +
-        twoMonths.toLocaleString('en-US', { month: 'long', day: 'numeric' }) + '</span>';
-      showToast('✓ Slots published to booking page');
+        '<br><span style="color:var(--text3);font-size:11px">Mon–Sat · 08:00–19:00 · lunch break excluded · covers next 3 months</span>';
+      showToast('✓ ' + slots.length + ' slots published');
       if(btn){ btn.disabled=false; btn.innerHTML='&#8593; Publish Free Slots'; }
     })
     .catch(function(e) {
