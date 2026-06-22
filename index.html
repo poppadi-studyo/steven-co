@@ -731,6 +731,10 @@ tr:hover td { background: var(--surface2); }
 .sched-status-badge.makeup    { background: var(--purple-bg);  color: var(--purple); }
 .sched-type-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
 
+/* Timetable pinch zoom */
+#tt-scroll-wrap table { transform-origin: 0 50%; }
+#tt-scroll-wrap { -webkit-user-select: none; user-select: none; }
+
 /* Availability grid */
 .avail-day { margin-bottom: 10px; }
 .avail-day-label { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 5px; }
@@ -1594,7 +1598,7 @@ tr:hover td { background: var(--surface2); }
             <!-- Student legend -->
             <div id="tt-legend" style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap"></div>
             <!-- Grid -->
-            <div id="tt-scroll-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y">
+            <div id="tt-scroll-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;position:relative">
               <div id="sched-timetable-grid"></div>
             </div>
           </div>
@@ -4068,8 +4072,9 @@ function initTTPinchZoom() {
 
   var _pinchStart = null;
   var _pinchZoomBase = 1.0;
-  var _currentScale = 1.0;
   var _isPinching = false;
+  var _originX = 0; // scroll-space X of pinch midpoint
+  var _liveScale = 1.0; // current gesture scale multiplier
 
   function pinchDist(e) {
     var dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -4080,16 +4085,20 @@ function initTTPinchZoom() {
   wrap.addEventListener('touchstart', function(e) {
     if (e.touches.length === 2) {
       _isPinching = true;
+      _liveScale = 1.0;
       _pinchStart = pinchDist(e);
       _pinchZoomBase = _ttZoom;
-      _currentScale = 1.0;
-      // Apply transform origin at midpoint of fingers
+
+      // Finger midpoint in viewport coords → scroll-space coords
+      var mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      var rect = wrap.getBoundingClientRect();
+      _originX = (mx - rect.left + wrap.scrollLeft);
+
       var table = document.getElementById('tt-table');
       if (table) {
-        var mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        var rect = wrap.getBoundingClientRect();
-        var originX = mx - rect.left + wrap.scrollLeft;
-        table.style.transformOrigin = originX + 'px 0';
+        // transformOrigin in scroll-space (table is a child of wrap)
+        table.style.transformOrigin = _originX + 'px 50%';
+        table.style.willChange = 'transform';
       }
     } else {
       _isPinching = false;
@@ -4097,28 +4106,53 @@ function initTTPinchZoom() {
   }, { passive: true });
 
   wrap.addEventListener('touchmove', function(e) {
-    if (e.touches.length !== 2 || !_isPinching || !_pinchStart) return;
-    e.preventDefault();
+    if (!_isPinching || e.touches.length !== 2 || !_pinchStart) return;
+    e.preventDefault(); // prevent page scroll/zoom during pinch
+
     var dist = pinchDist(e);
-    _currentScale = dist / _pinchStart;
-    var newZoom = Math.max(0.3, Math.min(5.0, _pinchZoomBase * _currentScale));
-    // Apply CSS transform for smooth feel — no rerender during gesture
+    _liveScale = dist / _pinchStart;
+    var clampedZoom = Math.max(0.25, Math.min(6.0, _pinchZoomBase * _liveScale));
+    _liveScale = clampedZoom / _pinchZoomBase; // re-clamp scale to match
+
     var table = document.getElementById('tt-table');
-    if (table) table.style.transform = 'scaleX(' + (_currentScale) + ')';
-    // Store for commit
-    _ttZoom = newZoom;
+    if (table) {
+      // Scale table live — no rerender, pure CSS, 60fps
+      table.style.transform = 'scaleX(' + _liveScale + ')';
+    }
   }, { passive: false });
 
-  wrap.addEventListener('touchend', function(e) {
+  function onPinchEnd(e) {
     if (!_isPinching) return;
     _isPinching = false;
-    _pinchStart = null;
-    // Remove transform and rerender at new zoom level
+
+    var committedZoom = Math.max(0.25, Math.min(6.0, _pinchZoomBase * _liveScale));
+    _ttZoom = committedZoom;
+
+    // Before rerender: measure where pinch origin sits in viewport
+    var wrap2 = document.getElementById('tt-scroll-wrap');
+    var scrollBefore = wrap2 ? wrap2.scrollLeft : 0;
+    // The origin in layout space was _originX (pre-scale)
+    // After scale, new layout origin = _originX * (_ttZoom / _pinchZoomBase)
+    // We want the viewport anchor to stay at the same finger midpoint
+    // So new scrollLeft = new layout origin - (old layout origin - scrollBefore)
+    var scaledOriginX = _originX * (_ttZoom / _pinchZoomBase);
+    var viewportAnchor = _originX - scrollBefore; // finger offset from scroll start
+    var newScroll = scaledOriginX - viewportAnchor;
+
+    // Remove live transform
     var table = document.getElementById('tt-table');
-    if (table) table.style.transform = '';
+    if (table) { table.style.transform = ''; table.style.willChange = ''; }
+
+    // Rerender at new zoom, then restore scroll
     renderTimetableView();
-    // Restore scroll position roughly
-  }, { passive: true });
+    requestAnimationFrame(function() {
+      var w = document.getElementById('tt-scroll-wrap');
+      if (w) w.scrollLeft = Math.max(0, newScroll);
+    });
+  }
+
+  wrap.addEventListener('touchend',   onPinchEnd, { passive: true });
+  wrap.addEventListener('touchcancel', onPinchEnd, { passive: true });
 }
 
 // ── DRAG TO EXTEND DURATION ──────────────────────────────
