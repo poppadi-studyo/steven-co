@@ -731,44 +731,6 @@ tr:hover td { background: var(--surface2); }
 .sched-status-badge.makeup    { background: var(--purple-bg);  color: var(--purple); }
 .sched-type-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
 
-/* Hybrid timetable */
-.tt-cal-dh { font-size:9px;color:var(--text3);text-align:center;padding:2px 0;font-weight:500 }
-.tt-cal-cell { height:26px;display:flex;flex-direction:row;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;position:relative;gap:3px;transition:background 0.1s;padding:0 2px }
-.tt-cal-cell:active { transform:scale(0.88) }
-.tt-cal-cell.empty { cursor:default;pointer-events:none }
-.tt-cal-cell.tt-sel { background:var(--teal) }
-.tt-cal-cell.tt-sel .tt-cal-num { color:#fff;font-weight:600 }
-.tt-cal-cell.tt-today .tt-cal-num { color:var(--teal);font-weight:600 }
-.tt-cal-cell.tt-sel.tt-today .tt-cal-num { color:#fff }
-.tt-cal-cell.tt-dayoff { background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(226,75,74,0.1) 3px,rgba(226,75,74,0.1) 6px) }
-.tt-cal-cell.tt-dayoff .tt-cal-num { color:var(--red) }
-.tt-cal-num { font-size:12px;color:var(--text);line-height:1;min-width:16px;text-align:center }
-.tt-cal-dots { display:flex;gap:1px;align-items:center;flex-wrap:nowrap }
-.tt-cal-dot { width:3px;height:3px;border-radius:50%;flex-shrink:0 }
-.tt-cal-cell.tt-sel .tt-cal-dot { opacity:0.8 }
-
-/* Timetable card overrides — kill default card padding/margin */
-#tt-month-card { padding: 0; margin-bottom: 0; }
-#tt-day-card   { padding: 0; margin-bottom: 0; }
-#tt-target-card { padding: 10px 14px; margin-bottom: 0; }
-#sched-timetable-container .card { margin-bottom: 0; }
-#tt-strip { border-radius: 8px; overflow: hidden; border: 0.5px solid var(--border); }
-#page-schedule { padding-top: 12px; }
-#sched-gcal-banner { margin-bottom: 6px; }
-.tt-hr-col { width:82px;flex-shrink:0;display:flex;flex-direction:column;border-right:0.5px solid var(--border) }
-.tt-hr-col:last-child { border-right:none }
-.tt-hr-lbl { font-size:9px;color:var(--text3);text-align:center;padding:4px 2px;background:var(--surface2);border-bottom:0.5px solid var(--border) }
-.tt-hr-body { flex:1;min-height:58px;background:var(--surface);position:relative;cursor:pointer;transition:background 0.1s }
-.tt-hr-body:hover { background:var(--surface2) }
-.tt-hr-body.tt-brk { background:var(--surface2);cursor:default }
-.tt-hr-body.tt-brk::after { content:"lunch";font-size:8px;color:var(--text3);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) }
-.tt-blk { position:absolute;inset:3px 2px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 5px;cursor:pointer;overflow:hidden;text-align:center }
-.tt-blk.tt-cancelled { opacity:0.35 }
-.tt-blk-name { font-size:12px;font-weight:600;color:#fff;white-space:nowrap;text-align:center;width:100% }
-.tt-blk-meta { font-size:9px;color:rgba(255,255,255,0.82);margin-top:1px;text-align:center }
-.tt-bar-wrap { height:10px;background:var(--surface2);border-radius:6px;overflow:hidden;position:relative;margin-bottom:10px }
-.tt-bar-sched { position:absolute;top:0;left:0;height:100%;background:var(--teal-bg);border-radius:6px;transition:width 0.4s }
-.tt-bar-done { position:absolute;top:0;left:0;height:100%;background:var(--teal);border-radius:6px;transition:width 0.4s }
 /* Timetable zoom — CSS transform only, never triggers re-render */
 #tt-scaler { display: inline-block; transform-origin: 0 0; will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 #tt-scroll-wrap { overflow: auto; -webkit-overflow-scrolling: touch; position: relative; -webkit-user-select: none; user-select: none; }
@@ -804,6 +766,38 @@ tr:hover td { background: var(--surface2); }
 }
 .ess-green { background: var(--green-bg); color: var(--green); }
 .ess-red   { background: var(--red-bg);   color: var(--red);   }
+
+/* ── HYBRID TIMETABLE ─────────────────────────────── */
+.tt-dh  { font-size:9px;color:var(--text3);text-align:center;padding:2px 0;font-weight:500 }
+.tt-dc  { height:26px;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:2px;border-radius:5px;cursor:pointer;transition:background 0.1s }
+.tt-dc:active { opacity:0.7 }
+.tt-dc.empty  { pointer-events:none }
+.tt-dc.sel    { background:var(--teal) }
+.tt-dc.sel .tt-dn { color:#fff;font-weight:600 }
+.tt-dc.tod .tt-dn { color:var(--teal);font-weight:600 }
+.tt-dc.sel.tod .tt-dn { color:#fff }
+.tt-dc.off    { background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(226,75,74,0.1) 3px,rgba(226,75,74,0.1) 6px) }
+.tt-dc.off .tt-dn { color:var(--red) }
+.tt-dn  { font-size:12px;color:var(--text);line-height:1;width:18px;text-align:center }
+.tt-dots{ display:flex;gap:1px }
+.tt-dot { width:3px;height:3px;border-radius:50%;flex-shrink:0 }
+.tt-dc.sel .tt-dot { opacity:0.75 }
+/* day strip */
+.tt-hc  { width:76px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border) }
+.tt-hc:last-child { border-right:none }
+.tt-hl  { font-size:9px;color:var(--text3);text-align:center;padding:3px 2px;background:var(--surface2);border-bottom:1px solid var(--border) }
+.tt-hb  { flex:1;min-height:56px;background:var(--surface);position:relative;cursor:pointer }
+.tt-hb:hover { background:var(--surface2) }
+.tt-hb.brk { background:var(--surface2);cursor:default }
+.tt-hb.brk::after { content:"lunch";font-size:8px;color:var(--text3);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) }
+.tt-blk { position:absolute;inset:2px 2px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;padding:2px 4px }
+.tt-blk.cxl { opacity:0.35 }
+.tt-bn  { font-size:11px;font-weight:600;color:#fff;white-space:nowrap;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis }
+.tt-bm  { font-size:9px;color:rgba(255,255,255,0.8);text-align:center }
+/* target bar */
+.tt-bar { height:8px;background:var(--surface2);border-radius:5px;overflow:hidden;position:relative;margin:6px 0 }
+.tt-bs  { position:absolute;top:0;left:0;height:100%;background:var(--teal-bg);border-radius:5px }
+.tt-bd  { position:absolute;top:0;left:0;height:100%;background:var(--teal);border-radius:5px }
 </style>
 </head>
 <body>
@@ -1520,50 +1514,100 @@ tr:hover td { background: var(--surface2); }
       </div>
 
       <!-- ── SCHEDULE PAGE ── -->
-      <div class="page" id="page-schedule" style="padding-top:0">
+      <div class="page" id="page-schedule">
 
-        <!-- SLIM TOPBAR -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-          <h1 style="font-size:18px;font-weight:600;color:var(--text)">My Schedule</h1>
-          <div style="display:flex;gap:4px;align-items:center">
-            <div style="display:flex;gap:2px;background:var(--surface2);border-radius:var(--radius);padding:3px">
-              <button class="sched-view-toggle active" id="sched-toggle-timetable" onclick="setSchedViewMode('timetable')">Calendar</button>
-              <button class="sched-view-toggle"        id="sched-toggle-cards"    onclick="setSchedViewMode('cards')">Cards</button>
-              <button class="sched-view-toggle"        id="sched-toggle-list"     onclick="setSchedViewMode('list')">List</button>
+        <!-- TOP BAR: minimal — just title + view toggle -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:17px;font-weight:600;color:var(--text)">My Schedule</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <div style="display:flex;gap:1px;background:var(--surface2);border-radius:8px;padding:2px">
+              <button class="sched-view-toggle active" id="sched-toggle-timetable" onclick="setSchedViewMode('timetable')" style="font-size:11px;padding:4px 9px">Calendar</button>
+              <button class="sched-view-toggle" id="sched-toggle-cards" onclick="setSchedViewMode('cards')" style="font-size:11px;padding:4px 9px">Cards</button>
+              <button class="sched-view-toggle" id="sched-toggle-list" onclick="setSchedViewMode('list')" style="font-size:11px;padding:4px 9px">List</button>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="openAddSession()">+ Session</button>
+            <button class="btn btn-primary btn-sm" onclick="openAddSession()" style="font-size:11px;padding:4px 10px">+ Add</button>
           </div>
         </div>
 
-        <!-- hidden elements kept for JS compatibility -->
+        <!-- Hidden stubs for JS compatibility -->
         <div style="display:none">
-          <button id="sched-back-btn"></button>
-          <span id="sched-main-title"></span>
-          <span id="sched-main-sub"></span>
-          <button id="sched-nav-prev" onclick="schedNav(-1)"></button>
-          <span id="sched-period-label"></span>
-          <button id="sched-nav-next" onclick="schedNav(1)"></button>
-          <div id="sched-filter-btns"></div>
-          <div id="sched-zoom-controls"></div>
-          <span id="sched-zoom-label"></span>
+          <span id="sched-main-title"></span><span id="sched-main-sub"></span>
+          <button id="sched-back-btn"></button><button id="sched-nav-prev" onclick="schedNav(-1)"></button>
+          <span id="sched-period-label"></span><button id="sched-nav-next" onclick="schedNav(1)"></button>
+          <div id="sched-filter-btns"></div><div id="sched-zoom-controls"></div><span id="sched-zoom-label"></span>
         </div>
 
-        <!-- GCal connect banner -->
-        <div id="sched-gcal-banner" class="card" style="display:none;border-color:var(--purple);background:var(--purple-bg);margin-bottom:10px">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-            <div style="font-size:13px;font-weight:600;color:var(--purple)">Connect Google Calendar
-              <div style="font-size:11px;font-weight:400;color:var(--text2);margin-top:2px">Sync events, day offs, and breaks.</div>
-            </div>
-            <button class="btn btn-purple btn-sm" onclick="authoriseGoogleCalendar()">Connect</button>
+        <!-- GCal banner (only shows if not connected) -->
+        <div id="sched-gcal-banner" style="display:none;background:var(--purple-bg);border:1px solid var(--purple);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div style="font-size:12px;color:var(--purple);font-weight:500">Connect Google Calendar to sync events</div>
+            <button class="btn btn-sm" onclick="authoriseGoogleCalendar()" style="background:var(--purple);color:#fff;border:none;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;flex-shrink:0">Connect</button>
           </div>
         </div>
 
-        <!-- DAY CARDS VIEW (default) -->
+        <!-- TIMETABLE VIEW (hybrid: mini calendar + day strip) -->
+        <div id="sched-timetable-container">
+
+          <!-- paste banner -->
+          <div id="tt-paste-banner" style="display:none;background:var(--teal);color:#fff;padding:8px 14px;border-radius:8px;margin-bottom:6px;font-size:12px;font-weight:600;justify-content:space-between;align-items:center">
+            <span id="tt-paste-msg">Tap empty slot to paste</span>
+            <button onclick="cancelTTPaste()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:11px">Cancel</button>
+          </div>
+
+          <!-- MINI MONTH CALENDAR -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:6px;overflow:hidden">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 4px">
+              <span id="tt-month-title" style="font-size:13px;font-weight:600;color:var(--text)"></span>
+              <div style="display:flex;gap:3px">
+                <button onclick="ttNavMonth(-1)" style="border:none;background:none;font-size:15px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:5px">‹</button>
+                <button onclick="ttNavMonth(1)"  style="border:none;background:none;font-size:15px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:5px">›</button>
+              </div>
+            </div>
+            <div id="tt-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);padding:2px 8px 6px;gap:1px"></div>
+          </div>
+
+          <!-- DAY STRIP -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:6px;overflow:hidden">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 6px;border-bottom:1px solid var(--border)">
+              <div>
+                <div id="tt-day-title" style="font-size:13px;font-weight:600;color:var(--text)"></div>
+                <div id="tt-day-sub" style="font-size:11px;color:var(--text3);margin-top:1px"></div>
+              </div>
+              <button id="tt-dayoff-btn" onclick="ttToggleDayOff()" style="font-size:10px;color:var(--text3);border:1px solid var(--border-strong);background:none;border-radius:6px;padding:3px 8px;cursor:pointer"></button>
+            </div>
+            <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;padding:6px 10px 8px">
+              <div id="tt-strip" style="display:inline-flex;border-radius:7px;overflow:hidden;border:1px solid var(--border);min-width:max-content"></div>
+            </div>
+          </div>
+
+          <!-- TARGET BAR -->
+          <div id="tt-target-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:6px"></div>
+
+          <!-- FREE SLOTS -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <div style="font-size:12px;font-weight:600;color:var(--text)">Free slots for booking</div>
+              <div style="display:flex;gap:5px">
+                <button onclick="previewFreeSlots()" style="font-size:10px;border:1px solid var(--border-strong);background:none;border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--text3)">Preview</button>
+                <button id="publish-slots-btn" onclick="publishSlots()" style="font-size:10px;border:none;background:var(--teal);color:#fff;border-radius:5px;padding:3px 8px;cursor:pointer">Publish</button>
+                <a href="book.html" target="_blank" style="font-size:10px;border:1px solid var(--border-strong);background:none;border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--text3);text-decoration:none">Public page</a>
+              </div>
+            </div>
+            <div id="publish-slots-status" style="font-size:11px;color:var(--text3);min-height:14px"></div>
+            <div id="free-slots-preview" style="display:none;margin-top:6px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:5px">Tap ✕ to remove before publishing &nbsp;<span id="free-slots-count"></span></div>
+              <div id="free-slots-list" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- DAY CARDS VIEW -->
         <div id="sched-cards-container" style="display:none">
           <div id="sched-cards-grid"></div>
         </div>
 
-        <!-- SCHEDULE VIEW (time-block grid) -->
+        <!-- SCHEDULE GRID VIEW -->
         <div id="sched-grid-container" class="card" style="padding:0;overflow:hidden;display:none">
           <div id="sched-zoom-wrapper" style="transform-origin:top left;transition:transform 0.15s">
             <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" id="sched-grid-scroll">
@@ -1592,71 +1636,8 @@ tr:hover td { background: var(--surface2); }
           </div>
         </div>
 
-        <!-- HYBRID TIMETABLE CONTAINER -->
-        <div id="sched-timetable-container" style="margin-top:0;display:flex;flex-direction:column;gap:8px">
-
-          <!-- paste mode banner -->
-          <div id="tt-paste-banner" style="display:none;background:var(--teal);color:#fff;padding:10px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;justify-content:space-between;align-items:center">
-            <span id="tt-paste-msg">Tap an empty slot to paste</span>
-            <button onclick="cancelTTPaste()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">Cancel</button>
-          </div>
-
-          <!-- Mini month calendar -->
-          <div class="card" id="tt-month-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 2px">
-              <span id="tt-month-title" style="font-size:15px;font-weight:600;color:var(--text)"></span>
-              <div style="display:flex;gap:4px">
-                <button onclick="ttNavMonth(-1)" class="btn btn-ghost btn-sm">&#8249;</button>
-                <button onclick="ttNavMonth(1)"  class="btn btn-ghost btn-sm">&#8250;</button>
-              </div>
-            </div>
-            <div id="tt-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 4px;gap:0px"></div>
-          </div>
-
-          <!-- Day strip -->
-          <div class="card" id="tt-day-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px 8px;border-bottom:1px solid var(--border)">
-              <div>
-                <div id="tt-day-title" style="font-size:15px;font-weight:600;color:var(--text)"></div>
-                <div id="tt-day-sub" style="font-size:12px;color:var(--text3);margin-top:2px"></div>
-              </div>
-              <button id="tt-dayoff-btn" onclick="ttToggleDayOff()" style="font-size:11px;color:var(--text3);border:0.5px solid var(--border-strong);background:none;border-radius:7px;padding:5px 11px;cursor:pointer"></button>
-            </div>
-            <div id="tt-strip-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px 10px">
-              <div id="tt-strip" style="display:inline-flex;border-radius:9px;overflow:hidden;border:0.5px solid var(--border);min-width:max-content;margin-top:10px"></div>
-            </div>
-          </div>
-
-          <!-- Target bar (bottom) -->
-          <div class="card" id="tt-target-card" style="padding:14px 16px"></div>
-
-        </div>
-
-        <!-- Availability (month view only) -->
-        <div id="sched-avail-section" style="margin-top:16px">
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-              <div>
-                <div class="card-title" style="margin:0">Free Slots for Booking</div>
-                <div style="font-size:12px;color:var(--text3);margin-top:3px">Auto-computed from your schedule · Mon–Sat 08:00–19:00 · excl. lunch</div>
-              </div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-                <button class="btn btn-ghost btn-sm" id="preview-slots-btn" onclick="previewFreeSlots()">Preview</button>
-                <button class="btn btn-teal btn-sm" id="publish-slots-btn" onclick="publishSlots()">&#8593; Publish</button>
-                <a href="book.html" target="_blank" class="btn btn-ghost btn-sm">&#128279; Public page</a>
-              </div>
-            </div>
-            <div id="publish-slots-status" style="font-size:12px;color:var(--text3);margin:10px 0;min-height:18px;line-height:1.6"></div>
-            <!-- Preview list — shown after preview/publish -->
-            <div id="free-slots-preview" style="display:none">
-              <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">
-                Computed free slots <span id="free-slots-count" style="font-weight:400;color:var(--text3)"></span>
-                <span style="font-size:11px;font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0;margin-left:8px">Tap ✕ to remove a slot before publishing</span>
-              </div>
-              <div id="free-slots-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-            </div>
-          </div>
-        </div>
+        <!-- Hidden: avail-slots-grid stub for JS compat -->
+        <div style="display:none"><div id="avail-slots-grid"></div></div>
 
       </div>
 
@@ -3889,490 +3870,319 @@ async function runSessionImport() {
 }
 
 
-// ─── HYBRID TIMETABLE (mini calendar + day strip + target) ──
+// ─── HYBRID TIMETABLE ────────────────────────────────────
 
-var PT_STUDENT_COLORS = [
-  '#E8544A','#D4537E','#BA7517','#7F77DD','#1D9E75',
-  '#378ADD','#639922','#D85A30','#0C447C','#534AB7'
-];
-var _ptColorMap = {};
-
-function buildPTColorMap() {
-  _ptColorMap = {};
-  var names = Array.from(new Set(
-    DATA.privateSessions.map(function(s) { return s.student_name; }).filter(Boolean)
-  )).sort();
-  names.forEach(function(n, i) { _ptColorMap[n] = PT_STUDENT_COLORS[i % PT_STUDENT_COLORS.length]; });
-}
-
-function getPTStudentColor(name) { return _ptColorMap[name] || 'var(--gray)'; }
-
-var _ttViewYear  = new Date().getFullYear();
-var _ttViewMonth = new Date().getMonth();
-var _ttSelDate   = (function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })();
-var _ttTarget    = parseInt(localStorage.getItem('stevenco_pt_target')||'0')||0;
-var _ttEditTarget = false;
+var PT_COLORS = ['#E8544A','#D4537E','#BA7517','#7F77DD','#1D9E75','#378ADD','#639922','#D85A30','#0C447C','#534AB7'];
+var _ptCM = {};
+var _ttViewY = new Date().getFullYear();
+var _ttViewM = new Date().getMonth();
+var _ttSel   = (function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })();
+var _ttTarget = parseInt(localStorage.getItem('stevenco_pt_target')||'0')||0;
+var _ttEditTgt = false;
 var _ttPasteMode = null;
 var _ttPasteSession = null;
-
+var _sasSessionId = null;
+var _computedFreeSlots = [];
 var TT_HOURS = [7,8,9,10,11,12,13,14,15,16,17,18,19];
+
+function buildPTColorMap() {
+  _ptCM = {};
+  Array.from(new Set(DATA.privateSessions.map(function(s){return s.student_name;}).filter(Boolean))).sort()
+    .forEach(function(n,i){ _ptCM[n] = PT_COLORS[i % PT_COLORS.length]; });
+}
+function ptColor(n){ return _ptCM[n]||'var(--gray)'; }
 
 function renderTimetableView() {
   buildPTColorMap();
-  renderTTCalendar();
-  renderTTDayStrip();
+  renderTTCal();
+  renderTTStrip();
   renderTTTarget();
 }
 
-// ── MINI CALENDAR ────────────────────────────────────────
-
+// ── MINI CALENDAR ─────────────────────────────────────
 function ttNavMonth(dir) {
-  _ttViewMonth += dir;
-  if (_ttViewMonth > 11) { _ttViewMonth = 0; _ttViewYear++; }
-  if (_ttViewMonth < 0)  { _ttViewMonth = 11; _ttViewYear--; }
-  renderTTCalendar();
+  _ttViewM += dir;
+  if (_ttViewM>11){_ttViewM=0;_ttViewY++;} if (_ttViewM<0){_ttViewM=11;_ttViewY--;}
+  renderTTCal();
 }
 
 function ttSelectDate(ds) {
-  _ttSelDate = ds;
-  renderTTCalendar();
-  renderTTDayStrip();
-  renderTTTarget();
-  setTimeout(function() {
-    var dc = document.getElementById('tt-day-card');
-    if (dc) dc.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 60);
+  _ttSel = ds; renderTTCal(); renderTTStrip(); renderTTTarget();
+  setTimeout(function(){ var el=document.getElementById('tt-strip'); if(el) el.closest('[style*="border-radius:12px"]').scrollIntoView({behavior:'smooth',block:'nearest'}); },60);
 }
 
-function renderTTCalendar() {
-  var mNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var titleEl = document.getElementById('tt-month-title');
-  if (titleEl) titleEl.textContent = mNames[_ttViewMonth] + ' ' + _ttViewYear;
-
-  var grid = document.getElementById('tt-cal-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  var special = getSpecial();
-  var todayStr = dateToStr(new Date());
-
-  ['M','T','W','T','F','S','S'].forEach(function(l) {
-    var dh = document.createElement('div'); dh.className = 'tt-cal-dh'; dh.textContent = l;
-    grid.appendChild(dh);
-  });
-
-  var first = new Date(_ttViewYear, _ttViewMonth, 1).getDay();
-  var dow   = (first + 6) % 7;
-  var dim   = new Date(_ttViewYear, _ttViewMonth + 1, 0).getDate();
-
-  for (var i = 0; i < dow; i++) {
-    var e = document.createElement('div'); e.className = 'tt-cal-cell empty'; grid.appendChild(e);
-  }
-
-  for (var d = 1; d <= dim; d++) {
-    var ds = _ttViewYear + '-' + String(_ttViewMonth + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-    var isDayOff = !!special.dayOffs[ds];
-
-    // Dots from private sessions
-    var seen = {};
-    var dots = DATA.privateSessions.filter(function(s) {
-      if (s.date !== ds || s.status === 'Cancelled' || s.status === 'Deleted') return false;
-      if (seen[s.student_name]) return false;
-      seen[s.student_name] = 1; return true;
-    });
-
-    var cell = document.createElement('div'); cell.className = 'tt-cal-cell';
-    if (isDayOff) cell.classList.add('tt-dayoff');
-    if (ds === _ttSelDate) cell.classList.add('tt-sel');
-    if (ds === todayStr) cell.classList.add('tt-today');
-
-    cell.innerHTML = '<div class="tt-cal-num">' + d + '</div>' +
-      '<div class="tt-cal-dots">' +
-      dots.slice(0,5).map(function(s) {
-        return '<div class="tt-cal-dot" style="background:' + getPTStudentColor(s.student_name) + '"></div>';
-      }).join('') +
-      '</div>';
-
-    (function(ds) {
-      cell.onclick = function() { ttSelectDate(ds); };
-    })(ds);
+function renderTTCal() {
+  var mN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var el=document.getElementById('tt-month-title'); if(el) el.textContent=mN[_ttViewM]+' '+_ttViewY;
+  var grid=document.getElementById('tt-cal-grid'); if(!grid) return;
+  grid.innerHTML='';
+  var special=getSpecial(); var today=dateToStr(new Date());
+  ['M','T','W','T','F','S','S'].forEach(function(l){ var d=document.createElement('div'); d.className='tt-dh'; d.textContent=l; grid.appendChild(d); });
+  var first=(new Date(_ttViewY,_ttViewM,1).getDay()+6)%7;
+  var dim=new Date(_ttViewY,_ttViewM+1,0).getDate();
+  for(var i=0;i<first;i++){var e=document.createElement('div');e.className='tt-dc empty';grid.appendChild(e);}
+  for(var d=1;d<=dim;d++){
+    var ds=_ttViewY+'-'+String(_ttViewM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var seen={}; var dots=DATA.privateSessions.filter(function(s){ if(s.date!==ds||s.status==='Cancelled'||s.status==='Deleted'||seen[s.student_name])return false; seen[s.student_name]=1; return true; });
+    var cell=document.createElement('div'); cell.className='tt-dc';
+    if(special.dayOffs[ds]) cell.classList.add('off');
+    if(ds===_ttSel) cell.classList.add('sel');
+    if(ds===today) cell.classList.add('tod');
+    cell.innerHTML='<span class="tt-dn">'+d+'</span><span class="tt-dots">'+dots.slice(0,4).map(function(s){return'<span class="tt-dot" style="background:'+ptColor(s.student_name)+'"></span>';}).join('')+'</span>';
+    (function(ds){cell.onclick=function(){ttSelectDate(ds);};})(ds);
     grid.appendChild(cell);
   }
 }
 
-// ── DAY STRIP ────────────────────────────────────────────
-
-function renderTTDayStrip() {
-  var d = new Date(_ttSelDate + 'T12:00:00');
-  var dNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  var mNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var special = getSpecial();
-  var isDayOff = !!special.dayOffs[_ttSelDate];
-
-  var titleEl = document.getElementById('tt-day-title');
-  var subEl   = document.getElementById('tt-day-sub');
-  var offBtn  = document.getElementById('tt-dayoff-btn');
-  if (titleEl) titleEl.textContent = dNames[d.getDay()] + ', ' + d.getDate() + ' ' + mNames[d.getMonth()];
-  if (offBtn)  { offBtn.textContent = isDayOff ? 'Remove day off' : 'Mark day off'; offBtn.style.color = isDayOff ? 'var(--red)' : 'var(--text3)'; offBtn.style.borderColor = isDayOff ? 'var(--red)' : 'var(--border-strong)'; }
-
-  var daySessions = DATA.privateSessions.filter(function(s) {
-    return s.date === _ttSelDate && s.status !== 'Deleted';
-  });
-  var popSessions = (DATA.poppadiSessions || []).filter(function(s) {
-    return s.date === _ttSelDate && s.status !== 'Cancelled';
-  });
-
-  var earned = daySessions.filter(function(s) { return s.status !== 'Cancelled'; })
-    .reduce(function(t,s) { return t + Number(s.fee||0); }, 0);
-  var count  = daySessions.filter(function(s) { return s.status !== 'Cancelled'; }).length;
-  if (subEl) subEl.textContent = isDayOff ? 'Day off' : (count === 0 ? 'No sessions' : count + ' session' + (count !== 1 ? 's' : '') + ' · ฿' + earned.toLocaleString());
-
-  var strip = document.getElementById('tt-strip');
-  if (!strip) return;
-  strip.innerHTML = '';
-
-  if (isDayOff) {
-    var em = document.createElement('div');
-    em.style.cssText = 'padding:20px 16px;font-size:13px;color:var(--text3);text-align:center;width:400px';
-    em.textContent = 'Day off';
-    strip.appendChild(em);
-    return;
-  }
-
-  // Build occupancy map
-  var hourMap = {};
-  daySessions.forEach(function(s) {
-    var sh = parseInt((s.start_time || '09:00').split(':')[0]);
-    var dur = Number(s.duration_hrs) || 1;
-    for (var k = 0; k < dur; k++) {
-      if (!hourMap[sh + k]) hourMap[sh + k] = { sess: s, type: 'private', isStart: k === 0 };
-    }
-  });
-  popSessions.forEach(function(s) {
-    var sh = parseInt((s.start_time || '09:00').split(':')[0]);
-    var dur = Number(s.hours) || 1;
-    for (var k = 0; k < dur; k++) {
-      if (!hourMap[sh + k]) hourMap[sh + k] = { sess: s, type: 'poppadi', isStart: k === 0 };
-    }
-  });
-
-  var skipHours = {};
-  TT_HOURS.forEach(function(h) {
-    if (skipHours[h]) return;
-    var isBreak = h === 12;
-    var col = document.createElement('div'); col.className = 'tt-hr-col';
-    var lbl = document.createElement('div'); lbl.className = 'tt-hr-lbl';
-    lbl.textContent = String(h).padStart(2,'0') + ':00';
-    col.appendChild(lbl);
-    var body = document.createElement('div');
-    body.className = 'tt-hr-body' + (isBreak ? ' tt-brk' : '');
-
-    var entry = !isBreak ? hourMap[h] : null;
-    if (!isBreak && !entry) {
-      (function(h) {
-        body.onclick = function() { ttCellClick(_ttSelDate, String(h).padStart(2,'0') + ':00'); };
-      })(h);
-    }
-    if (entry && entry.isStart) {
-      var s = entry.sess;
-      var isPrivate = entry.type === 'private';
-      var dur = Number(isPrivate ? s.duration_hrs : s.hours) || 1;
-      for (var k = 1; k < dur; k++) skipHours[h + k] = true;
-      if (dur > 1) col.style.width = (82 * dur) + 'px';
-
-      var isCancelled = s.status === 'Cancelled';
-      var isCompleted = s.status === 'Completed';
-      var bgColor = isPrivate ? getPTStudentColor(s.student_name || '') : '#888780';
-      var blk = document.createElement('div');
-      blk.className = 'tt-blk' + (isCancelled ? ' tt-cancelled' : '');
-      blk.style.background = bgColor;
-      if (dur > 1) blk.style.width = ((82 * dur) - 4) + 'px';
-      blk.innerHTML =
-        '<div class="tt-blk-name">' + (isCancelled ? '&#10005; ' : isCompleted ? '&#10003; ' : '') + escHtml(isPrivate ? (s.student_name||'') : (s.nickname||s.subject||'Poppadi')) + '</div>' +
-        '<div class="tt-blk-meta">' + (isPrivate ? (Number(s.duration_hrs)||1) : (Number(s.hours)||1)) + 'h' + (isPrivate && s.fee ? ' · ฿' + (isCancelled ? 0 : Number(s.fee)).toLocaleString() : '') + '</div>';
-      if (isPrivate) {
-        (function(sid) {
-          blk.onclick = function(e) { e.stopPropagation(); openSessionActionSheet('pt_' + sid); };
-        })(s.id);
-      }
+// ── DAY STRIP ─────────────────────────────────────────
+function renderTTStrip() {
+  var d=new Date(_ttSel+'T12:00:00');
+  var dN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var mN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var special=getSpecial(); var isOff=!!special.dayOffs[_ttSel];
+  var tEl=document.getElementById('tt-day-title'); if(tEl) tEl.textContent=dN[d.getDay()]+', '+d.getDate()+' '+mN[d.getMonth()];
+  var oBtn=document.getElementById('tt-dayoff-btn');
+  if(oBtn){oBtn.textContent=isOff?'Remove day off':'Mark day off';oBtn.style.color=isOff?'var(--red)':'var(--text3)';oBtn.style.borderColor=isOff?'var(--red)':'var(--border-strong)';}
+  var ss=DATA.privateSessions.filter(function(s){return s.date===_ttSel&&s.status!=='Deleted';});
+  var pop=(DATA.poppadiSessions||[]).filter(function(s){return s.date===_ttSel&&s.status!=='Cancelled';});
+  var earned=ss.filter(function(s){return s.status!=='Cancelled';}).reduce(function(t,s){return t+Number(s.fee||0);},0);
+  var count=ss.filter(function(s){return s.status!=='Cancelled';}).length;
+  var sub=document.getElementById('tt-day-sub'); if(sub) sub.textContent=isOff?'Day off':(count===0?'No sessions':count+' session'+(count!==1?'s':'')+' · ฿'+earned.toLocaleString());
+  var strip=document.getElementById('tt-strip'); if(!strip) return; strip.innerHTML='';
+  if(isOff){var em=document.createElement('div');em.style.cssText='padding:16px;font-size:12px;color:var(--text3);min-width:200px;text-align:center';em.textContent='Day off';strip.appendChild(em);return;}
+  var hm={};
+  ss.forEach(function(s){ var sh=parseInt((s.start_time||'09:00').split(':')[0]); var dur=Number(s.duration_hrs)||1; for(var k=0;k<dur;k++){if(!hm[sh+k])hm[sh+k]={s:s,type:'private',start:k===0,dur:dur};} });
+  pop.forEach(function(s){ var sh=parseInt((s.start_time||'09:00').split(':')[0]); var dur=Number(s.hours)||1; for(var k=0;k<dur;k++){if(!hm[sh+k])hm[sh+k]={s:s,type:'pop',start:k===0,dur:dur};} });
+  var skip={};
+  TT_HOURS.forEach(function(h){
+    if(skip[h])return;
+    var col=document.createElement('div'); col.className='tt-hc';
+    var lbl=document.createElement('div'); lbl.className='tt-hl'; lbl.textContent=String(h).padStart(2,'0')+':00'; col.appendChild(lbl);
+    var body=document.createElement('div'); body.className='tt-hb'+(h===12?' brk':'');
+    var ent=h!==12?hm[h]:null;
+    if(!h!==12&&!ent){(function(h){body.onclick=function(){ttCellClick(_ttSel,String(h).padStart(2,'0')+':00');};})(h);}
+    if(ent&&ent.start){
+      var s=ent.s; var isP=ent.type==='private'; var dur=ent.dur;
+      for(var k=1;k<dur;k++) skip[h+k]=true;
+      col.style.width=(76*dur)+'px';
+      var blk=document.createElement('div');
+      blk.className='tt-blk'+(s.status==='Cancelled'?' cxl':'');
+      blk.style.background=isP?ptColor(s.student_name||''):'#888780';
+      if(dur>1) blk.style.width=((76*dur)-4)+'px';
+      var pfx=s.status==='Completed'?'✓ ':s.status==='Cancelled'?'✕ ':'';
+      var name=isP?(s.student_name||''):(s.nickname||s.subject||'Poppadi');
+      var fee=isP&&s.fee?(s.status==='Cancelled'?0:Number(s.fee)):0;
+      blk.innerHTML='<div class="tt-bn">'+pfx+escHtml(name)+'</div><div class="tt-bm">'+(Number(isP?s.duration_hrs:s.hours)||1)+'h'+(fee?' · ฿'+fee.toLocaleString():'')+'</div>';
+      if(isP){(function(id){blk.onclick=function(e){e.stopPropagation();openSessionActionSheet('pt_'+id);};})(s.id);}
       body.appendChild(blk);
     }
-    col.appendChild(body);
-    strip.appendChild(col);
+    if(!ent&&h!==12){(function(h){body.onclick=function(){ttCellClick(_ttSel,String(h).padStart(2,'0')+':00');};})(h);}
+    col.appendChild(body); strip.appendChild(col);
   });
 }
 
-// ── TARGET BAR ───────────────────────────────────────────
-
+// ── TARGET BAR ────────────────────────────────────────
 function renderTTTarget() {
-  var card = document.getElementById('tt-target-card');
-  if (!card) return;
-
-  // Determine current month from selected date
-  var selD = new Date(_ttSelDate + 'T12:00:00');
-  var y = selD.getFullYear(); var m = selD.getMonth();
-
-  var monthSess = DATA.privateSessions.filter(function(s) {
-    var sd = new Date(s.date + 'T12:00:00');
-    return sd.getFullYear() === y && sd.getMonth() === m && s.status !== 'Deleted';
-  });
-  var completed = monthSess.filter(function(s) { return s.status === 'Completed'; });
-  var scheduled = monthSess.filter(function(s) { return s.status === 'Scheduled'; });
-  var earnedBaht = completed.reduce(function(t,s) { return t + Number(s.fee||0); }, 0);
-  var projBaht   = scheduled.reduce(function(t,s) { return t + Number(s.fee||0); }, 0);
-  var earnedHrs  = completed.reduce(function(t,s) { return t + Number(s.duration_hrs||0); }, 0);
-  var target     = _ttTarget || 0;
-
-  if (_ttEditTarget) {
-    card.innerHTML =
-      '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px">Set monthly private tutoring target</div>' +
-      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">' +
-        '<span style="font-size:14px;color:var(--text3)">฿</span>' +
-        '<input id="tt-target-input" type="number" value="' + (target||'') + '" placeholder="e.g. 28000" style="flex:1;font-size:14px;padding:8px 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface2);color:var(--text)">' +
-        '<button id="tt-target-set" style="padding:8px 14px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Set</button>' +
-      '</div>' +
-      '<div style="font-size:11px;color:var(--text3)">Set what private tutoring needs to contribute this month, after Poppadi and WWA income.</div>';
-    setTimeout(function() {
-      var btn = document.getElementById('tt-target-set');
-      if (btn) btn.onclick = function() {
-        var v = parseInt(document.getElementById('tt-target-input').value);
-        if (v > 0) { _ttTarget = v; localStorage.setItem('stevenco_pt_target', v); }
-        _ttEditTarget = false;
-        renderTTTarget();
-      };
-    }, 0);
+  var card=document.getElementById('tt-target-card'); if(!card) return;
+  var d=new Date(_ttSel+'T12:00:00'); var y=d.getFullYear(); var m=d.getMonth();
+  var ms=DATA.privateSessions.filter(function(s){ var sd=new Date(s.date+'T12:00:00'); return sd.getFullYear()===y&&sd.getMonth()===m&&s.status!=='Deleted'; });
+  var done=ms.filter(function(s){return s.status==='Completed';}); var sched=ms.filter(function(s){return s.status==='Scheduled';});
+  var eb=done.reduce(function(t,s){return t+Number(s.fee||0);},0); var pb=sched.reduce(function(t,s){return t+Number(s.fee||0);},0);
+  var eh=done.reduce(function(t,s){return t+Number(s.duration_hrs||0);},0);
+  var mN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  if(_ttEditTgt){
+    card.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">Monthly private tutoring target</div>'+
+      '<div style="display:flex;gap:6px;align-items:center"><span style="font-size:13px;color:var(--text3)">฿</span>'+
+      '<input id="tt-ti" type="number" value="'+(_ttTarget||'')+'" placeholder="e.g. 28000" style="flex:1;font-size:13px;padding:6px 10px;border-radius:7px;border:1px solid var(--border-strong);background:var(--surface2);color:var(--text)">'+
+      '<button id="tt-ts" style="padding:6px 12px;border-radius:7px;border:none;background:var(--teal);color:#fff;font-size:12px;font-weight:600;cursor:pointer">Set</button></div>'+
+      '<div style="font-size:10px;color:var(--text3);margin-top:5px">Set what private tutoring needs after Poppadi and WWA income.</div>';
+    setTimeout(function(){var btn=document.getElementById('tt-ts');if(btn)btn.onclick=function(){var v=parseInt(document.getElementById('tt-ti').value);if(v>0){_ttTarget=v;localStorage.setItem('stevenco_pt_target',v);}_ttEditTgt=false;renderTTTarget();};},0);
     return;
   }
-
-  var mNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-  if (!target) {
-    card.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center">' +
-        '<div>' +
-          '<div style="font-size:13px;font-weight:600;color:var(--text)">' + mNames[m] + ' income</div>' +
-          '<div style="font-size:12px;color:var(--text3);margin-top:2px">฿' + earnedBaht.toLocaleString() + ' completed · ฿' + projBaht.toLocaleString() + ' scheduled</div>' +
-        '</div>' +
-        '<button id="tt-target-edit" style="font-size:11px;color:var(--text3);border:0.5px solid var(--border-strong);background:none;border-radius:6px;padding:3px 10px;cursor:pointer">Set target</button>' +
-      '</div>';
-    setTimeout(function() { var b=document.getElementById('tt-target-edit'); if(b) b.onclick=function(){_ttEditTarget=true;renderTTTarget();}; }, 0);
+  if(!_ttTarget){
+    card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:12px;font-weight:600;color:var(--text)">'+mN[m]+' income</div><button id="tt-te" style="font-size:10px;border:1px solid var(--border-strong);background:none;border-radius:5px;padding:2px 8px;cursor:pointer;color:var(--text3)">Set target</button></div>'+
+      '<div style="font-size:11px;color:var(--text3);margin-top:3px">฿'+eb.toLocaleString()+' completed &nbsp;·&nbsp; ฿'+pb.toLocaleString()+' scheduled</div>';
+    setTimeout(function(){var b=document.getElementById('tt-te');if(b)b.onclick=function(){_ttEditTgt=true;renderTTTarget();};},0);
     return;
   }
-
-  var total = earnedBaht + projBaht;
-  var pctDone  = Math.min(100, (earnedBaht / target) * 100);
-  var pctTotal = Math.min(100, (total / target) * 100);
-  var remaining = Math.max(0, target - total);
-  var avgRate = earnedHrs > 0 ? earnedBaht / earnedHrs : 900;
-  var needHrs = remaining > 0 ? Math.ceil((remaining / avgRate) * 2) / 2 : 0;
-  var isOver  = total >= target;
-
-  var msg = isOver
-    ? 'Target reached &mdash; <strong>฿' + Math.round(total - target).toLocaleString() + '</strong> ahead'
-    : (needHrs > 0 ? 'Need <strong>' + needHrs + 'h more</strong> to hit ฿' + target.toLocaleString() : 'On track for ฿' + target.toLocaleString());
-
-  card.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">' +
-      '<span style="font-size:13px;font-weight:600;color:var(--text)">' + mNames[m] + ' target &nbsp;฿' + target.toLocaleString() + '</span>' +
-      '<button id="tt-target-edit" style="font-size:11px;color:var(--text3);border:0.5px solid var(--border-strong);background:none;border-radius:6px;padding:3px 10px;cursor:pointer">Edit</button>' +
-    '</div>' +
-    '<div class="tt-bar-wrap">' +
-      '<div class="tt-bar-sched" style="width:' + pctTotal + '%"></div>' +
-      '<div class="tt-bar-done" style="width:' + pctDone + '%"></div>' +
-    '</div>' +
-    '<div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.5">' + msg + '</div>' +
-    '<div style="display:flex;border-top:0.5px solid var(--border);padding-top:10px">' +
-      '<div style="flex:1;text-align:center;padding:0 4px">' +
-        '<div style="font-size:14px;font-weight:600;color:var(--teal)">฿' + earnedBaht.toLocaleString() + '</div>' +
-        '<div style="font-size:10px;color:var(--text3);margin-top:2px">Completed</div>' +
-      '</div>' +
-      '<div style="flex:1;text-align:center;padding:0 4px;border-left:0.5px solid var(--border)">' +
-        '<div style="font-size:14px;font-weight:600;color:var(--amber)">฿' + projBaht.toLocaleString() + '</div>' +
-        '<div style="font-size:10px;color:var(--text3);margin-top:2px">Scheduled</div>' +
-      '</div>' +
-      '<div style="flex:1;text-align:center;padding:0 4px;border-left:0.5px solid var(--border)">' +
-        '<div style="font-size:14px;font-weight:600;color:' + (isOver ? 'var(--teal)' : 'var(--red)') + '">฿' + Math.max(0, target - total).toLocaleString() + '</div>' +
-        '<div style="font-size:10px;color:var(--text3);margin-top:2px">Still needed</div>' +
-      '</div>' +
-      '<div style="flex:1;text-align:center;padding:0 4px;border-left:0.5px solid var(--border)">' +
-        '<div style="font-size:14px;font-weight:600;color:var(--text)">' + earnedHrs + 'h</div>' +
-        '<div style="font-size:10px;color:var(--text3);margin-top:2px">Done</div>' +
-      '</div>' +
+  var total=eb+pb; var pD=Math.min(100,(eb/_ttTarget)*100); var pT=Math.min(100,(total/_ttTarget)*100);
+  var rem=Math.max(0,_ttTarget-total); var avg=eh>0?eb/eh:900; var needH=rem>0?Math.ceil((rem/avg)*2)/2:0;
+  var over=total>=_ttTarget;
+  var msg=over?'Target reached — <strong>฿'+Math.round(total-_ttTarget).toLocaleString()+'</strong> ahead':(needH>0?'Need <strong>'+needH+'h more</strong> to hit ฿'+_ttTarget.toLocaleString():'On track');
+  card.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+      '<div style="font-size:12px;font-weight:600;color:var(--text)">'+mN[m]+' &nbsp;·&nbsp; ฿'+_ttTarget.toLocaleString()+'</div>'+
+      '<button id="tt-te" style="font-size:10px;border:1px solid var(--border-strong);background:none;border-radius:5px;padding:2px 8px;cursor:pointer;color:var(--text3)">Edit</button>'+
+    '</div>'+
+    '<div class="tt-bar"><div class="tt-bs" style="width:'+pT+'%"></div><div class="tt-bd" style="width:'+pD+'%"></div></div>'+
+    '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">'+msg+'</div>'+
+    '<div style="display:flex;border-top:1px solid var(--border);padding-top:7px;gap:0">'+
+      ['฿'+eb.toLocaleString()+',Completed,var(--teal)','฿'+pb.toLocaleString()+',Scheduled,var(--amber)','฿'+Math.max(0,_ttTarget-total).toLocaleString()+',Needed,'+(over?'var(--teal)':'var(--red)'),eh+'h,Done,var(--text)'].map(function(x){
+        var p=x.split(','); return '<div style="flex:1;text-align:center;border-left:1px solid var(--border);padding:0 4px"><div style="font-size:13px;font-weight:600;color:'+p[2]+'">'+p[0]+'</div><div style="font-size:9px;color:var(--text3);margin-top:1px">'+p[1]+'</div></div>';
+      }).join('').replace('border-left:1px solid var(--border);','')+
     '</div>';
-
-  setTimeout(function() { var b=document.getElementById('tt-target-edit'); if(b) b.onclick=function(){_ttEditTarget=true;renderTTTarget();}; }, 0);
+  setTimeout(function(){var b=document.getElementById('tt-te');if(b)b.onclick=function(){_ttEditTgt=true;renderTTTarget();};},0);
 }
 
-// ── DAY OFF TOGGLE ────────────────────────────────────────
+// ── FREE SLOTS ────────────────────────────────────────
+var _computedFreeSlots = [];
 
-function ttToggleDayOff() {
-  openMarkDayOff(_ttSelDate);
+function computeFreeSlots() {
+  var today=new Date();today.setHours(0,0,0,0);
+  var end=new Date(today.getFullYear(),today.getMonth()+3,today.getDate());
+  var W=['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+  var S2=['08:00','10:00','13:00','15:00','16:00','17:00'];
+  var busy={};
+  getAllEvents().filter(function(e){return !e.allDay;}).forEach(function(e){
+    if(!e.date||!e.start||!e.end)return;
+    if(!busy[e.date])busy[e.date]=[];
+    busy[e.date].push({s:timeToMinutes(e.start),e:timeToMinutes(e.end)});
+  });
+  var slots=[]; var d=new Date(today); d.setDate(d.getDate()+1);
+  while(d<=end){
+    var ds=dateToStr(d); var dow=d.getDay();
+    if(dow!==0&&!checkDayOff(ds)){
+      var b=busy[ds]||[];
+      var dN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow];
+      var o2=S2.filter(function(t){var m=timeToMinutes(t);return !b.some(function(x){return x.s<m+120&&x.e>m;});});
+      o2.forEach(function(t){slots.push({date:ds,day:dN,start_time:t,end_time:addHours(t,2),duration:'2',status:'Open'});});
+      W.forEach(function(t){
+        var m=timeToMinutes(t);var e1=m+60;
+        if(b.some(function(x){return x.s<e1&&x.e>m;}))return;
+        if(o2.some(function(x){var bm=timeToMinutes(x);return m>=bm&&m<bm+120;}))return;
+        slots.push({date:ds,day:dN,start_time:t,end_time:addHours(t,1),duration:'1',status:'Open'});
+      });
+    }
+    d.setDate(d.getDate()+1);
+  }
+  return slots;
 }
 
-// ── CELL CLICK (empty) ────────────────────────────────────
+function previewFreeSlots() {
+  _computedFreeSlots=computeFreeSlots();
+  var pv=document.getElementById('free-slots-preview'); var list=document.getElementById('free-slots-list');
+  var cnt=document.getElementById('free-slots-count'); var st=document.getElementById('publish-slots-status');
+  if(!pv||!list)return;
+  if(_computedFreeSlots.length===0){if(st)st.textContent='No free slots found — calendar may be fully booked.';pv.style.display='none';return;}
+  if(st)st.textContent=''; if(cnt)cnt.textContent='('+_computedFreeSlots.length+')';
+  pv.style.display='block';
+  function render(){
+    list.innerHTML='';
+    _computedFreeSlots.forEach(function(sl,i){
+      var chip=document.createElement('div');
+      chip.style.cssText='display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:12px;background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal)';
+      var d2=new Date(sl.date+'T12:00:00');
+      chip.innerHTML='<span>'+d2.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d2.getMonth()]+' '+sl.start_time+'('+sl.duration+'h)</span>'+
+        '<button onclick="removeFreeSlot('+i+')" style="background:none;border:none;cursor:pointer;color:var(--teal);font-size:12px;padding:0;line-height:1">&#215;</button>';
+      list.appendChild(chip);
+    });
+    if(cnt)cnt.textContent='('+_computedFreeSlots.length+')';
+  }
+  render();
+  window.removeFreeSlot=function(i){_computedFreeSlots.splice(i,1);render();};
+}
 
+function publishSlots() {
+  if(!WEB_APP_URL){showToast('Set Apps Script URL in Settings');return;}
+  if(_computedFreeSlots.length===0) _computedFreeSlots=computeFreeSlots();
+  var slots=_computedFreeSlots; var st=document.getElementById('publish-slots-status');
+  var btn=document.getElementById('publish-slots-btn');
+  if(!slots.length){if(st)st.textContent='No slots to publish.';return;}
+  if(btn){btn.disabled=true;btn.textContent='...';}
+  if(st)st.textContent='Publishing '+slots.length+' slots...';
+  webAppWrite('publishAvailableSlots',{slots:slots}).then(function(){
+    if(st)st.innerHTML='&#10003; '+slots.length+' slots published';
+    showToast('Slots published'); _computedFreeSlots=[];
+    var pv=document.getElementById('free-slots-preview');if(pv)pv.style.display='none';
+    if(btn){btn.disabled=false;btn.textContent='Publish';}
+  }).catch(function(e){
+    if(st)st.textContent='Failed: '+(e.message||'check connection');
+    if(btn){btn.disabled=false;btn.textContent='Publish';}
+  });
+}
+
+// ── DAY OFF ───────────────────────────────────────────
+function ttToggleDayOff(){ openMarkDayOff(_ttSel); }
+
+// ── CELL CLICK ────────────────────────────────────────
 function ttCellClick(dateStr, timeSlot) {
-  if (_ttPasteMode) { ttPasteSession(dateStr, timeSlot); return; }
+  if(_ttPasteMode){ttPasteSession(dateStr,timeSlot);return;}
   openAddSession();
-  setTimeout(function() {
-    var dateEl = document.getElementById('session-date');
-    var timeEl = document.getElementById('session-start-time');
-    if (dateEl) dateEl.value = dateStr;
-    if (timeEl) timeEl.value = timeSlot;
-  }, 50);
+  setTimeout(function(){var de=document.getElementById('session-date');var te=document.getElementById('session-start-time');if(de)de.value=dateStr;if(te)te.value=timeSlot;},50);
 }
 
-// ── ACTION SHEET ─────────────────────────────────────────
-
-var _sasSessionId = null;
-var _sasReleased  = false;
-
+// ── ACTION SHEET ──────────────────────────────────────
 function openSessionActionSheet(eventId) {
-  var rawId = eventId.replace('pt_', '');
-  var sess  = DATA.privateSessions.find(function(s) { return s.id === rawId; });
-  if (!sess) return;
-  _sasSessionId = eventId;
-  _sasReleased  = false;
-
-  document.getElementById('sas-title').textContent = (sess.student_name||'') + (sess.subject ? ' · ' + sess.subject : '');
-  document.getElementById('sas-meta').textContent  = (sess.date||'') + (sess.start_time ? ' · ' + sess.start_time : '');
-
-  var stEl = document.getElementById('sas-start-time');
-  if (stEl) stEl.value = sess.start_time || '09:00';
-
-  var curDur = Number(sess.duration_hrs) || 1;
-  document.querySelectorAll('.sas-dur-btn').forEach(function(b) {
-    var isActive = parseFloat(b.dataset.dur) === curDur;
-    b.style.background  = isActive ? 'var(--teal)' : 'transparent';
-    b.style.color       = isActive ? '#fff' : 'var(--text2)';
-    b.style.borderColor = isActive ? 'var(--teal)' : 'var(--border-strong)';
-  });
-
-  var curStatus = sess.status || 'Scheduled';
-  ['completed','scheduled','missed','cancelled'].forEach(function(s) {
-    var btn = document.getElementById('sas-s-' + s); if (!btn) return;
-    var isActive = curStatus.toLowerCase() === s;
-    btn.style.background  = isActive ? 'var(--teal)' : 'transparent';
-    btn.style.color       = isActive ? '#fff' : 'var(--text2)';
-    btn.style.borderColor = isActive ? 'var(--teal)' : 'var(--border-strong)';
-  });
-  document.getElementById('sas-release-row').style.display = curStatus === 'Cancelled' ? 'block' : 'none';
-  document.getElementById('session-action-sheet').style.display = 'block';
+  var rawId=eventId.replace('pt_','');
+  var sess=DATA.privateSessions.find(function(s){return s.id===rawId;}); if(!sess)return;
+  _sasSessionId=eventId;
+  document.getElementById('sas-title').textContent=(sess.student_name||'')+(sess.subject?' · '+sess.subject:'');
+  document.getElementById('sas-meta').textContent=(sess.date||'')+(sess.start_time?' · '+sess.start_time:'');
+  var stEl=document.getElementById('sas-start-time'); if(stEl)stEl.value=sess.start_time||'09:00';
+  var curDur=Number(sess.duration_hrs)||1;
+  document.querySelectorAll('.sas-dur-btn').forEach(function(b){var a=parseFloat(b.dataset.dur)===curDur;b.style.background=a?'var(--teal)':'transparent';b.style.color=a?'#fff':'var(--text2)';b.style.borderColor=a?'var(--teal)':'var(--border-strong)';});
+  var cur=sess.status||'Scheduled';
+  ['completed','scheduled','missed','cancelled'].forEach(function(s){var btn=document.getElementById('sas-s-'+s);if(!btn)return;var a=cur.toLowerCase()===s;btn.style.background=a?'var(--teal)':'transparent';btn.style.color=a?'#fff':'var(--text2)';btn.style.borderColor=a?'var(--teal)':'var(--border-strong)';});
+  document.getElementById('sas-release-row').style.display=cur==='Cancelled'?'block':'none';
+  document.getElementById('session-action-sheet').style.display='block';
 }
-
-function closeActionSheet() {
-  document.getElementById('session-action-sheet').style.display = 'none';
-  _sasSessionId = null;
+function closeActionSheet(){document.getElementById('session-action-sheet').style.display='none';_sasSessionId=null;}
+async function setSessStatus(status){
+  if(!_sasSessionId)return;
+  var s=DATA.privateSessions.find(function(x){return x.id===_sasSessionId.replace('pt_','');});if(!s)return;
+  s.status=status;
+  ['completed','scheduled','missed','cancelled'].forEach(function(k){var b=document.getElementById('sas-s-'+k);if(!b)return;var a=status.toLowerCase()===k;b.style.background=a?'var(--teal)':'transparent';b.style.color=a?'#fff':'var(--text2)';b.style.borderColor=a?'var(--teal)':'var(--border-strong)';});
+  document.getElementById('sas-release-row').style.display=status==='Cancelled'?'block':'none';
+  renderTimetableView();renderPrivateTutoring();showToast('Status → '+status);
+  try{await webAppWrite('updateSession',{row:s});}catch(e){}
 }
-
-async function setSessStatus(status) {
-  if (!_sasSessionId) return;
-  var rawId = _sasSessionId.replace('pt_', '');
-  var sess  = DATA.privateSessions.find(function(s) { return s.id === rawId; }); if (!sess) return;
-  sess.status = status;
-  ['completed','scheduled','missed','cancelled'].forEach(function(s) {
-    var btn = document.getElementById('sas-s-' + s); if (!btn) return;
-    var isActive = status.toLowerCase() === s;
-    btn.style.background  = isActive ? 'var(--teal)' : 'transparent';
-    btn.style.color       = isActive ? '#fff' : 'var(--text2)';
-    btn.style.borderColor = isActive ? 'var(--teal)' : 'var(--border-strong)';
-  });
-  document.getElementById('sas-release-row').style.display = status === 'Cancelled' ? 'block' : 'none';
-  renderTimetableView(); renderPrivateTutoring();
-  showToast('Status → ' + status);
-  try { await webAppWrite('updateSession', { row: sess }); } catch(err) {}
+function setSasDuration(dur){document.querySelectorAll('.sas-dur-btn').forEach(function(b){var a=parseFloat(b.dataset.dur)===dur;b.style.background=a?'var(--teal)':'transparent';b.style.color=a?'#fff':'var(--text2)';b.style.borderColor=a?'var(--teal)':'var(--border-strong)';});}
+async function saveSessTime(){
+  if(!_sasSessionId)return;
+  var s=DATA.privateSessions.find(function(x){return x.id===_sasSessionId.replace('pt_','');});if(!s)return;
+  var stEl=document.getElementById('sas-start-time'); var adb=document.querySelector('.sas-dur-btn[style*="var(--teal)"]');
+  var dur=adb?parseFloat(adb.dataset.dur):(Number(s.duration_hrs)||1); var ns=stEl?stEl.value:s.start_time; if(!ns)return;
+  s.start_time=ns;s.duration_hrs=dur;
+  var p=ns.split(':'); var tm=parseInt(p[0])*60+parseInt(p[1]||0)+Math.round(dur*60);
+  s.end_time=pad2(Math.floor(tm/60))+':'+pad2(tm%60); s.fee=Number(s.rate||900)*dur;
+  renderTimetableView();renderPrivateTutoring();showToast('Updated');
+  try{await webAppWrite('updateSession',{row:s});}catch(e){}
 }
-
-function setSasDuration(dur) {
-  document.querySelectorAll('.sas-dur-btn').forEach(function(b) {
-    var isActive = parseFloat(b.dataset.dur) === dur;
-    b.style.background  = isActive ? 'var(--teal)' : 'transparent';
-    b.style.color       = isActive ? '#fff' : 'var(--text2)';
-    b.style.borderColor = isActive ? 'var(--teal)' : 'var(--border-strong)';
-  });
+async function setSessRelease(doR){
+  var yb=document.getElementById('sas-release-yes');var nb=document.getElementById('sas-release-no');
+  if(yb){yb.style.background=doR?'var(--teal)':'transparent';yb.style.color=doR?'#fff':'var(--teal)';}
+  if(nb){nb.style.background=!doR?'var(--text2)':'transparent';nb.style.color=!doR?'#fff':'var(--text2)';}
+  if(!doR||!WEB_APP_URL)return;
+  var id=_sasSessionId?_sasSessionId.replace('pt_',''):null;
+  var s=id?DATA.privateSessions.find(function(x){return x.id===id;}):null; if(!s)return;
+  var d=new Date(s.date+'T12:00:00');
+  try{await webAppWrite('publishAvailableSlots',{slots:[{date:s.date,day:d.toLocaleString('en-GB',{weekday:'short'}),start_time:s.start_time||'09:00',end_time:s.end_time||'10:00',duration:String(Number(s.duration_hrs)||1),status:'Open'}],append:true});showToast('Slot released');}
+  catch(e){showToast('Could not release slot');}
 }
-
-async function saveSessTime() {
-  if (!_sasSessionId) return;
-  var rawId = _sasSessionId.replace('pt_', '');
-  var sess  = DATA.privateSessions.find(function(s) { return s.id === rawId; }); if (!sess) return;
-  var stEl  = document.getElementById('sas-start-time');
-  var activeDurBtn = document.querySelector('.sas-dur-btn[style*="var(--teal)"]');
-  var dur   = activeDurBtn ? parseFloat(activeDurBtn.dataset.dur) : (Number(sess.duration_hrs)||1);
-  var newStart = stEl ? stEl.value : sess.start_time;
-  if (!newStart) return;
-  sess.start_time = newStart;
-  sess.duration_hrs = dur;
-  var parts = newStart.split(':');
-  var totalMins = parseInt(parts[0]) * 60 + parseInt(parts[1]||0) + Math.round(dur * 60);
-  sess.end_time = pad2(Math.floor(totalMins/60)) + ':' + pad2(totalMins%60);
-  sess.fee = Number(sess.rate||900) * dur;
-  renderTimetableView(); renderPrivateTutoring();
-  showToast('Updated · ' + newStart + ' · ' + dur + 'h');
-  try { await webAppWrite('updateSession', { row: sess }); } catch(err) {}
+function sasAction(action){
+  if(!_sasSessionId)return;
+  var id=_sasSessionId.replace('pt_','');
+  var s=DATA.privateSessions.find(function(x){return x.id===id;});if(!s)return;
+  if(action==='delete'){if(!confirm('Delete?'))return;DATA.privateSessions=DATA.privateSessions.filter(function(x){return x.id!==id;});closeActionSheet();renderTimetableView();renderPrivateTutoring();showToast('Deleted');try{webAppWrite('updateSession',{row:Object.assign({},s,{status:'Deleted'})});}catch(e){}return;}
+  _ttPasteMode=action;_ttPasteSession=JSON.parse(JSON.stringify(s));closeActionSheet();
+  var banner=document.getElementById('tt-paste-banner');
+  if(banner){banner.style.display='flex';document.getElementById('tt-paste-msg').textContent=(action==='copy'?'Copy':'Move')+': '+s.student_name+' — tap empty slot';}
+  showToast((action==='copy'?'Copy':'Cut')+' — tap empty slot');
 }
-
-async function setSessRelease(doRelease) {
-  _sasReleased = doRelease;
-  var yesBtn = document.getElementById('sas-release-yes');
-  var noBtn  = document.getElementById('sas-release-no');
-  if (yesBtn) { yesBtn.style.background = doRelease ? 'var(--teal)' : 'transparent'; yesBtn.style.color = doRelease ? '#fff' : 'var(--teal)'; }
-  if (noBtn)  { noBtn.style.background  = !doRelease ? 'var(--text2)' : 'transparent'; noBtn.style.color = !doRelease ? '#fff' : 'var(--text2)'; }
-  if (!doRelease || !WEB_APP_URL) return;
-  var rawId = _sasSessionId ? _sasSessionId.replace('pt_','') : null;
-  var sess  = rawId ? DATA.privateSessions.find(function(s) { return s.id === rawId; }) : null;
-  if (!sess) return;
-  var d = new Date(sess.date + 'T12:00:00');
-  var slot = { date: sess.date, day: d.toLocaleString('en-GB',{weekday:'short'}), start_time: sess.start_time||'09:00', end_time: sess.end_time||'10:00', duration: String(Number(sess.duration_hrs)||1), status: 'Open' };
-  try { await webAppWrite('publishAvailableSlots', { slots:[slot], append:true }); showToast('Slot released'); }
-  catch(err) { showToast('Could not release slot'); }
+async function ttPasteSession(ds,ts){
+  if(!_ttPasteMode||!_ttPasteSession)return;
+  var n=JSON.parse(JSON.stringify(_ttPasteSession)); n.date=ds;n.start_time=ts;
+  var dur=Number(n.duration_hrs)||1; var p=ts.split(':'); var tm=parseInt(p[0])*60+parseInt(p[1]||0)+Math.round(dur*60);
+  n.end_time=pad2(Math.floor(tm/60))+':'+pad2(tm%60);
+  if(_ttPasteMode==='cut'){DATA.privateSessions=DATA.privateSessions.filter(function(x){return x.id!==_ttPasteSession.id;});try{webAppWrite('updateSession',{row:Object.assign({},_ttPasteSession,{status:'Deleted'})});}catch(e){}}
+  n.id='PT-'+Date.now();n.created_at=new Date().toISOString();DATA.privateSessions.push(n);
+  try{await webAppWrite('addSession',{row:n});}catch(e){}
+  cancelTTPaste();renderTimetableView();renderPrivateTutoring();
+  showToast((_ttPasteMode==='cut'?'Moved':'Copied')+' to '+ds+' '+ts);
 }
+function cancelTTPaste(){_ttPasteMode=null;_ttPasteSession=null;var b=document.getElementById('tt-paste-banner');if(b)b.style.display='none';}
 
-function sasAction(action) {
-  if (!_sasSessionId) return;
-  var rawId = _sasSessionId.replace('pt_','');
-  var sess  = DATA.privateSessions.find(function(s) { return s.id === rawId; }); if (!sess) return;
-  if (action === 'delete') {
-    if (!confirm('Delete this session permanently?')) return;
-    DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== rawId; });
-    closeActionSheet(); renderTimetableView(); renderPrivateTutoring();
-    showToast('Session deleted');
-    try { webAppWrite('updateSession', { row: Object.assign({}, sess, {status:'Deleted'}) }); } catch(e) {}
-    return;
-  }
-  _ttPasteMode = action;
-  _ttPasteSession = JSON.parse(JSON.stringify(sess));
-  closeActionSheet();
-  var banner = document.getElementById('tt-paste-banner');
-  if (banner) { banner.style.display = 'flex'; document.getElementById('tt-paste-msg').textContent = (action==='copy'?'Copy':'Move') + ': ' + sess.student_name + ' — tap empty slot'; }
-  showToast((action==='copy'?'Copy':'Cut') + ' — tap an empty slot');
-}
-
-async function ttPasteSession(dateStr, timeSlot) {
-  if (!_ttPasteMode || !_ttPasteSession) return;
-  var newSess = JSON.parse(JSON.stringify(_ttPasteSession));
-  newSess.date = dateStr; newSess.start_time = timeSlot;
-  var dur = Number(newSess.duration_hrs)||1;
-  var parts = timeSlot.split(':');
-  var totalMins = parseInt(parts[0])*60 + parseInt(parts[1]||0) + Math.round(dur*60);
-  newSess.end_time = pad2(Math.floor(totalMins/60)) + ':' + pad2(totalMins%60);
-  if (_ttPasteMode === 'cut') {
-    DATA.privateSessions = DATA.privateSessions.filter(function(s) { return s.id !== _ttPasteSession.id; });
-    try { webAppWrite('updateSession', { row: Object.assign({}, _ttPasteSession, {status:'Deleted'}) }); } catch(e) {}
-  }
-  newSess.id = 'PT-' + Date.now(); newSess.created_at = new Date().toISOString();
-  DATA.privateSessions.push(newSess);
-  try { await webAppWrite('addSession', { row: newSess }); } catch(e) {}
-  cancelTTPaste(); renderTimetableView(); renderPrivateTutoring();
-  showToast((_ttPasteMode==='cut'?'Moved':'Copied') + ' to ' + dateStr + ' ' + timeSlot);
-}
-
-function cancelTTPaste() {
-  _ttPasteMode = null; _ttPasteSession = null;
-  var banner = document.getElementById('tt-paste-banner');
-  if (banner) banner.style.display = 'none';
-}
-
+// ─── stubs for removed old functions ─────────────────
 // ─── WWA CLIENT MODAL ─────────────────────────────────────
 const ROLE_WEIGHTS = { strategy: 1.0, copy: 0.85, am: 0.6, ops: 0.35, none: 0 };
 const ROLE_LABELS  = { strategy: 'Strategist', copy: 'Copywriter', am: 'Account Manager', ops: 'Content Ops', none: 'Not involved' };
@@ -5759,20 +5569,13 @@ function applySchedZoom() {
 // ── VIEW MODE ─────────────────────────────────────────────
 function setSchedViewMode(mode) {
   schedViewMode = mode;
-  var ttBtn = document.getElementById('sched-toggle-timetable');
-  if (ttBtn) ttBtn.classList.toggle('active', mode === 'timetable');
-  document.getElementById('sched-toggle-cards').classList.toggle('active', mode === 'cards');
-  document.getElementById('sched-toggle-list').classList.toggle('active', mode === 'list');
-  // Hide all containers
-  ['sched-cards-container','sched-grid-container','sched-list-container'].forEach(function(id) {
-    var el = document.getElementById(id); if (el) el.style.display = 'none';
+  ['timetable','cards','list'].forEach(function(m){
+    var b=document.getElementById('sched-toggle-'+m); if(b) b.classList.toggle('active', m===mode);
   });
-  var ttCont = document.getElementById('sched-timetable-container');
-  if (ttCont) ttCont.style.display = mode === 'timetable' ? 'block' : 'none';
-  document.getElementById('sched-cards-container').style.display = mode === 'cards' ? 'block' : 'none';
-  document.getElementById('sched-list-container').style.display  = mode === 'list'  ? 'block' : 'none';
-  var zoomCtrl = document.getElementById('sched-zoom-controls');
-  if (zoomCtrl) zoomCtrl.style.display = 'none';
+  var ids = {timetable:'sched-timetable-container', cards:'sched-cards-container', list:'sched-list-container'};
+  Object.keys(ids).forEach(function(m){
+    var el=document.getElementById(ids[m]); if(el) el.style.display = m===mode ? 'block' : 'none';
+  });
   renderScheduleView();
 }
 
@@ -7580,138 +7383,6 @@ function setSelectedColor(color) {
 }
 
 // ── AVAILABILITY ─────────────────────────────────────────
-function renderAvailSlots() {
-  var el = document.getElementById('avail-slots-grid');
-  if (!el) return;
-  var html = '';
-  AVAIL_DAYS.forEach(function(day) {
-    html += '<div class="avail-day"><div class="avail-day-label">' + day + '</div><div class="avail-slots">';
-    AVAIL_SLOTS.forEach(function(slot) {
-      var on = availState[day] && availState[day][slot];
-      html += '<div class="avail-slot' + (on ? ' on' : '') + '" onclick="toggleAvailSlot(\'' + day + '\',\'' + slot + '\')">' + slot + '</div>';
-    });
-    html += '</div></div>';
-  });
-  el.innerHTML = html;
-  renderAvailText();
-}
-function toggleAvailSlot(day, slot) {
-  if (!availState[day]) availState[day] = {};
-  availState[day][slot] = !availState[day][slot];
-  renderAvailSlots();
-}
-function saveAvailability() { localStorage.setItem('stevenco_avail', JSON.stringify(availState)); showToast('Availability saved'); }
-// ── PUBLISH SLOTS ─────────────────────────────────────────
-var _computedFreeSlots = []; // computed slots, user can remove before publishing
-
-function computeFreeSlots() {
-  var today = new Date(); today.setHours(0,0,0,0);
-  var threeMonths = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
-  var WORK_HOURS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'];
-  var STRICT_2H  = ['08:00','10:00','13:00','15:00','16:00','17:00'];
-  var busyByDate = {};
-  getAllEvents().filter(function(e) { return !e.allDay; }).forEach(function(e) {
-    if (!e.date || !e.start || !e.end) return;
-    if (!busyByDate[e.date]) busyByDate[e.date] = [];
-    busyByDate[e.date].push({ start: timeToMinutes(e.start), end: timeToMinutes(e.end) });
-  });
-  var slots = [];
-  var d = new Date(today); d.setDate(d.getDate() + 1);
-  while (d <= threeMonths) {
-    var ds = dateToStr(d);
-    var dowNum = d.getDay();
-    var dowName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dowNum];
-    if (dowNum !== 0 && !checkDayOff(ds)) {
-      var busy = busyByDate[ds] || [];
-      var open2h = STRICT_2H.filter(function(t) {
-        var tMin = timeToMinutes(t);
-        return !busy.some(function(b) { return b.start < tMin + 120 && b.end > tMin; });
-      });
-      open2h.forEach(function(t) {
-        slots.push({ date: ds, day: dowName, start_time: t, end_time: addHours(t,2), duration: '2', status: 'Open' });
-      });
-      WORK_HOURS.forEach(function(t) {
-        var tMin = timeToMinutes(t); var end1h = tMin + 60;
-        if (busy.some(function(b) { return b.start < end1h && b.end > tMin; })) return;
-        var in2h = open2h.some(function(b) { var bMin = timeToMinutes(b); return tMin >= bMin && tMin < bMin + 120; });
-        if (in2h) return;
-        slots.push({ date: ds, day: dowName, start_time: t, end_time: addHours(t,1), duration: '1', status: 'Open' });
-      });
-    }
-    d.setDate(d.getDate() + 1);
-  }
-  return slots;
-}
-
-function previewFreeSlots() {
-  _computedFreeSlots = computeFreeSlots();
-  var previewDiv = document.getElementById('free-slots-preview');
-  var listDiv    = document.getElementById('free-slots-list');
-  var countEl    = document.getElementById('free-slots-count');
-  var statusEl   = document.getElementById('publish-slots-status');
-  if (!previewDiv || !listDiv) return;
-
-  if (_computedFreeSlots.length === 0) {
-    statusEl.textContent = 'No free slots found — calendar may be fully booked.';
-    previewDiv.style.display = 'none'; return;
-  }
-
-  statusEl.textContent = '';
-  countEl.textContent  = '(' + _computedFreeSlots.length + ')';
-  previewDiv.style.display = 'block';
-
-  function renderSlotChips() {
-    listDiv.innerHTML = '';
-    _computedFreeSlots.forEach(function(slot, i) {
-      var chip = document.createElement('div');
-      chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;border-radius:20px;background:var(--teal-bg);color:var(--teal);border:0.5px solid var(--teal)';
-      var d = new Date(slot.date + 'T12:00:00');
-      var label = d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' ' + slot.start_time + ' (' + slot.duration + 'h)';
-      chip.innerHTML = '<span>' + label + '</span><button onclick="removeFreeSlot(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--teal);font-size:13px;line-height:1;padding:0;margin-left:2px">&#215;</button>';
-      listDiv.appendChild(chip);
-    });
-    countEl.textContent = '(' + _computedFreeSlots.length + ')';
-  }
-  renderSlotChips();
-
-  window.removeFreeSlot = function(idx) {
-    _computedFreeSlots.splice(idx, 1);
-    renderSlotChips();
-  };
-}
-
-function publishSlots() {
-  if (!WEB_APP_URL) { showToast('⚠ Apps Script URL not set — go to Settings'); return; }
-  // If no preview computed yet, compute now
-  if (_computedFreeSlots.length === 0) _computedFreeSlots = computeFreeSlots();
-  var slots = _computedFreeSlots;
-
-  var btn = document.getElementById('publish-slots-btn');
-  if(btn){ btn.disabled=true; btn.textContent = 'Publishing...'; }
-  var statusEl = document.getElementById('publish-slots-status');
-  if (slots.length === 0) {
-    if(statusEl) statusEl.innerHTML = '<span style="color:var(--amber)">No free slots to publish.</span>';
-    if(btn){ btn.disabled=false; btn.textContent = '↑ Publish'; }
-    return;
-  }
-  if(statusEl) statusEl.textContent = 'Publishing ' + slots.length + ' slots...';
-  webAppWrite('publishAvailableSlots', { slots: slots })
-    .then(function() {
-      var now = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
-      if(statusEl) statusEl.innerHTML = '&#10003; <strong>' + slots.length + ' slots</strong> published &nbsp;&middot;&nbsp; ' + now;
-      showToast('&#10003; ' + slots.length + ' slots published');
-      if(btn){ btn.disabled=false; btn.textContent = '↑ Publish'; }
-      _computedFreeSlots = [];
-      var previewDiv = document.getElementById('free-slots-preview');
-      if(previewDiv) previewDiv.style.display = 'none';
-    })
-    .catch(function(e) {
-      if(statusEl) statusEl.innerHTML = '<span style="color:var(--red)">Publish failed — ' + (e.message||'check connection') + '</span>';
-      if(btn){ btn.disabled=false; btn.textContent = '↑ Publish'; }
-    });
-}
-
-// old publishSlots kept as alias below — replaced above
 
 
 function renderAvailText() {
