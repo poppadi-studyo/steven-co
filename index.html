@@ -769,7 +769,7 @@ tr:hover td { background: var(--surface2); }
 
 /* ── HYBRID TIMETABLE ─────────────────────────────── */
 .tt-dh  { font-size:9px;color:var(--text3);text-align:center;padding:2px 0;font-weight:500 }
-.tt-dc  { height:26px;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:2px;border-radius:5px;cursor:pointer;transition:background 0.1s }
+.tt-dc  { height:26px;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:2px;border-radius:5px;cursor:pointer;transition:background 0.1s;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;min-width:0 }
 .tt-dc:active { opacity:0.7 }
 .tt-dc.empty  { pointer-events:none }
 .tt-dc.sel    { background:var(--teal) }
@@ -778,7 +778,7 @@ tr:hover td { background: var(--surface2); }
 .tt-dc.sel.tod .tt-dn { color:#fff }
 .tt-dc.off    { background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(226,75,74,0.1) 3px,rgba(226,75,74,0.1) 6px) }
 .tt-dc.off .tt-dn { color:var(--red) }
-.tt-dn  { font-size:12px;color:var(--text);line-height:1;width:18px;text-align:center }
+.tt-dn  { font-size:12px;color:var(--text);line-height:1;text-align:center }
 .tt-dots{ display:flex;gap:1px }
 .tt-dot { width:3px;height:3px;border-radius:50%;flex-shrink:0 }
 .tt-dc.sel .tt-dot { opacity:0.75 }
@@ -1546,7 +1546,7 @@ tr:hover td { background: var(--surface2); }
         </div>
 
         <!-- TIMETABLE VIEW (hybrid: mini calendar + day strip) -->
-        <div id="sched-timetable-container">
+        <div id="sched-timetable-container" style="width:100%;box-sizing:border-box;overflow:hidden">
 
           <!-- paste banner -->
           <div id="tt-paste-banner" style="display:none;background:var(--teal);color:#fff;padding:8px 14px;border-radius:8px;margin-bottom:6px;font-size:12px;font-weight:600;justify-content:space-between;align-items:center">
@@ -1555,15 +1555,15 @@ tr:hover td { background: var(--surface2); }
           </div>
 
           <!-- MINI MONTH CALENDAR -->
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:6px;overflow:hidden">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 4px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:6px;overflow:hidden;width:100%;box-sizing:border-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px 2px">
               <span id="tt-month-title" style="font-size:13px;font-weight:600;color:var(--text)"></span>
-              <div style="display:flex;gap:3px">
-                <button onclick="ttNavMonth(-1)" style="border:none;background:none;font-size:15px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:5px">‹</button>
-                <button onclick="ttNavMonth(1)"  style="border:none;background:none;font-size:15px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:5px">›</button>
+              <div style="display:flex;gap:2px">
+                <button onclick="ttNavMonth(-1)" style="border:none;background:none;font-size:15px;cursor:pointer;color:var(--text3);padding:1px 6px">‹</button>
+                <button onclick="ttNavMonth(1)"  style="border:none;background:none;font-size:15px;cursor:pointer;color:var(--text3);padding:1px 6px">›</button>
               </div>
             </div>
-            <div id="tt-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);padding:2px 8px 6px;gap:1px"></div>
+            <div id="tt-cal-grid" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:0 4px 6px;gap:0;width:100%;box-sizing:border-box;overflow:hidden"></div>
           </div>
 
           <!-- DAY STRIP -->
