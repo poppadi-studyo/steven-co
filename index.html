@@ -746,10 +746,19 @@ tr:hover td { background: var(--surface2); }
 .tt-cal-dots { display:flex;gap:1px;align-items:center;flex-wrap:nowrap }
 .tt-cal-dot { width:3px;height:3px;border-radius:50%;flex-shrink:0 }
 .tt-cal-cell.tt-sel .tt-cal-dot { opacity:0.8 }
+
+/* Timetable card overrides — kill default card padding/margin */
+#tt-month-card { padding: 0; margin-bottom: 0; }
+#tt-day-card   { padding: 0; margin-bottom: 0; }
+#tt-target-card { padding: 10px 14px; margin-bottom: 0; }
+#sched-timetable-container .card { margin-bottom: 0; }
+#tt-strip { border-radius: 8px; overflow: hidden; border: 0.5px solid var(--border); }
+#page-schedule { padding-top: 12px; }
+#sched-gcal-banner { margin-bottom: 6px; }
 .tt-hr-col { width:82px;flex-shrink:0;display:flex;flex-direction:column;border-right:0.5px solid var(--border) }
 .tt-hr-col:last-child { border-right:none }
 .tt-hr-lbl { font-size:9px;color:var(--text3);text-align:center;padding:4px 2px;background:var(--surface2);border-bottom:0.5px solid var(--border) }
-.tt-hr-body { flex:1;min-height:68px;background:var(--surface);position:relative;cursor:pointer;transition:background 0.1s }
+.tt-hr-body { flex:1;min-height:58px;background:var(--surface);position:relative;cursor:pointer;transition:background 0.1s }
 .tt-hr-body:hover { background:var(--surface2) }
 .tt-hr-body.tt-brk { background:var(--surface2);cursor:default }
 .tt-hr-body.tt-brk::after { content:"lunch";font-size:8px;color:var(--text3);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) }
@@ -1593,7 +1602,7 @@ tr:hover td { background: var(--surface2); }
           </div>
 
           <!-- Mini month calendar -->
-          <div class="card" id="tt-month-card" style="padding-bottom:2px">
+          <div class="card" id="tt-month-card">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 2px">
               <span id="tt-month-title" style="font-size:15px;font-weight:600;color:var(--text)"></span>
               <div style="display:flex;gap:4px">
