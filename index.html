@@ -733,7 +733,7 @@ tr:hover td { background: var(--surface2); }
 
 /* Hybrid timetable */
 .tt-cal-dh { font-size:10px;color:var(--text3);text-align:center;padding:3px 0;font-weight:500 }
-.tt-cal-cell { height:38px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:4px;border-radius:6px;cursor:pointer;position:relative;gap:2px;transition:background 0.1s }
+.tt-cal-cell { height:34px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:4px;border-radius:6px;cursor:pointer;position:relative;gap:2px;transition:background 0.1s }
 .tt-cal-cell:active { transform:scale(0.88) }
 .tt-cal-cell.empty { cursor:default;pointer-events:none }
 .tt-cal-cell.tt-sel { background:var(--teal) }
@@ -1511,77 +1511,42 @@ tr:hover td { background: var(--surface2); }
       </div>
 
       <!-- ── SCHEDULE PAGE ── -->
-      <div class="page" id="page-schedule">
+      <div class="page" id="page-schedule" style="padding-top:0">
 
-        <!-- SHARED TOPBAR (both views use this) -->
-        <div class="page-header">
-          <div class="page-header-row">
-            <div style="display:flex;align-items:center;gap:10px">
-              <button id="sched-back-btn" class="btn btn-ghost btn-sm" onclick="showSchedMonthView()" style="display:none">← Month</button>
-              <div>
-                <h1 id="sched-main-title">My Schedule</h1>
-                <p id="sched-main-sub" style="font-size:12px;color:var(--text3);margin-top:2px">Unified calendar · All three streams</p>
-              </div>
+        <!-- SLIM TOPBAR -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <h1 style="font-size:18px;font-weight:600;color:var(--text)">My Schedule</h1>
+          <div style="display:flex;gap:4px;align-items:center">
+            <div style="display:flex;gap:2px;background:var(--surface2);border-radius:var(--radius);padding:3px">
+              <button class="sched-view-toggle active" id="sched-toggle-timetable" onclick="setSchedViewMode('timetable')">Calendar</button>
+              <button class="sched-view-toggle"        id="sched-toggle-cards"    onclick="setSchedViewMode('cards')">Cards</button>
+              <button class="sched-view-toggle"        id="sched-toggle-list"     onclick="setSchedViewMode('list')">List</button>
             </div>
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-              <button class="btn btn-ghost btn-sm" id="sched-nav-prev" onclick="schedNav(-1)">‹</button>
-              <span id="sched-period-label" style="font-size:13px;font-weight:500;min-width:130px;text-align:center"></span>
-              <button class="btn btn-ghost btn-sm" id="sched-nav-next" onclick="schedNav(1)">›</button>
-              <button class="btn btn-secondary btn-sm" onclick="schedGoToday()">Today</button>
-              <div style="width:1px;height:20px;background:var(--border);margin:0 2px"></div>
-              <button class="btn btn-ghost btn-sm" onclick="openMarkDayOff()" title="Mark Day Off">🍃 Mark Day Off</button>
-              <button class="btn btn-primary btn-sm" onclick="openAddCalEvent()">+ Add Event</button>
-            </div>
+            <button class="btn btn-primary btn-sm" onclick="openAddSession()">+ Session</button>
           </div>
+        </div>
 
-          <!-- Filter + View toggle row -->
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:10px">
-            <div style="display:flex;gap:4px;flex-wrap:wrap" id="sched-filter-btns">
-              <button class="sched-filter-btn active" data-filter="all"     onclick="setSchedFilter('all')">All</button>
-              <button class="sched-filter-btn"        data-filter="poppadi" onclick="setSchedFilter('poppadi')">🏫 Poppadi's</button>
-              <button class="sched-filter-btn"        data-filter="private" onclick="setSchedFilter('private')">📚 Private</button>
-              <button class="sched-filter-btn"        data-filter="wwa"     onclick="setSchedFilter('wwa')">✦ WWA</button>
-              <button class="sched-filter-btn"        data-filter="personal" onclick="setSchedFilter('personal')">Personal</button>
-              <button class="sched-filter-btn"        data-filter="dayoff"  onclick="setSchedFilter('dayoff')" style="border-color:var(--red-bg)">🍃 Day Off</button>
-            </div>
-            <div style="display:flex;gap:4px;align-items:center">
-              <div style="display:flex;gap:2px;background:var(--surface2);border-radius:var(--radius);padding:3px">
-                <button class="sched-view-toggle active" id="sched-toggle-timetable" onclick="setSchedViewMode('timetable')">⊞ Timetable</button>
-                <button class="sched-view-toggle"        id="sched-toggle-cards"    onclick="setSchedViewMode('cards')">⊟ Day Cards</button>
-                <button class="sched-view-toggle"        id="sched-toggle-list"     onclick="setSchedViewMode('list')">☰ List</button>
-              </div>
-              <!-- Zoom controls (Schedule view only) -->
-              <div id="sched-zoom-controls" style="display:flex;gap:4px;align-items:center">
-                <button class="btn btn-ghost btn-sm" onclick="adjustSchedZoom(-0.15)" style="font-size:14px;padding:2px 8px">−</button>
-                <span id="sched-zoom-label" style="font-size:10px;color:var(--text3);min-width:32px;text-align:center">100%</span>
-                <button class="btn btn-ghost btn-sm" onclick="adjustSchedZoom(0.15)"  style="font-size:14px;padding:2px 8px">+</button>
-                <button class="btn btn-ghost btn-sm" onclick="resetSchedZoom()"       style="font-size:10px">Reset</button>
-              </div>
-              <button class="btn btn-ghost btn-sm" onclick="downloadSchedPDF()" title="Download PDF">⬇ PDF</button>
-            </div>
-          </div>
+        <!-- hidden elements kept for JS compatibility -->
+        <div style="display:none">
+          <button id="sched-back-btn"></button>
+          <span id="sched-main-title"></span>
+          <span id="sched-main-sub"></span>
+          <button id="sched-nav-prev" onclick="schedNav(-1)"></button>
+          <span id="sched-period-label"></span>
+          <button id="sched-nav-next" onclick="schedNav(1)"></button>
+          <div id="sched-filter-btns"></div>
+          <div id="sched-zoom-controls"></div>
+          <span id="sched-zoom-label"></span>
         </div>
 
         <!-- GCal connect banner -->
-        <div id="sched-gcal-banner" class="card" style="display:none;border-color:var(--purple);background:var(--purple-bg);margin-bottom:16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--purple);margin-bottom:4px">Connect Google Calendar</div>
-              <div style="font-size:12px;color:var(--text2)">Authorise read + write access to sync all events, day offs, breaks, and highlights.</div>
+        <div id="sched-gcal-banner" class="card" style="display:none;border-color:var(--purple);background:var(--purple-bg);margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div style="font-size:13px;font-weight:600;color:var(--purple)">Connect Google Calendar
+              <div style="font-size:11px;font-weight:400;color:var(--text2);margin-top:2px">Sync events, day offs, and breaks.</div>
             </div>
-            <button class="btn btn-purple btn-sm" onclick="authoriseGoogleCalendar()">Connect Calendar</button>
+            <button class="btn btn-purple btn-sm" onclick="authoriseGoogleCalendar()">Connect</button>
           </div>
-        </div>
-
-        <!-- Legend -->
-        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:var(--text2);align-items:center">
-          <span><span class="sched-dot" style="background:var(--private)"></span>Private Tutoring</span>
-          <span><span class="sched-dot" style="background:var(--poppadi)"></span>Poppadi's</span>
-          <span><span class="sched-dot" style="background:var(--wwa)"></span>WWA / Meetings</span>
-          <span><span class="sched-dot" style="background:var(--gray)"></span>Personal</span>
-          <span><span class="sched-dot" style="background:#888;opacity:0.5"></span>Break</span>
-          <span><span>🍃</span> Day Off</span>
-          <span>✦ <span style="background:linear-gradient(90deg,#f0c27f,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Highlight</span></span>
         </div>
 
         <!-- DAY CARDS VIEW (default) -->
@@ -1629,19 +1594,19 @@ tr:hover td { background: var(--surface2); }
 
           <!-- Mini month calendar -->
           <div class="card" id="tt-month-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px 8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 4px">
               <span id="tt-month-title" style="font-size:15px;font-weight:600;color:var(--text)"></span>
               <div style="display:flex;gap:4px">
                 <button onclick="ttNavMonth(-1)" class="btn btn-ghost btn-sm">&#8249;</button>
                 <button onclick="ttNavMonth(1)"  class="btn btn-ghost btn-sm">&#8250;</button>
               </div>
             </div>
-            <div id="tt-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 10px 8px;gap:1px"></div>
+            <div id="tt-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 6px;gap:1px"></div>
           </div>
 
           <!-- Day strip -->
           <div class="card" id="tt-day-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px 10px;border-bottom:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px 8px;border-bottom:1px solid var(--border)">
               <div>
                 <div id="tt-day-title" style="font-size:15px;font-weight:600;color:var(--text)"></div>
                 <div id="tt-day-sub" style="font-size:12px;color:var(--text3);margin-top:2px"></div>
