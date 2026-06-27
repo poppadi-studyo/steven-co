@@ -732,8 +732,8 @@ tr:hover td { background: var(--surface2); }
 .sched-type-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
 
 /* Hybrid timetable */
-.tt-cal-dh { font-size:10px;color:var(--text3);text-align:center;padding:3px 0;font-weight:500 }
-.tt-cal-cell { height:34px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:4px;border-radius:6px;cursor:pointer;position:relative;gap:2px;transition:background 0.1s }
+.tt-cal-dh { font-size:9px;color:var(--text3);text-align:center;padding:2px 0;font-weight:500 }
+.tt-cal-cell { height:26px;display:flex;flex-direction:row;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;position:relative;gap:3px;transition:background 0.1s;padding:0 2px }
 .tt-cal-cell:active { transform:scale(0.88) }
 .tt-cal-cell.empty { cursor:default;pointer-events:none }
 .tt-cal-cell.tt-sel { background:var(--teal) }
@@ -742,9 +742,9 @@ tr:hover td { background: var(--surface2); }
 .tt-cal-cell.tt-sel.tt-today .tt-cal-num { color:#fff }
 .tt-cal-cell.tt-dayoff { background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(226,75,74,0.1) 3px,rgba(226,75,74,0.1) 6px) }
 .tt-cal-cell.tt-dayoff .tt-cal-num { color:var(--red) }
-.tt-cal-num { font-size:12px;color:var(--text);line-height:1 }
-.tt-cal-dots { display:flex;gap:2px;justify-content:center;flex-wrap:wrap;max-width:26px }
-.tt-cal-dot { width:4px;height:4px;border-radius:50%;flex-shrink:0 }
+.tt-cal-num { font-size:12px;color:var(--text);line-height:1;min-width:16px;text-align:center }
+.tt-cal-dots { display:flex;gap:1px;align-items:center;flex-wrap:nowrap }
+.tt-cal-dot { width:3px;height:3px;border-radius:50%;flex-shrink:0 }
 .tt-cal-cell.tt-sel .tt-cal-dot { opacity:0.8 }
 .tt-hr-col { width:82px;flex-shrink:0;display:flex;flex-direction:column;border-right:0.5px solid var(--border) }
 .tt-hr-col:last-child { border-right:none }
@@ -1584,24 +1584,24 @@ tr:hover td { background: var(--surface2); }
         </div>
 
         <!-- HYBRID TIMETABLE CONTAINER -->
-        <div id="sched-timetable-container" style="margin-top:0;display:flex;flex-direction:column;gap:10px">
+        <div id="sched-timetable-container" style="margin-top:0;display:flex;flex-direction:column;gap:8px">
 
           <!-- paste mode banner -->
-          <div id="tt-paste-banner" style="display:none;background:var(--teal);color:#fff;padding:10px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center">
+          <div id="tt-paste-banner" style="display:none;background:var(--teal);color:#fff;padding:10px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;justify-content:space-between;align-items:center">
             <span id="tt-paste-msg">Tap an empty slot to paste</span>
             <button onclick="cancelTTPaste()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">Cancel</button>
           </div>
 
           <!-- Mini month calendar -->
-          <div class="card" id="tt-month-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 4px">
+          <div class="card" id="tt-month-card" style="padding-bottom:2px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 2px">
               <span id="tt-month-title" style="font-size:15px;font-weight:600;color:var(--text)"></span>
               <div style="display:flex;gap:4px">
                 <button onclick="ttNavMonth(-1)" class="btn btn-ghost btn-sm">&#8249;</button>
                 <button onclick="ttNavMonth(1)"  class="btn btn-ghost btn-sm">&#8250;</button>
               </div>
             </div>
-            <div id="tt-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 6px;gap:1px"></div>
+            <div id="tt-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 4px;gap:0px"></div>
           </div>
 
           <!-- Day strip -->
@@ -1613,7 +1613,7 @@ tr:hover td { background: var(--surface2); }
               </div>
               <button id="tt-dayoff-btn" onclick="ttToggleDayOff()" style="font-size:11px;color:var(--text3);border:0.5px solid var(--border-strong);background:none;border-radius:7px;padding:5px 11px;cursor:pointer"></button>
             </div>
-            <div id="tt-strip-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 14px 14px">
+            <div id="tt-strip-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px 10px">
               <div id="tt-strip" style="display:inline-flex;border-radius:9px;overflow:hidden;border:0.5px solid var(--border);min-width:max-content;margin-top:10px"></div>
             </div>
           </div>
